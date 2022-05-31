@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 120
+max-complexity = 40
+ignore =
+  D100  # missing doc string for public modules
+  D104  # missing doc string in public pkg
+  D200  # one-line docstring should fit on one line w quotes
+  D202  # no blank lines allowed after fcn docstring
+  D301  # use r""" if any backslashes in docstring
+
+exclude=
+  .eggs
+  .git
+  __pycache__
+  venv
+
+docstring-convention = google
