@@ -1,5 +1,5 @@
 # gestrol library
-from gestrol.camera_interface import CameraInterface
+from gestrol.camera.base import CameraInterface
 
 
 class FrameStream:

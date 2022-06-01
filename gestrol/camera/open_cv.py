@@ -1,11 +1,13 @@
 # standard libraries
-import abc
 import logging
 import sys
 
 # external libraries
 import cv2
 import numpy as np
+
+# gestrol library
+from gestrol.camera.base import CameraInterface
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -14,20 +16,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger()
-
-
-class CameraInterface(abc.ABC):
-    @abc.abstractmethod
-    def __init__(self):
-        pass
-
-    @abc.abstractmethod
-    def __del__(self):
-        pass
-
-    @abc.abstractmethod
-    def get_frame(self) -> np.ndarray:
-        pass
 
 
 class OpenCVCameraInterface(CameraInterface):
