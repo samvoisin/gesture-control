@@ -2,7 +2,7 @@
 import numpy as np
 
 # gestrol library
-from gestrol.frame_stream.frame_modifiers.base import FrameModifier
+from gestrol.frame_stream.modifiers.base import FrameModifier
 
 
 class SingleChannelModifier(FrameModifier):

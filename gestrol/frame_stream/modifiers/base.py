@@ -20,6 +20,9 @@ class FrameModifier(abc.ABC):
     Base class for callable which modifies a frame of video data
     """
 
+    def __repr__(self):
+        return "<%s>" % self.__class__.__name__
+
     def __call__(self, frame: np.ndarray) -> np.ndarray:
         try:
             return self.modify_frame(frame)
