@@ -1,3 +1,6 @@
+# ignore everything in root-level data directory
+/data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -130,3 +133,10 @@ dmypy.json
 
 # vscode
 .vscode/settings.json
+
+# images
+*.jpg
+
+# data files
+*.zip
+*.mat
