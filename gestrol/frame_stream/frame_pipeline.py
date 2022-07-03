@@ -1,11 +1,8 @@
 # standard libraries
 from typing import Sequence
 
-# external libraries
-import numpy as np
-
 # gestrol library
-from gestrol.frame_stream.modifiers.base import FrameModifier
+from gestrol.frame_stream.modifiers.base import FrameModifier, ImageFormat
 
 
 class FramePipeline:
@@ -13,10 +10,10 @@ class FramePipeline:
     Modular pipeline for concatenating and applying FrameModifiers
     """
 
-    def __init__(self, modifier_pipeline: Sequence[FrameModifier]):
-        self.modifier_pipeline = modifier_pipeline
+    def __init__(self, modifier_pipeline: Sequence[FrameModifier] = None):
+        self.modifier_pipeline = modifier_pipeline or []
 
-    def __call__(self, frame: np.ndarray) -> np.ndarray:
+    def __call__(self, frame: ImageFormat) -> ImageFormat:
         for modifier in self.modifier_pipeline:
             frame = modifier(frame)
         return frame

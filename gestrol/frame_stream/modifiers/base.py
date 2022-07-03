@@ -2,9 +2,12 @@
 import abc
 import logging
 import sys
+from typing import Union
 
 # external libraries
 import numpy as np
+from PIL.Image import Image
+from torch import Tensor
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -15,6 +18,9 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 
+ImageFormat = Union[Tensor, np.ndarray, Image]
+
+
 class FrameModifier(abc.ABC):
     """
     Base class for callable which modifies a frame of video data
@@ -23,13 +29,9 @@ class FrameModifier(abc.ABC):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
 
-    def __call__(self, frame: np.ndarray) -> np.ndarray:
-        try:
-            return self.modify_frame(frame)
-        except Exception:
-            logger.exception(f"Error modifying frame in {self.__class__.__name__}")
-            return frame
+    def __call__(self, frame: ImageFormat) -> ImageFormat:
+        return self.modify_frame(frame)
 
     @abc.abstractmethod
-    def modify_frame(self, frame: np.ndarray, **kwargs) -> np.ndarray:
+    def modify_frame(self, frame: ImageFormat, **kwargs) -> ImageFormat:
         pass
