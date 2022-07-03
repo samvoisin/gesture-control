@@ -9,7 +9,7 @@ from torch import Tensor
 from torchvision.models.detection.faster_rcnn import FasterRCNN, FastRCNNPredictor
 
 MODELS_DIR = Path(__file__).parents[2] / "models"
-SSD_MODEL_PATH = MODELS_DIR / "ssd_hand_detect_no_pretrain.pt"
+SSD_MODEL_PATH = MODELS_DIR / "ssd_hand_detect.pt"
 
 GPU_DEVICE = torch.device("cuda")
 
