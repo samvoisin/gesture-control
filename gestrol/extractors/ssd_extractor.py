@@ -30,7 +30,11 @@ def load_ssd_model(model_path: Path, device: torch.device) -> FasterRCNN:
 
 
 class SSDExtractor:
-    def __init__(self, model: torch.nn.Module = None, device: str = None, top_n: int = 2):
+    """
+    Use SSD model to identify bounding box around hand(s) in a frame.
+    """
+
+    def __init__(self, model: torch.nn.Module = None, device: str = None, top_n: int = 1):
         self.model = model or load_ssd_model(model_path=SSD_MODEL_PATH, device=GPU_DEVICE)
         self.device = device or GPU_DEVICE
         self.top_n = top_n
