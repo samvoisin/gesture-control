@@ -29,16 +29,7 @@ class OpenCVCameraInterface(CameraInterface):
 
     def get_frame(self) -> np.ndarray:
         _, frame = self.camera.read()
-        frame = frame
         return frame
-
-    # def capture_frames(self):
-    #    retval, frame = self.get_frame()
-    #    while retval:
-    #        retval, frame = self.get_frame()
-    #        key = cv2.waitKey(delay=20)
-    #        if key == 27:  # exit on ESC
-    #            break
 
 
 if __name__ == "__main__":
