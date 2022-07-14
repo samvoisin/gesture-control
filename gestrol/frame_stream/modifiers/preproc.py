@@ -8,6 +8,10 @@ from gestrol.frame_stream.modifiers.base import FrameModifier
 
 
 class SSDPreprocModifier(FrameModifier):
+    """
+    preprocess a frame before feeding into SSD hand identifier.
+    """
+
     def __init__(self) -> None:
         super().__init__()
         self.fcn_composition = transforms.Compose(

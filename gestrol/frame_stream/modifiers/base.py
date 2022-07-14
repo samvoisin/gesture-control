@@ -23,7 +23,7 @@ ImageFormat = Union[Tensor, np.ndarray, Image]
 
 class FrameModifier(abc.ABC):
     """
-    Base class for callable which modifies a frame of video data
+    Base class for callable which modifies a frame of video data.
     """
 
     def __repr__(self):
