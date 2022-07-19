@@ -2,7 +2,7 @@
 from typing import Sequence
 
 # gestrol library
-from gestrol.frame_stream.modifiers.base import FrameModifier, ImageFormat
+from gestrol.frame_pipeline.modifiers.base import FrameModifier, ImageFormat
 
 
 class FramePipeline:

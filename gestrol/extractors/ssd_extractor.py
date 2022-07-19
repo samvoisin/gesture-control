@@ -8,6 +8,9 @@ import torchvision
 from torch import Tensor
 from torchvision.models.detection.faster_rcnn import FasterRCNN, FastRCNNPredictor
 
+# gestrol library
+from gestrol.frame_pipeline.modifiers.base import ImageFormat
+
 MODELS_DIR = Path(__file__).parents[2] / "models"
 SSD_MODEL_PATH = MODELS_DIR / "ssd_hand_detect.pt"
 
@@ -43,3 +46,26 @@ class SSDExtractor:
         prepped_frame = [frame.to(self.device)]
         bbox_preds = [bbox for bbox in self.model(prepped_frame)[0]["boxes"][: self.top_n]]
         return bbox_preds
+
+
+class SingleHandSSDExtractor:
+    """
+    Use SSD model to identify bounding box around highest confidence hand prediction.
+    """
+
+    def __init__(self, model: torch.nn.Module = None, device: str = None):
+        self.model = model or load_ssd_model(model_path=SSD_MODEL_PATH, device=GPU_DEVICE)
+        self.device = device or GPU_DEVICE
+
+    def __call__(self, frame: ImageFormat) -> Tensor:
+        if not isinstance(frame, Tensor):
+            frame = Tensor(frame)
+        prepped_frame = [frame.to(self.device)]
+        boxes = self.model(prepped_frame)[0]["boxes"]
+        if len(boxes) < 1:
+            return frame[:, :2, :2]
+        boxes = boxes[0]  # top confidence prediction
+        boxes = boxes.to(int)
+        x0, y0, x1, y1 = boxes
+        frame = frame[:, y0:y1, x0:x1]
+        return frame

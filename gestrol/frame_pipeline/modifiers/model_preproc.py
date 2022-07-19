@@ -4,7 +4,7 @@ from torch import Tensor
 from torchvision import transforms
 
 # gestrol library
-from gestrol.frame_stream.modifiers.base import FrameModifier
+from gestrol.frame_pipeline.modifiers.base import FrameModifier
 
 
 class SSDPreprocModifier(FrameModifier):

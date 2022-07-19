@@ -26,7 +26,7 @@ class VideoLoaderInterface(CameraInterface):
 
     def __del__(self):
         self.camera.release()
-        logger.info("Video complete")
+        logger.info("Video ended")
 
     def get_frame(self) -> np.ndarray:
         _, frame = self.camera.read()
