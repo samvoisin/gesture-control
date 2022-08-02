@@ -28,6 +28,7 @@ class OpenCVCameraInterface(CameraInterface):
         logger.info("Camera released")
 
     def get_frame(self) -> np.ndarray:
+        # TODO: docstring - info on channels: first (3, 120, 120) or last (120, 120, 3)
         _, frame = self.camera.read()
         return frame
 

@@ -10,6 +10,3 @@ class FrameStream:
         while True:
             yield self.camera.get_frame()
 
-
-if __name__ == "__main__":
-    pass
