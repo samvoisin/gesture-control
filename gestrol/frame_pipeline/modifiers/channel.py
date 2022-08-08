@@ -9,16 +9,10 @@ from gestrol.frame_pipeline.modifiers.base import FrameModifier
 
 
 class SingleChannelModifier(FrameModifier):
-    def __init__(self, channel: int = 0):
-        self.channel = channel
-
-    def modify_frame(self, frame: np.ndarray) -> np.ndarray:
-        return frame[:, :, self.channel]
+    def modify_frame(self, frame: np.ndarray, channel: int = 0) -> np.ndarray:
+        return frame[:, :, channel]
 
 
 class ChannelSwapModifier(FrameModifier):
-    def __init__(self, channel_order: Sequence[int] = (2, 1, 0)):
-        self.channel_order = channel_order
-
-    def modify_frame(self, frame: np.ndarray) -> np.ndarray:
-        return frame[:, :, self.channel_order]
+    def modify_frame(self, frame: np.ndarray, channel_order: Sequence[int] = (2, 1, 0)) -> np.ndarray:
+        return frame[:, :, channel_order]
