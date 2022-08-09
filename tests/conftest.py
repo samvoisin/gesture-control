@@ -1,12 +1,14 @@
+# external libraries
+import numpy as np
 import pytest
 
+# gestrol library
 from gestrol.camera.base import CameraInterface
+
 
 @pytest.fixture
 def dummy_camera_interface():
     class DummyCameraInterface(CameraInterface):
-
-
         def __init__(self):
             ...
 
@@ -14,5 +16,4 @@ def dummy_camera_interface():
             ...
 
         def get_frame(self):
-            raise Error("check shape vs opencv channel order")
-            return np.empty(shape=(4, 120, 120))
+            return np.empty(shape=(120, 120, 3))

@@ -26,7 +26,7 @@ def make_img_w_bboxes(img, bboxes):
     return img
 
 
-vp = Path("/home/samvoisin/Videos/Webcam/hand_test_vid.webm")
+vp = Path("./").resolve() / "data" / "videos" / "hand_test_vid.webm"
 vli = VideoLoaderInterface(video_path=vp)
 fs = FrameStream(camera=vli)
 
