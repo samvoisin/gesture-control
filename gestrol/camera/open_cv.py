@@ -44,7 +44,7 @@ class OpenCVCameraInterface(CameraInterface):
     ):
         # define video writers
         fourcc = cv2.VideoWriter_fourcc(*codec)
-        writer = cv2.VideoWriter(save_path, fourcc, fps, frame_size, color)
+        writer = cv2.VideoWriter(str(save_path), fourcc, fps, frame_size, color)
 
         while True:
             frame = self.get_frame()
