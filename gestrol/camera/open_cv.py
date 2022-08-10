@@ -2,7 +2,8 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Sequence
+from time import time
+from typing import Optional, Sequence
 
 # external libraries
 import cv2
@@ -30,7 +31,12 @@ class OpenCVCameraInterface(CameraInterface):
         logger.info("Camera released")
 
     def get_frame(self) -> np.ndarray:
-        # TODO: docstring - info on channels: first (3, 120, 120) or last (120, 120, 3)
+        """
+        Capture frame from camera.
+
+        Returns:
+            numpy array with dimensions (width, height, number of channels)
+        """
         _, frame = self.camera.read()
         return frame
 
@@ -40,17 +46,23 @@ class OpenCVCameraInterface(CameraInterface):
         fps: int = 30,
         frame_size: Sequence[int] = (1920, 1080),
         color: bool = True,
-        codec: str = "MJPG",
+        codec: str = "mp4v",
+        vlen: Optional[int] = None,
     ):
         # define video writers
         fourcc = cv2.VideoWriter_fourcc(*codec)
         writer = cv2.VideoWriter(str(save_path), fourcc, fps, frame_size, color)
+        logger.info(f"video will save to {str(save_path)}")
 
+        stime = time()
         while True:
             frame = self.get_frame()
             writer.write(frame)
 
-            if cv2.waitKey(0) == ord("q"):
+            if vlen and time() - stime > vlen:
+                writer.release()
+                break
+            elif cv2.waitKey(0) == ord("q"):
                 writer.release()
                 break
 

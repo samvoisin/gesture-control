@@ -3,6 +3,7 @@
 # standard libraries
 import io
 import os
+from typing import Dict, List
 
 # external libraries
 from setuptools import find_packages, setup
@@ -17,10 +18,10 @@ REQUIRES_PYTHON = ">=3.8"
 VERSION = "0.1.0"
 
 # What packages are required for this module to be executed?
-REQUIRED = []
+REQUIRED: List[str] = []
 
 # What packages are optional?
-EXTRAS = {}
+# EXTRAS = {}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -38,7 +39,7 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 # Load the package's __version__.py module as a dictionary.
-about = {}
+about: Dict[str, str] = {}
 if not VERSION:
     project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
     with open(os.path.join(here, project_slug, "__version__.py")) as f:

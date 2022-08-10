@@ -8,17 +8,21 @@ from typing import Any, Dict, List, Protocol, Sequence
 from yaml import safe_load
 
 
+def _clear_prompt():
+    print(" " * 50, end="\r")
+
+
 class TrainingCameraInterface(Protocol):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         ...
 
-    def __del__(self, **kwargs):
+    def __del__(self, **kwargs: Any):
         ...
 
-    def get_frame(self, **kwargs) -> Any:
+    def get_frame(self, **kwargs: Any) -> Any:
         ...
 
-    def record_video(self, **kwargs):
+    def record_video(self, **kwargs: Any):
         ...
 
 
@@ -46,8 +50,9 @@ class TrainingInstructor:
         return sample_queue
 
     def _parse_instructions_yaml(self, instructions: Dict[str, Any]):
-        self.training_data_dir = Path(instructions["training_data_dir"])
+        self.training_data_dir = Path(instructions["training_data_dir"]).resolve()
         sample_size = instructions["sample_size"]
+        self._sample_time = instructions["sample_time"]
         self._gesture_instructions = instructions["gesture_instructions"]
         self._sample_queue = self._make_sample_queue(self._gesture_instructions.keys(), n_iters=sample_size)
         self._sample_counts = {gesture_label: 0 for gesture_label in self._gesture_instructions.keys()}
@@ -57,23 +62,28 @@ class TrainingInstructor:
 
         instruction = self._gesture_instructions[sample_label]
         print(
-            f"Perform the following gesture when recording begins:\n{instruction}\n\nPress 'q' when finished recording",
+            f"Perform the following gesture when recording begins:\n{instruction}\nRecording will last for"
+            f" {self._sample_time}s",
             end="\r",
         )
-        sleep(3)
+        sleep(5)
+
         for i in range(3, 0, -1):
             print(f"Recording to begin in {i}...", end="\r")
             sleep(1)
 
-        self.cam.record_video(save_path=save_path)  # requires implicit method of ending recording (e.g. user press 'q')
+        _clear_prompt()
+        print("Now recording...", end="\r")
+        self.cam.record_video(save_path=save_path, vlen=self._sample_time)
 
     def collect_training_data(self):
         for sample_label in self._sample_queue:
-            sample = self.record_sample(sample_label)
-            self.save_sample_clip(sample, sample_label)
+            self.record_sample(sample_label)
             # wait for user to press a key
             print("Return hand to neutral position.", end="\r")
-            sleep(0.5)
+            sleep(1)
+            _clear_prompt()
             for i in range(3, 0, -1):
                 print(f"Next gesture in {i}...", end="\r")
                 sleep(1)
+            _clear_prompt()
