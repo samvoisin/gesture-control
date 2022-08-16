@@ -5,8 +5,9 @@ init: init-venv  # create virtual env and install deps
 	./venv/bin/python3 -m pip install -U pip
 	./venv/bin/python3 -m pip install -r requirements/requirements-dev.txt
 	./venv/bin/python3 -m pip install -r requirements/requirements.txt
-	./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
 	./venv/bin/python3 -m pip install -e .
+	./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
+	./venv/vin/python3 -m pip check
 
 lint:  # format all source code
 	./venv/bin/isort gestrol/ tests/ setup.py
