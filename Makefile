@@ -9,9 +9,15 @@ init: init-venv  # create virtual env and install deps
 	./venv/bin/python3 -m pip install -e .
 
 lint:  # format all source code
-	./venv/vin/isort gestrol/ tests/ setup.py
+	./venv/bin/isort gestrol/ tests/ setup.py
  	.venv/bin/black --config=pyproject.toml --check .
 	.venv/bin/flake8 --config=.flake8 --per-file-ignores='tests/*'
 
 test:  # run all tests in project
-	./venv/vin/pytest -vvv tests/
+	./venv/bin/pytest -vvv tests/
+
+clean:  # remove development files
+	rm -rf venv
+	find . -name __pycache__ | xargs rm -rf
+	find . -name *.egg-info | xargs rm -rf
+	find . -name .pytest_cache | xargs rm -rf
