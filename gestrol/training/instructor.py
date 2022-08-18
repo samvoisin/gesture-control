@@ -19,9 +19,6 @@ class TrainingCameraInterface(Protocol):
     def __del__(self, **kwargs: Any):
         ...
 
-    def get_frame(self, **kwargs: Any) -> Any:
-        ...
-
     def record_video(self, **kwargs: Any):
         ...
 
@@ -53,14 +50,14 @@ class TrainingInstructor:
         self.training_data_dir = Path(instructions["training_data_dir"]).resolve()
         sample_size = instructions["sample_size"]
         self._sample_time = instructions["sample_time"]
-        self._gesture_instructions = instructions["gesture_instructions"]
-        self._sample_queue = self._make_sample_queue(self._gesture_instructions.keys(), n_iters=sample_size)
-        self._sample_counts = {gesture_label: 0 for gesture_label in self._gesture_instructions.keys()}
+        self.gesture_instructions = instructions["gesture_instructions"]
+        self._sample_queue = self._make_sample_queue(self.gesture_instructions.keys(), n_iters=sample_size)
+        self._sample_counts = {gesture_label: 0 for gesture_label in self.gesture_instructions.keys()}
 
-    def record_sample(self, sample_label: str, video_format: str = ".mp4"):
+    def record_sample(self, sample_label: str, video_format: str = ".avi"):
         save_path = self.training_data_dir / sample_label / (str(self._sample_counts[sample_label]) + video_format)
 
-        instruction = self._gesture_instructions[sample_label]
+        instruction = self.gesture_instructions[sample_label]
         print(
             f"Perform the following gesture when recording begins:\n{instruction}\nRecording will last for"
             f" {self._sample_time}s",
@@ -79,7 +76,7 @@ class TrainingInstructor:
     def collect_training_data(self):
         for sample_label in self._sample_queue:
             self.record_sample(sample_label)
-            # wait for user to press a key
+            self._sample_counts[sample_label] += 1
             print("Return hand to neutral position.", end="\r")
             sleep(1)
             _clear_prompt()

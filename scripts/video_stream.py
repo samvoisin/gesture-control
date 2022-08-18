@@ -27,6 +27,7 @@ def make_img_w_bboxes(img, bboxes):
 
 
 vp = Path("./").resolve() / "data" / "videos" / "hand_test_vid.webm"
+# vp = Path("./").resolve() / "data" / "gesture_training_vids" / "h_f_down" / "0.mp4"
 vli = VideoLoaderInterface(video_path=vp)
 fs = FrameStream(camera=vli)
 
@@ -46,7 +47,7 @@ cv2.namedWindow("preview")
 for frame in fs.stream_frames():
     procd_frame = frame_pipeline(frame)
     extr_frame = ssd_extractor(procd_frame)
-    extr_frame = extr_frame.numpy()[0, :, :]  # need to solve this problem
+    extr_frame = extr_frame.numpy()[0, :, :]  # TODO: need to solve this problem
     cv2.imshow("preview", extr_frame)
     key = cv2.waitKey(20)
     if key == 27:  # exit on ESC

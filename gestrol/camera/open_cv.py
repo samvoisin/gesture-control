@@ -3,7 +3,7 @@ import logging
 import sys
 from pathlib import Path
 from time import time
-from typing import Optional, Sequence
+from typing import Optional
 
 # external libraries
 import cv2
@@ -44,14 +44,15 @@ class OpenCVCameraInterface(CameraInterface):
         self,
         save_path: Path,
         fps: int = 30,
-        frame_size: Sequence[int] = (1920, 1080),
         color: bool = True,
-        codec: str = "mp4v",
+        codec: str = "MJPG",
         vlen: Optional[int] = None,
     ):
+        _frame_size = (640, 480)  # hard coded for compatibility with OpenCV; these are the only values that will work
+
         # define video writers
         fourcc = cv2.VideoWriter_fourcc(*codec)
-        writer = cv2.VideoWriter(str(save_path), fourcc, fps, frame_size, color)
+        writer = cv2.VideoWriter(str(save_path), fourcc, fps, _frame_size, color)
         logger.info(f"video will save to {str(save_path)}")
 
         stime = time()
