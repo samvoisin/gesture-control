@@ -9,7 +9,7 @@ from torch import Tensor
 from torchvision.models.detection.faster_rcnn import FasterRCNN, FastRCNNPredictor
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import ImageFormat
+from gestrol.frame_pipeline.modifiers.base import FrameFormat
 
 MODELS_DIR = Path(__file__).parents[2] / "models"
 SSD_MODEL_PATH = MODELS_DIR / "ssd_hand_detect.pt"
@@ -57,7 +57,7 @@ class SingleHandSSDExtractor:
         self.model = model or load_ssd_model(model_path=SSD_MODEL_PATH, device=GPU_DEVICE)
         self.device = device or GPU_DEVICE
 
-    def __call__(self, frame: ImageFormat) -> Tensor:
+    def __call__(self, frame: FrameFormat) -> Tensor:
         if not isinstance(frame, Tensor):
             frame = Tensor(frame)
         prepped_frame = [frame.to(self.device)]

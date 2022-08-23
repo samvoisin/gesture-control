@@ -17,3 +17,5 @@ def dummy_camera_interface():
 
         def get_frame(self):
             return np.empty(shape=(120, 120, 3))
+
+    return DummyCameraInterface()

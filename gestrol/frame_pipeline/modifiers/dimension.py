@@ -5,7 +5,7 @@ from typing import Sequence
 import torch
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import FrameModifier, ImageFormat
+from gestrol.frame_pipeline.modifiers.base import FrameFormat, FrameModifier
 
 
 class TensorDimensionSwapModifier(FrameModifier):
@@ -17,7 +17,7 @@ class TensorDimensionSwapModifier(FrameModifier):
         """
         self.dimension_swaps = dimension_swaps
 
-    def modify_frame(self, frame: ImageFormat) -> torch.Tensor:
+    def modify_frame(self, frame: FrameFormat) -> torch.Tensor:
         if not isinstance(frame, torch.Tensor):
             frame = torch.Tensor(frame)
         for dimension_swap in self.dimension_swaps:

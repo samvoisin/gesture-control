@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 
-ImageFormat = Union[Tensor, np.ndarray, Image]
+FrameFormat = Union[Tensor, np.ndarray, Image]
 
 
 class FrameModifier(abc.ABC):
@@ -29,9 +29,9 @@ class FrameModifier(abc.ABC):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
 
-    def __call__(self, frame: ImageFormat) -> ImageFormat:
+    def __call__(self, frame: FrameFormat) -> FrameFormat:
         return self.modify_frame(frame)
 
     @abc.abstractmethod
-    def modify_frame(self, frame: ImageFormat, **kwargs) -> ImageFormat:
+    def modify_frame(self, frame: FrameFormat, **kwargs) -> FrameFormat:
         pass
