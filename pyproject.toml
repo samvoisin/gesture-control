@@ -40,7 +40,6 @@ import_heading_firstparty = "gestrol library"
 dedup_headings = true
 line_length = 120
 
-
 [tool.pytest.ini_options]
 # Option below requires `tests/optional.py`
 optional-tests = [
@@ -50,3 +49,12 @@ optional-tests = [
 markers = [
   "incompatible_with_mypyc: run when testing mypyc compiled black"
 ]
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = [
+  'PIL',
+  'torchvision',
+  'cv2'
+]
+ignore_missing_imports = true
