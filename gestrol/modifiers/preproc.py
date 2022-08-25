@@ -4,7 +4,7 @@ from torch import Tensor
 from torchvision import transforms
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class SSDPreprocModifier(FrameModifier):
@@ -12,7 +12,7 @@ class SSDPreprocModifier(FrameModifier):
     preprocess a frame before feeding into SSD hand identifier.
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.fcn_composition = transforms.Compose(
             [

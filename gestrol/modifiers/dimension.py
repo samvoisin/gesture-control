@@ -5,7 +5,7 @@ from typing import Sequence
 import torch
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import FrameFormat, FrameModifier
+from gestrol.modifiers.base import FrameFormat, FrameModifier
 
 
 class TensorDimensionSwapModifier(FrameModifier):

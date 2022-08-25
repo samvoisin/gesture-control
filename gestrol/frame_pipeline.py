@@ -1,8 +1,8 @@
 # standard libraries
-from typing import Sequence
+from typing import Optional, Sequence
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import FrameFormat, FrameModifier
+from gestrol.modifiers.base import FrameFormat, FrameModifier
 
 
 class FramePipeline:
@@ -13,7 +13,9 @@ class FramePipeline:
     def __init__(self, modifier_pipeline: Sequence[FrameModifier] = None):
         self.modifier_pipeline = modifier_pipeline or []
 
-    def __call__(self, frame: FrameFormat) -> FrameFormat:
+    def __call__(self, frame: FrameFormat) -> Optional[FrameFormat]:
         for modifier in self.modifier_pipeline:
+            if frame is None:
+                return None
             frame = modifier(frame)
         return frame

@@ -4,7 +4,7 @@ from PIL import Image
 from torch import Tensor
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class NumpyToTensorModifier(FrameModifier):

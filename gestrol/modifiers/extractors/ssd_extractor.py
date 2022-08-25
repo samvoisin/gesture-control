@@ -1,6 +1,6 @@
 # standard libraries
 from pathlib import Path
-from typing import List
+from typing import Optional
 
 # external libraries
 import torch
@@ -9,7 +9,7 @@ from torch import Tensor
 from torchvision.models.detection.faster_rcnn import FasterRCNN, FastRCNNPredictor
 
 # gestrol library
-from gestrol.frame_pipeline.modifiers.base import FrameFormat
+from gestrol.modifiers.base import FrameFormat, FrameModifier
 
 MODELS_DIR = Path(__file__).parents[2] / "models"
 SSD_MODEL_PATH = MODELS_DIR / "ssd_hand_detect.pt"
@@ -38,17 +38,13 @@ class SSDExtractor:
     """
 
     def __init__(self, model: torch.nn.Module = None, device: str = None, top_n: int = 1):
+        raise NotImplementedError(f"{self.__class__.__name__} not implemented.")
         self.model = model or load_ssd_model(model_path=SSD_MODEL_PATH, device=GPU_DEVICE)
         self.device = device or GPU_DEVICE
         self.top_n = top_n
 
-    def __call__(self, frame: Tensor) -> List[Tensor]:
-        prepped_frame = [frame.to(self.device)]
-        bbox_preds = [bbox for bbox in self.model(prepped_frame)[0]["boxes"][: self.top_n]]
-        return bbox_preds
 
-
-class SingleHandSSDExtractor:
+class SingleHandSSDExtractor(FrameModifier):
     """
     Use SSD model to identify bounding box around highest confidence hand prediction.
     """
@@ -57,13 +53,13 @@ class SingleHandSSDExtractor:
         self.model = model or load_ssd_model(model_path=SSD_MODEL_PATH, device=GPU_DEVICE)
         self.device = device or GPU_DEVICE
 
-    def __call__(self, frame: FrameFormat) -> Tensor:
+    def modify_frame(self, frame: FrameFormat) -> Optional[FrameFormat]:
         if not isinstance(frame, Tensor):
-            frame = Tensor(frame)
+            raise TypeError(f"{self.__class__.__name__}.modify_frame requires `torch.Tensor` input.")
         prepped_frame = [frame.to(self.device)]
         boxes = self.model(prepped_frame)[0]["boxes"]
         if len(boxes) < 1:
-            return frame[:, :2, :2]
+            return None
         boxes = boxes[0]  # top confidence prediction
         boxes = boxes.to(int)
         x0, y0, x1, y1 = boxes
