@@ -2,7 +2,7 @@
 from typing import Optional, Sequence
 
 # gestrol library
-from gestrol.modifiers.base import FrameFormat, FrameModifier
+from gestrol.modifiers.base import Frame, FrameModifier
 
 
 class FramePipeline:
@@ -13,7 +13,7 @@ class FramePipeline:
     def __init__(self, modifier_pipeline: Sequence[FrameModifier] = None):
         self.modifier_pipeline = modifier_pipeline or []
 
-    def __call__(self, frame: FrameFormat) -> Optional[FrameFormat]:
+    def __call__(self, frame: Frame) -> Optional[Frame]:
         for modifier in self.modifier_pipeline:
             if frame is None:
                 return None

@@ -10,12 +10,18 @@ from gestrol.modifiers.channel import ChannelSwapModifier, SingleChannelModifier
 
 
 @pytest.fixture
-def dummy_frame_dim():
+def dummy_frame_dim() -> int:
+    """
+    Dimensions of test frame.
+    """
     return 100
 
 
 @pytest.fixture(scope="function")
-def dummy_frame(dummy_frame_dim):
+def dummy_frame(dummy_frame_dim) -> np.ndarray:
+    """
+    Test frame.
+    """
     res = np.empty(shape=(dummy_frame_dim, dummy_frame_dim, 3))
     ones_arr = np.ones(shape=(dummy_frame_dim, dummy_frame_dim))
     for i in range(3):
@@ -28,6 +34,14 @@ def dummy_frame(dummy_frame_dim):
     [0, 1, 2],
 )
 def test_single_channel_modifier(channel: int, dummy_frame_dim: int, dummy_frame: np.ndarray):
+    """
+    Test for `SingleChannelModifier` class.
+
+    Tests ensure that:
+        1. result is not `None`
+        2. frame height and width dims are unchanged
+        3. correct channel is selected
+    """
     single_channel_modifier = SingleChannelModifier(channel=channel)
     one_channel_array = cast(np.ndarray, single_channel_modifier(dummy_frame))
     assert one_channel_array is not None
@@ -36,6 +50,13 @@ def test_single_channel_modifier(channel: int, dummy_frame_dim: int, dummy_frame
 
 
 def test_channel_swap_modifier(dummy_frame: np.ndarray):
+    """
+    Test for ChannelSwapModifier class.
+
+    Tests ensure that:
+        1. result is not `None`
+        2. channels are swapped in intended order
+    """
     co = (2, 1, 0)
     channel_swap_modifier = ChannelSwapModifier(channel_order=co)
     swapped_array = cast(np.ndarray, channel_swap_modifier(dummy_frame))

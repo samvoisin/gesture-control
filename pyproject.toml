@@ -54,6 +54,7 @@ markers = [
 [[tool.mypy.overrides]]
 module = [
   'PIL',
+  'PIL.*',
   'torchvision',
   'cv2'
 ]
