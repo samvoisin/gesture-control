@@ -1,33 +1,37 @@
 # external libraries
 import numpy as np
-from PIL import Image
+from PIL.Image import Image, fromarray
 from torch import Tensor
+from torchvision.transforms import ToTensor
 
 # gestrol library
 from gestrol.modifiers.base import Frame, FrameModifier
 
 
-class NumpyToTensorModifier(FrameModifier):
+class FrameToTensorModifier(FrameModifier):
     """
-    Convert numpy array to pytorch Tensor.
+    Convert PIL.Image.Image or numpy array to torch.Tensor.
     """
+
+    def __init__(self):
+        """
+        Initiate method.
+        """
+        self._convert_type = ToTensor()
 
     def modify_frame(self, frame: Frame) -> Tensor:
         """
-        Convert frame type.
+        Convert frame to `torch.Tensor`.
 
         Args:
-            frame: numpy array with shape (h, w, 3)
-
-        Raises:
-            TypeError: raised if `frame` is not `np.ndarray`
+            frame: frame object to be converted
 
         Returns:
-            pytorch Tensor with same dimensions as `frame`
+            Tensor representation of frame
         """
-        if not isinstance(frame, np.ndarray):
-            raise TypeError(f"frame must have type {np.ndarray}, but has type {type(frame)}.")
-        return Tensor(frame)
+        if isinstance(frame, Tensor):
+            return frame
+        return self._convert_type(frame)
 
 
 class TensorToNumpyModifier(FrameModifier):
@@ -58,7 +62,7 @@ class NumpyToImageModifier(FrameModifier):
     Convert numpy array to PIL.Image.Image type object in "RGB" mode.
     """
 
-    def modify_frame(self, frame: Frame) -> Image.Image:
+    def modify_frame(self, frame: Frame) -> Image:
         """
         Convert frame type.
 
@@ -73,4 +77,4 @@ class NumpyToImageModifier(FrameModifier):
         """
         if not isinstance(frame, np.ndarray):
             raise TypeError(f"frame must have type {np.ndarray}, but has type {type(frame)}.")
-        return Image.fromarray(frame.astype("uint8"), "RGB")
+        return fromarray(frame.astype("uint8"), "RGB")

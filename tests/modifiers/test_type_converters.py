@@ -5,10 +5,11 @@ from typing import List
 import numpy as np
 import pytest
 import torch
-from PIL.Image import Image
+from PIL.Image import Image, fromarray
 
 # gestrol library
-from gestrol.modifiers import NumpyToImageModifier, NumpyToTensorModifier, TensorToNumpyModifier
+from gestrol.modifiers import FrameToTensorModifier, NumpyToImageModifier, TensorToNumpyModifier
+from gestrol.modifiers.base import Frame
 
 
 def test_numpy_to_image_modifier():
@@ -21,16 +22,20 @@ def test_numpy_to_image_modifier():
     assert isinstance(img, Image)
 
 
-def test_numpy_to_tensor_modifier():
+@pytest.mark.parametrize(
+    "frame",
+    [
+        np.empty(shape=(180, 180, 3)),
+        torch.empty((180, 180, 3)),
+        fromarray(np.empty(shape=(180, 180, 3), dtype="uint8")),
+    ],
+)
+def test_frame_to_tensor_modifier(frame: Frame):
     """
-    Test to ensure numpy array returned as Tensor with identical dimensons.
+    Test to ensure FrameToTensorModifier works on all three possible frame types.
     """
-    arr_dims = (180, 180, 3)
-    arr = np.empty(shape=arr_dims)
-    mod = NumpyToTensorModifier()
-    t = mod.modify_frame(arr)
-    assert isinstance(t, torch.Tensor)
-    assert arr.shape == t.shape
+    mod = FrameToTensorModifier()
+    assert isinstance(mod(frame), torch.Tensor)
 
 
 @pytest.mark.parametrize(

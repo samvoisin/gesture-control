@@ -1,10 +1,9 @@
 # external libraries
-from PIL import Image
 from torch import Tensor
 from torchvision import transforms
 
 # gestrol library
-from gestrol.modifiers.base import FrameModifier
+from gestrol.modifiers.base import Frame, FrameModifier
 
 
 class SSDPreprocModifier(FrameModifier):
@@ -21,5 +20,5 @@ class SSDPreprocModifier(FrameModifier):
             ]
         )
 
-    def modify_frame(self, frame: Image.Image) -> Tensor:
+    def modify_frame(self, frame: Frame) -> Tensor:
         return self.fcn_composition(frame)

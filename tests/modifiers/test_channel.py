@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 # gestrol library
-from gestrol.modifiers.channel import ChannelSwapModifier, SingleChannelModifier
+from gestrol.modifiers.channel import ChannelDimOrderModifier, ChannelSwapModifier, SingleChannelSelectorModifier
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def test_single_channel_modifier(channel: int, dummy_frame_dim: int, dummy_frame
         2. frame height and width dims are unchanged
         3. correct channel is selected
     """
-    single_channel_modifier = SingleChannelModifier(channel=channel)
+    single_channel_modifier = SingleChannelSelectorModifier(channel=channel)
     one_channel_array = cast(np.ndarray, single_channel_modifier(dummy_frame))
     assert one_channel_array is not None
     assert one_channel_array.shape == (dummy_frame_dim, dummy_frame_dim)
@@ -63,3 +63,22 @@ def test_channel_swap_modifier(dummy_frame: np.ndarray):
     assert swapped_array is not None
     for i, channel in enumerate(co):
         assert np.all(swapped_array[:, :, i] == channel)
+
+
+def test_channel_dim_order_modifier(dummy_frame: np.ndarray):
+    """
+    Test to ensure `ChannelDimOrderModifier` swaps the channel dimension to first and last dimension.
+    """
+    mod = ChannelDimOrderModifier(mode="first")
+    frame = dummy_frame.copy()
+    frame = cast(np.ndarray, mod(frame))
+
+    assert frame.shape[0] == 3
+    assert frame.shape[-1] != 3
+
+    mod = ChannelDimOrderModifier()  # defaults to "last" mode
+    frame = cast(np.ndarray, mod(frame))
+    assert frame.shape[0] != 3
+    assert frame.shape[-1] == 3
+
+    assert np.all(frame == dummy_frame)
