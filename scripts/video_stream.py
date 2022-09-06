@@ -6,10 +6,11 @@ import cv2
 
 # gestrol library
 from gestrol.camera import VideoLoaderInterface
-from gestrol.extractors.ssd_extractor import SingleHandSSDExtractor
 from gestrol.frame_pipeline import FramePipeline
-from gestrol.frame_pipeline.modifiers import ChannelSwapModifier, NumpyToImageModifier, SSDPreprocModifier
 from gestrol.frame_stream import FrameStream
+from gestrol.modifiers import ChannelSwapModifier
+from gestrol.modifiers.extractors.ssd_extractor import SingleHandSSDExtractor, load_ssd_model
+from gestrol.modifiers.type_converters import FrameToTensorModifier
 
 
 def bbox_xywh_coords(bbox):
@@ -26,28 +27,29 @@ def make_img_w_bboxes(img, bboxes):
     return img
 
 
+mp = Path("./").resolve() / "models" / "ssd_hand_detect.pt"
 vp = Path("./").resolve() / "data" / "videos" / "hand_test_vid.webm"
 # vp = Path("./").resolve() / "data" / "gesture_training_vids" / "h_f_down" / "0.mp4"
 vli = VideoLoaderInterface(video_path=vp)
 fs = FrameStream(camera=vli)
 
+model = load_ssd_model(model_path=mp)
 
 mod_pipe = [
     ChannelSwapModifier(),
-    NumpyToImageModifier(),
-    SSDPreprocModifier(),
+    FrameToTensorModifier(),
+    SingleHandSSDExtractor(model=model),
 ]
 frame_pipeline = FramePipeline(modifier_pipeline=mod_pipe)
-
-ssd_extractor = SingleHandSSDExtractor()
 
 
 cv2.namedWindow("preview")
 
 for frame in fs.stream_frames():
     procd_frame = frame_pipeline(frame)
-    extr_frame = ssd_extractor(procd_frame)
-    extr_frame = extr_frame.numpy()[0, :, :]  # TODO: need to solve this problem
+    if procd_frame is None:
+        continue
+    extr_frame = procd_frame.numpy()[0, :, :]  # TODO: need to solve this problem
     cv2.imshow("preview", extr_frame)
     key = cv2.waitKey(20)
     if key == 27:  # exit on ESC
