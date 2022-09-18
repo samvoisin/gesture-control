@@ -54,7 +54,7 @@ class TensorToNumpyModifier(FrameModifier):
         """
         if not isinstance(frame, Tensor):
             raise TypeError(f"frame must have type {Tensor}, but has type {type(frame)}.")
-        return frame.numpy()  # NOTE: removed frame.detach() here; may need to add back if problems with GPU
+        return frame.detach().numpy()
 
 
 class NumpyToImageModifier(FrameModifier):
