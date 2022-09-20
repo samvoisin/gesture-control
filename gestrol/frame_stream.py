@@ -1,5 +1,9 @@
+# standard libraries
+from typing import Generator
+
 # gestrol library
 from gestrol.camera.base import CameraInterface
+from gestrol.modifiers.base import Frame
 
 
 class FrameStream:
@@ -9,11 +13,20 @@ class FrameStream:
 
     def __init__(self, camera: CameraInterface):
         """
+        Initiate method.
+
         Args:
             camera (CameraInterface): A generic `CameraInterface` instance
         """
         self.camera = camera
 
-    def stream_frames(self):
+    def stream_frames(self) -> Generator[Frame, None, None]:
+        """
+        Stream frames from camera.
+
+        Yields:
+            Frame object
+        """
+
         while True:
             yield self.camera.get_frame()
