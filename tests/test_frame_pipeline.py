@@ -40,7 +40,7 @@ class TestFramePipeline:
         ]
 
         frame_pipeline = FramePipeline(modifier_pipeline=frame_pass)
-        frame = frame_pipeline(dummy_frame)
+        frame = frame_pipeline.process_frame(dummy_frame)
         assert np.all(frame == dummy_frame)
 
     def test_null_frame(
@@ -57,7 +57,7 @@ class TestFramePipeline:
         ]
 
         frame_pipeline = FramePipeline(modifier_pipeline=null_pipe)
-        frame = frame_pipeline(dummy_frame)
+        frame = frame_pipeline.process_frame(dummy_frame)
         assert frame is None
 
 

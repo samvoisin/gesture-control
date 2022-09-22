@@ -29,7 +29,7 @@ class FrameModifier(abc.ABC):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
 
-    def __call__(self, frame: Optional[Frame]) -> Optional[Frame]:
+    def __call__(self, frame: Frame) -> Optional[Frame]:
         """
         Call method for generic `FrameModifier`.
         Any `FrameModifier` must be capable of accepting a `Frame` object as input OR a `None` object as input.
@@ -40,15 +40,12 @@ class FrameModifier(abc.ABC):
         passed into a `FramePipeline` or occasional failures in extraction by Extractor models.
 
         Args:
-            frame: `Frame` or `None`
+            frame: `Frame` type
 
         Returns:
             `Frame` or `None`
         """
-        if frame is None:
-            return None
-        else:
-            return self.modify_frame(frame)
+        return self.modify_frame(frame)
 
     @abc.abstractmethod
     def modify_frame(self, frame: Frame) -> Optional[Frame]:
