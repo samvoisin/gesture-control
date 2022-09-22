@@ -8,7 +8,7 @@ from gestrol.modifiers.base import Frame
 
 class FrameStream:
     """
-    Stream frames from a generic `CameraInterface`.
+    Stream frames from a `CameraInterface`.
     """
 
     def __init__(self, camera: CameraInterface):
@@ -16,7 +16,7 @@ class FrameStream:
         Initiate method.
 
         Args:
-            camera (CameraInterface): A generic `CameraInterface` instance
+            camera (CameraInterface): `CameraInterface` instance
         """
         self.camera = camera
 

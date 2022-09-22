@@ -22,11 +22,24 @@ logger = logging.getLogger()
 
 
 class OpenCVCameraInterface(CameraInterface):
+    """
+    OpenCV camera interface.
+    """
+
     def __init__(self, index: int = 0):
+        """
+        Initiate method.
+
+        Args:
+            index: camera resource index. Defaults to 0.
+        """
         self.camera = cv2.VideoCapture(index=index)
         logger.info("Camera instantiated")
 
     def __del__(self):
+        """
+        Destructor method for releasing the camera resource.
+        """
         self.camera.release()
         logger.info("Camera released")
 
@@ -48,6 +61,16 @@ class OpenCVCameraInterface(CameraInterface):
         codec: str = "MJPG",
         vlen: Optional[int] = None,
     ):
+        """
+        Record a video and write it to disk.
+
+        Args:
+            save_path: Path to save video file
+            fps: Frame rate. Defaults to 30.
+            color: Color boolean. Defaults to True.
+            codec: Video codec. Defaults to "MJPG".
+            vlen: Length of recording in seconds. Defaults to None.
+        """
         _frame_size = (640, 480)  # hard coded for compatibility with OpenCV; these are the only values that will work
 
         # define video writers

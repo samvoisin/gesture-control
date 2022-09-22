@@ -31,18 +31,19 @@ class FrameModifier(abc.ABC):
 
     def __call__(self, frame: Optional[Frame]) -> Optional[Frame]:
         """
-        Call method for generic `FrameModifier`. Any `FrameModifier` must be capable of accepting a `Frameformat`
-        object as input OR a `None` object as input. In the event a `None` object is provided as input, it should be
-        passed to the next `FrameModifier` which should pass `None` to the next `FrameModifier` and so on.
+        Call method for generic `FrameModifier`.
+        Any `FrameModifier` must be capable of accepting a `Frame` object as input OR a `None` object as input.
+        In the event a `None` object is provided as input, it should be passed to the next `FrameModifier` which should
+        pass `None` to the next `FrameModifier` and so on.
 
         The reason for allowing `None` objects as input/output is to allow for operations which reduce the frame rate
         passed into a `FramePipeline` or occasional failures in extraction by Extractor models.
 
         Args:
-            frame: `FrameFormat` or `None`
+            frame: `Frame` or `None`
 
         Returns:
-            `FrameFormat` or `None`
+            `Frame` or `None`
         """
         if frame is None:
             return None
