@@ -92,7 +92,7 @@ class ChannelDimOrderModifier(FrameModifier):
         elif mode == "last":
             self._dim_order_modifier = self._last_mode
         else:
-            raise ValueError("Inappropriate argument to `channel_order` param. Must be 'first' or 'last'.")
+            raise ValueError("Invalid argument to `channel_order` param. Must be 'first' or 'last'.")
 
     def _first_mode(self, frame: np.ndarray) -> np.ndarray:
         return np.rollaxis(frame, 2, 0)
