@@ -15,7 +15,7 @@ lint:  # format all source code
 	.venv/bin/flake8 --config=.flake8 --per-file-ignores='tests/*'
 
 test:  # run all tests in project
-	./venv/bin/pytest -vvv tests/
+	@./venv/bin/pytest -vvv tests/
 
 clean:  # remove development files
 	rm -rf venv

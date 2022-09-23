@@ -1,23 +1,10 @@
 # standard libraries
-from typing import Optional, Protocol, Sequence
+from typing import Callable, Optional, Sequence
 
 # gestrol library
 from gestrol.modifiers.base import Frame
 
-
-class FrameModifierProtocol(Protocol):
-    """
-    Protocol for a FrameModifier object. This could be a class or a function.
-    """
-
-    def __call__(self, frame: Frame) -> Optional[Frame]:
-        """
-        Call method.
-
-        Args:
-            frame: Frame type
-        """
-        ...
+FrameModifierCallable = Callable[[Frame], Optional[Frame]]
 
 
 class FramePipeline:
@@ -25,7 +12,7 @@ class FramePipeline:
     Modular pipeline for concatenating and applying FrameModifiers.
     """
 
-    def __init__(self, modifier_pipeline: Sequence[FrameModifierProtocol] = None):
+    def __init__(self, modifier_pipeline: Optional[Sequence[FrameModifierCallable]] = None):
         """
         Initiate method.
 
