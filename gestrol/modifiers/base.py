@@ -1,22 +1,11 @@
 # standard libraries
 import abc
-import logging
-import sys
 from typing import Optional, Union
 
 # external libraries
 import numpy as np
 from PIL.Image import Image
 from torch import Tensor
-
-logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.INFO,
-    format="[%(asctime)s] (%(filename)s:%(lineno)d) %(levelname)s : %(message)s",
-)
-
-logger = logging.getLogger()
-
 
 Frame = Union[Tensor, np.ndarray, Image]
 

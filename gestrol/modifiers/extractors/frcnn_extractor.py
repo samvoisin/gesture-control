@@ -6,7 +6,8 @@ from typing import Optional
 import torch
 import torchvision
 from torch import Tensor
-from torchvision.models.detection.faster_rcnn import FasterRCNN, FastRCNNPredictor
+from torchvision.models.detection.anchor_utils import AnchorGenerator
+from torchvision.models.detection.faster_rcnn import FasterRCNN
 
 # gestrol library
 from gestrol.modifiers.base import Frame, FrameModifier
@@ -28,16 +29,20 @@ def load_frcnn_model(model_path: Path) -> FasterRCNN:
     Returns:
         a `torch.nn.Module` instance
     """
-    # construct the model
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        pretrained=True,
-    )
-    num_classes = 2  # 1 class (hand) + background
-    in_features = model.roi_heads.box_predictor.cls_score.in_features
-    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-    # load the saved model and send to device
+    backbone = torchvision.models.mobilenet_v2(pretrained=True).features
+    backbone.out_channels = 1280  # FRCNN needs out_channels attribute
+
+    # have RPN generate 5 x 3 anchors per spatial loc
+    # 5 sizes and 3 aspect ratios
+    anchor_generator = AnchorGenerator(sizes=((128, 256, 512),), aspect_ratios=((0.5, 1.0, 2.0),))
+
+    # define what are feature maps used to perform region of interest cropping
+    # and size of crop after rescaling
+    roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=["0"], output_size=7, sampling_ratio=2)
+
+    model = FasterRCNN(backbone, num_classes=2, rpn_anchor_generator=anchor_generator, box_roi_pool=roi_pooler)
+
     model.load_state_dict(torch.load(model_path))
-    # model = model.to(device)
     model.eval()
     return model
 

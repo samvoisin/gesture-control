@@ -3,10 +3,10 @@ import cv2
 
 # gestrol library
 from gestrol.camera import OpenCVCameraInterface
-from gestrol.extractors.ssd_extractor import SSDExtractor
 from gestrol.frame_pipeline import FramePipeline
-from gestrol.frame_pipeline.modifiers import ChannelSwapModifier, NumpyToImageModifier, SSDPreprocModifier
 from gestrol.frame_stream import FrameStream
+from gestrol.modifiers import ChannelSwapModifier, SSDPreprocModifier, convert_numpy_to_image
+from gestrol.modifiers.extractors.ssd_extractor import SingleHandSSDExtractor
 
 
 def bbox_xywh_coords(bbox):
@@ -26,17 +26,17 @@ def make_img_w_bboxes(img, bboxes):
 cam = OpenCVCameraInterface()  # this returns numpy arrays by default
 fs = FrameStream(camera=cam)
 
-mod_pipe = [ChannelSwapModifier(), NumpyToImageModifier(), SSDPreprocModifier()]
+mod_pipe = [ChannelSwapModifier(), convert_numpy_to_image, SSDPreprocModifier()]
 fp = FramePipeline(modifier_pipeline=mod_pipe)
 
-ssd_extractor = SSDExtractor()
+ssd_extractor = SingleHandSSDExtractor()
 
 
 cv2.namedWindow("preview")
 
 for frame in fs.stream_frames():
     # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # adds a lot of latency
-    procd_frame = fp(frame)
+    procd_frame = fp.process_frame(frame)
     bboxes = ssd_extractor(procd_frame)
     frame = make_img_w_bboxes(frame, bboxes)
     cv2.imshow("preview", frame)

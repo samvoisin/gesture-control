@@ -36,7 +36,7 @@ class SingleChannelSelectorModifier(FrameModifier):
             single channel numpy array
         """
         if not isinstance(frame, np.ndarray):
-            raise TypeError(f"frame must have type {np.ndarray}, but has type {type(frame)}.")
+            raise TypeError(f"{self.__class__.__name__} takes {np.ndarray} as input, but has type {type(frame)}.")
         return frame[:, :, self.channel]
 
 
@@ -68,7 +68,7 @@ class ChannelSwapModifier(FrameModifier):
             three channel numpy array
         """
         if not isinstance(frame, np.ndarray):
-            raise TypeError(f"frame must have type {np.ndarray}, but has type {type(frame)}.")
+            raise TypeError(f"{self.__class__.__name__} takes {np.ndarray} as input, but has type {type(frame)}.")
         return frame[:, :, self.channel_order]
 
 
@@ -114,5 +114,5 @@ class ChannelDimOrderModifier(FrameModifier):
             three channel numpy array
         """
         if not isinstance(frame, np.ndarray):
-            raise TypeError(f"frame must have type {np.ndarray}, but has type {type(frame)}.")
+            raise TypeError(f"{self.__class__.__name__} takes {np.ndarray} as input, but has type {type(frame)}.")
         return self._dim_order_modifier(frame)

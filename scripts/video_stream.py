@@ -8,9 +8,8 @@ import cv2
 from gestrol.camera import VideoLoaderInterface
 from gestrol.frame_pipeline import FramePipeline
 from gestrol.frame_stream import FrameStream
-from gestrol.modifiers import ChannelSwapModifier
+from gestrol.modifiers import ChannelSwapModifier, SSDPreprocModifier
 from gestrol.modifiers.extractors.ssd_extractor import SingleHandSSDExtractor, load_ssd_model
-from gestrol.modifiers.type_converters import FrameToTensorModifier
 
 
 def bbox_xywh_coords(bbox):
@@ -27,26 +26,36 @@ def make_img_w_bboxes(img, bboxes):
     return img
 
 
-mp = Path("./").resolve() / "models" / "ssd_hand_detect.pt"
 vp = Path("./").resolve() / "data" / "videos" / "hand_test_vid.webm"
-# vp = Path("./").resolve() / "data" / "gesture_training_vids" / "h_f_down" / "0.mp4"
 vli = VideoLoaderInterface(video_path=vp)
 fs = FrameStream(camera=vli)
 
-model = load_ssd_model(model_path=mp)
 
+# SSD model pipeline
+mp = Path("./").resolve() / "models" / "ssd_hand_detect.pt"
+model = load_ssd_model(model_path=mp)
 mod_pipe = [
     ChannelSwapModifier(),
-    FrameToTensorModifier(),
+    SSDPreprocModifier(),
     SingleHandSSDExtractor(model=model),
 ]
+
+# Faster R-CNN pipeline
+# mp = Path("./").resolve() / "models" / "frcnn_hand_detect.pt"
+# model = load_frcnn_model(mp)
+# mod_pipe = [
+#    ChannelSwapModifier(),
+#    FrameToTensorModifier(),
+#    SingleHandFRCNNExtractor(model=model),
+# ]
+
 frame_pipeline = FramePipeline(modifier_pipeline=mod_pipe)
 
 
 cv2.namedWindow("preview")
 
 for frame in fs.stream_frames():
-    procd_frame = frame_pipeline(frame)
+    procd_frame = frame_pipeline.process_frame(frame)
     if procd_frame is None:
         continue
     extr_frame = procd_frame.numpy()[0, :, :]  # TODO: need to solve this problem

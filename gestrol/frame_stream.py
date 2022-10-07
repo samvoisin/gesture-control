@@ -27,6 +27,5 @@ class FrameStream:
         Yields:
             Frame object
         """
-
         while True:
             yield self.camera.get_frame()
