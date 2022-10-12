@@ -18,13 +18,7 @@ REQUIRES_PYTHON = ">=3.8"
 VERSION = "0.1.0"
 
 # What packages are required for this module to be executed?
-REQUIRED: List[str] = [
-    "numpy~=1.22",
-    "opencv-python~=4.5",
-    "Pillow~=9.1",
-    "torch~=1.11",
-    "torchvision~=0.12",
-]
+REQUIRED: List[str] = []
 
 # What packages are optional?
 # EXTRAS = {}
