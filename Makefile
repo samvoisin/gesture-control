@@ -13,22 +13,22 @@ sync-venv: update-requirements
 	./venv/bin/pip install -e .
 
 init:  # create virtual env and install deps
-	python3.8 -m venv venv
-	./venv/bin/python3.8 -m pip install -U pip
+	@python3.8 -m venv venv
+	@./venv/bin/python3.8 -m pip install -U pip
 
-	./venv/bin/python3.8 -m pip install -r requirements/requirements-dev.txt
-	./venv/bin/python3.8 -m pip install -r requirements/requirements.txt
+	@./venv/bin/python3.8 -m pip install -r requirements/requirements-dev.txt
+	@./venv/bin/python3.8 -m pip install -r requirements/requirements.txt
 
-	./venv/bin/python3.8 -m pip install -e .
-	./venv/bin/python3.8 -m pre_commit install --install-hooks --overwrite
+	@./venv/bin/python3.8 -m pip install -e .
+	@./venv/bin/python3.8 -m pre_commit install --install-hooks --overwrite
 
 lint:  # format all source code
-	./venv/bin/isort gestrol/ tests/ setup.py
-	.venv/bin/black --config=pyproject.toml --check .
-	.venv/bin/flake8 --config=.flake8 --per-file-ignores='tests/*'
+	@./venv/bin/isort gestrol/ tests/ setup.py
+	@./venv/bin/black --config=pyproject.toml --check .
+	@./venv/bin/flake8 --config=.flake8 --per-file-ignores='tests/*:D'
 
 test:  # run all tests in project
-	@./venv/bin/pytest -vvv tests/
+	@./venv/bin/pytest -vv --cov-fail-under=70 --cov=./gestrol tests/
 
 clean:  # remove development files
 	rm -rf venv

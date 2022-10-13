@@ -33,7 +33,6 @@ class TestFramePipeline:
         return nm
 
     def test_frame_passthrough(self, dummy_frame: Frame, pass_through_modifier: DummyFrameModifier):
-
         frame_pass = [
             cast(FrameModifier, pass_through_modifier),
             cast(FrameModifier, pass_through_modifier),
@@ -49,7 +48,6 @@ class TestFramePipeline:
         pass_through_modifier: DummyFrameModifier,
         null_modifier: DummyFrameModifier,
     ):
-
         null_pipe = [
             cast(FrameModifier, pass_through_modifier),
             cast(FrameModifier, null_modifier),
@@ -59,8 +57,3 @@ class TestFramePipeline:
         frame_pipeline = FramePipeline(modifier_pipeline=null_pipe)
         frame = frame_pipeline.process_frame(dummy_frame)
         assert frame is None
-
-
-@pytest.mark.xfail(reason="FPSMonitor not yet implemented.")
-def test_fps_monitor():
-    assert False

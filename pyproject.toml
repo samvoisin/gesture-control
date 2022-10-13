@@ -50,6 +50,9 @@ markers = [
   "incompatible_with_mypyc: run when testing mypyc compiled black"
 ]
 
+[tool.coverage.run]
+omit = ['**/__init__.py']
+
 [tool.mypy]
 [[tool.mypy.overrides]]
 module = [
