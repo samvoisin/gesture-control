@@ -17,16 +17,17 @@ AUTHOR = "Sam Voisin"
 REQUIRES_PYTHON = ">=3.8"
 VERSION = "0.1.0"
 
-# What packages are required for this module to be executed?
+# required packages
+# cu113 part is required bc current GPU is sm_86 and pytorch only supports sm_70
 REQUIRED: List[str] = [
     "numpy~=1.22",
     "opencv-python~=4.5",
     "Pillow~=9.1",
-    "torch~=1.11",
-    "torchvision~=0.12",
+    "torch==1.11.0+cu113",
+    "torchvision==0.12.0+cu113",
 ]
 
-# What packages are optional?
+# optional extras
 # EXTRAS = {}
 
 # The rest you shouldn't have to touch too much :)

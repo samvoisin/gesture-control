@@ -1,3 +1,5 @@
+-c requirements.txt
+
 # install, making requirements, ...
 pip-tools~=6.8
 
