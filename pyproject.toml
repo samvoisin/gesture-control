@@ -16,6 +16,7 @@ exclude='''
         | \.vscode
         | venv
         | \.ipynb_checkpoints
+        | data
     )/
 )
 '''

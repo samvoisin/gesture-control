@@ -25,7 +25,7 @@ init:  # create virtual env and install deps
 lint:  # format all source code
 	@./venv/bin/isort gestrol/ tests/ setup.py
 	@./venv/bin/black --config=pyproject.toml --check .
-	@./venv/bin/flake8 --config=.flake8 --per-file-ignores='tests/*:D'
+	@./venv/bin/flake8 --config=.flake8
 
 test:  # run all tests in project
 	@./venv/bin/pytest -vv --cov-fail-under=70 --cov=./gestrol tests/

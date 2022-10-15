@@ -1,5 +1,5 @@
 # ignore dirs with large amounts of data
-/data/
+data/
 models/
 
 # Byte-compiled / optimized / DLL files
