@@ -67,15 +67,3 @@ class SingleHandSSDExtractor(FrameModifier):
         x0, y0, x1, y1 = boxes
         frame = frame[:, y0:y1, x0:x1]
         return frame
-
-
-class SSDMultiExtractor:
-    """
-    Use SSD model to identify bounding box around hand(s) in a frame.
-    """
-
-    def __init__(self, model: torch.nn.Module = None, device: str = None, top_n: int = 1):
-        raise NotImplementedError(f"{self.__class__.__name__} not implemented.")
-        self.model = model or load_ssd_model(model_path=SSD_MODEL_PATH, device=GPU_DEVICE)
-        self.device = device or GPU_DEVICE
-        self.top_n = top_n

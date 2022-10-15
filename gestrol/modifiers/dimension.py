@@ -9,6 +9,12 @@ from gestrol.modifiers.base import Frame, FrameModifier
 
 
 class TensorDimensionSwapModifier(FrameModifier):
+    """
+    Swap the dimensions of a Tensor frame.
+
+    TODO: Can probably be simplified to a function.
+    """
+
     def __init__(self, dimension_swaps: Sequence[Sequence[int]]) -> None:
         """
         Args:

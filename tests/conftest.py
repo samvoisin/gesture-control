@@ -17,7 +17,7 @@ def dummy_frame_dim() -> int:
 @pytest.fixture
 def dummy_frame(dummy_frame_dim) -> np.ndarray:
     """
-    Test frame.
+    Test frame with dimensions (dummy_frame_dim, dummy_frame_dim, 3). All elements of array i are i for i in {0, 1, 2}.
     """
     res = np.empty(shape=(dummy_frame_dim, dummy_frame_dim, 3))
     ones_arr = np.ones(shape=(dummy_frame_dim, dummy_frame_dim))
