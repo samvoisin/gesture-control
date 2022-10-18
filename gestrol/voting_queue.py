@@ -1,6 +1,10 @@
 # standard libraries
 from queue import Queue
-from typing import Dict
+from typing import Any, Dict
+
+
+class QueueError(Exception):
+    pass
 
 
 class VotingQueue(Queue):
@@ -11,13 +15,30 @@ class VotingQueue(Queue):
     def __init__(self, maxsize: int) -> None:
         super().__init__(maxsize)
         self.vote_tally: Dict[int, int] = dict()
+        self.curr_lab = None
+
+    def put(self, item: Any):
+        """
+        Custom put implementation to avoid overfilling the queue.
+
+        Args:
+            item (Any): To be put in queue
+
+        Raises:
+            QueueError: _description_
+        """
+        if self.full():
+            print(item)
+            raise QueueError("Queue is full. Cannot put another element.")
+        else:
+            super().put(item)
 
     def vote(self) -> int:
         """
         Tally's popular vote of all entities in the queue. Items are removed from the queue in the process.
 
         Raises:
-            ValueError: If `vote` is called when queue is empty
+            QueueError: If `vote` is called when queue is empty
 
         Returns:
             int: Most popular label
@@ -25,7 +46,7 @@ class VotingQueue(Queue):
         self.vote_tally = dict()  # reset tally
 
         if self.empty():
-            raise ValueError("Voting queue is empty.")
+            raise QueueError("Voting queue is empty.")
 
         while not self.empty():
             lab = self.get()
