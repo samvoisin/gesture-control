@@ -28,7 +28,6 @@ class VotingQueue(Queue):
             QueueError: _description_
         """
         if self.full():
-            print(item)
             raise QueueError("Queue is full. Cannot put another element.")
         else:
             super().put(item)
