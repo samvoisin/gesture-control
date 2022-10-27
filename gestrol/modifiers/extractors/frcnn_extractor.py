@@ -64,13 +64,14 @@ class SingleHandFRCNNExtractor(FrameModifier):
         self.model = model or load_frcnn_model(model_path=FRCNN_MODEL_PATH)
         self.model = self.model.to(self.device)
 
-    def modify_frame(self, frame: Frame) -> Optional[Tensor]:
+    def __call__(self, frame: Frame) -> Optional[Tensor]:
         if not isinstance(frame, Tensor):
             raise TypeError(
                 f"{self.__class__.__name__}.modify_frame requires `torch.Tensor` input but received {type(frame)}."
             )
         prepped_frame = [frame.to(self.device)]
-        boxes = self.model(prepped_frame)[0]["boxes"]
+        with torch.no_grad():
+            boxes = self.model(prepped_frame)[0]["boxes"]
         if len(boxes) < 1:
             return None
         boxes = boxes[0]  # top confidence prediction

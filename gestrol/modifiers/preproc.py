@@ -19,7 +19,7 @@ class SSDPreprocModifier(FrameModifier):
             ]
         )
 
-    def modify_frame(self, frame: Frame) -> Tensor:
+    def __call__(self, frame: Frame) -> Tensor:
         return self.fcn_composition(frame)
 
 
@@ -39,5 +39,5 @@ class FasterRCNNPreprocModifier(FrameModifier):
             ]
         )
 
-    def modify_frame(self, frame: Frame) -> Tensor:
+    def __call__(self, frame: Frame) -> Tensor:
         return self.fcn_composition(frame)

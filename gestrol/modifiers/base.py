@@ -18,28 +18,13 @@ class FrameModifier(abc.ABC):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
 
+    @abc.abstractmethod
     def __call__(self, frame: Frame) -> Optional[Frame]:
         """
-        Call method for generic `FrameModifier`.
-        Any `FrameModifier` must be capable of accepting a `Frame` object as input OR a `None` object as input.
-        In the event a `None` object is provided as input, it should be passed to the next `FrameModifier` which should
-        pass `None` to the next `FrameModifier` and so on.
+        Abstract call method for modifying a `Frame` input.
 
-        The reason for allowing `None` objects as input/output is to allow for operations which reduce the frame rate
-        passed into a `FramePipeline` or occasional failures in extraction by Extractor models.
-
-        Args:
-            frame: `Frame` type
-
-        Returns:
-            `Frame` or `None`
-        """
-        return self.modify_frame(frame)
-
-    @abc.abstractmethod
-    def modify_frame(self, frame: Frame) -> Optional[Frame]:
-        """
-        Abstract method for actually modifying a `Frame` input. This should be overwritten in subclasses.
+        Any `FrameModifier` must be capable of accepting a `Frame` object as input and returning either a
+        `Frame` or `None` type object as output.
 
         Args:
             frame: a `Frame` type. `None` is handled in `__call__` method and is thus not a valid input.
