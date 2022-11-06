@@ -1,9 +1,0 @@
-training_data_dir: "./data/gesture_training_data"
-sample_size: 5
-sample_time: 3
-gesture_instructions:
-  fist: "hold closed fist with fingernails pointing to camera"
-  v_f_left: "Hold hand flat and VERTICAL with finders pointed toward camera. Hinge wrist to your LEFT."
-  v_f_right: "Hold hand flat and VERTICAL with finders pointed toward camera. Hinge wrist to your RIGHT."
-  h_f_up: "Hold hand flat and HORIZONTAL with finders pointed toward camera. Hinge wrist UP."
-  h_f_down: "Hold hand flat and HORIZONTAL with finders pointed toward camera. Hinge wrist DOWN."
