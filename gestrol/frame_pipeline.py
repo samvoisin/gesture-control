@@ -21,7 +21,7 @@ class FramePipeline:
         """
         self.modifier_pipeline = modifier_pipeline or []
 
-    def process_frame(self, frame: Frame) -> Optional[Frame]:
+    def process_frame(self, frame: Optional[Frame]) -> Optional[Frame]:
         """
         Modify frame by sequentially calling modifiers.
 
@@ -32,7 +32,7 @@ class FramePipeline:
             Frame type or None if a modifier has null result
         """
         for modifier in self.modifier_pipeline:
-            frame = modifier(frame)
             if frame is None:
                 return None
+            frame = modifier(frame)
         return frame

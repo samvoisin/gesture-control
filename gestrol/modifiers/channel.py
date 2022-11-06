@@ -22,7 +22,7 @@ class SingleChannelSelectorModifier(FrameModifier):
         """
         self.channel = channel
 
-    def modify_frame(self, frame: Frame) -> np.ndarray:
+    def __call__(self, frame: Frame) -> np.ndarray:
         """
         Select single channel.
 
@@ -54,7 +54,7 @@ class ChannelSwapModifier(FrameModifier):
         """
         self.channel_order = channel_order
 
-    def modify_frame(self, frame: Frame) -> np.ndarray:
+    def __call__(self, frame: Frame) -> np.ndarray:
         """
         Reorder channels.
 
@@ -100,7 +100,7 @@ class ChannelDimOrderModifier(FrameModifier):
     def _last_mode(self, frame: np.ndarray) -> np.ndarray:
         return np.rollaxis(frame, 0, 3)
 
-    def modify_frame(self, frame: Frame) -> np.ndarray:
+    def __call__(self, frame: Frame) -> np.ndarray:
         """
         Swap first and last axes of an array.
 

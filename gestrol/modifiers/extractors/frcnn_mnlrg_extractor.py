@@ -4,12 +4,12 @@ from typing import Optional
 
 # external libraries
 import torch
-from torch import Tensor
 from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn
 from torchvision.models.detection.faster_rcnn import FasterRCNN
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import Frame
+from gestrol.modifiers.extractors.base import FrameExtractor
 
 MODELS_DIR = Path(__file__).parents[2] / "models"
 FRCNN_MODEL_PATH = MODELS_DIR / "frcnn_hand_detect_mbn_v3_lrg.pt"
@@ -33,7 +33,7 @@ def load_frcnn_model(model_path: Path) -> FasterRCNN:
     return model
 
 
-class SingleHandMobileNetExtractor(FrameModifier):
+class SingleHandMobileNetExtractor(FrameExtractor):
     """
     Use Faster R-CNN model to identify bounding box around highest confidence hand prediction.
     """
@@ -46,22 +46,9 @@ class SingleHandMobileNetExtractor(FrameModifier):
             model: a pytorch `nn.Module` instance. Default behavior loads internal `frcnn_hand_detect.pt` model.
             device: device on which model will run. Defaults to machine GPU instance.
         """
-        self.device = device or GPU_DEVICE
-        self.model = model or load_frcnn_model(model_path=FRCNN_MODEL_PATH)
-        self.model = self.model.to(self.device)
-        self.model.eval()
+        device = device or GPU_DEVICE
+        model = model or load_frcnn_model(model_path=FRCNN_MODEL_PATH)
+        super().__init__(model, device)
 
-    def modify_frame(self, frame: Frame) -> Optional[Tensor]:
-        if not isinstance(frame, Tensor):
-            raise TypeError(
-                f"{self.__class__.__name__}.modify_frame requires `torch.Tensor` input but received {type(frame)}."
-            )
-        prepped_frame = [frame.to(self.device)]
-        boxes = self.model(prepped_frame)[0]["boxes"]
-        if len(boxes) < 1:
-            return None
-        boxes = boxes[0]  # top confidence prediction
-        boxes = boxes.to(int)
-        x0, y0, x1, y1 = boxes
-        frame = frame[:, y0:y1, x0:x1]
-        return frame
+    def __call__(self, frame: Frame) -> Optional[Frame]:
+        return super().__call__(frame)
