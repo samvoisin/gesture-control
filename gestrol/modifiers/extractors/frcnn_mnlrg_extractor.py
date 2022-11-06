@@ -28,6 +28,7 @@ def load_frcnn_model(model_path: Path) -> FasterRCNN:
         a `torch.nn.Module` instance
     """
     model = fasterrcnn_mobilenet_v3_large_fpn()
+    # model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2) This is for the updated model which needs more training
     model.load_state_dict(torch.load(model_path))
     return model
 

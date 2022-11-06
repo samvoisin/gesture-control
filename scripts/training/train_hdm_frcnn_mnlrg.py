@@ -123,6 +123,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, sc
         loss_value = losses_reduced.item()
 
         if not math.isfinite(loss_value):
+            breakpoint()
             print(f"Loss is {loss_value}, stopping training")
             print(loss_dict_reduced)
             sys.exit(1)
