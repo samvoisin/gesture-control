@@ -25,7 +25,7 @@ class VotingQueue(Queue):
             item (Any): To be put in queue
 
         Raises:
-            QueueError: _description_
+            QueueError: raised if voting queue is full.
         """
         if self.full():
             raise QueueError("Queue is full. Cannot put another element.")
@@ -34,10 +34,10 @@ class VotingQueue(Queue):
 
     def vote(self) -> int:
         """
-        Tally's popular vote of all entities in the queue. Items are removed from the queue in the process.
+        Tally popular vote of all entities in the queue. Items are removed from the queue in the process.
 
         Raises:
-            QueueError: If `vote` is called when queue is empty
+            QueueError: raised if `vote` is called when queue is empty
 
         Returns:
             int: Most popular label
