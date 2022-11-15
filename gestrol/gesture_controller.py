@@ -28,6 +28,10 @@ class CommandControllerProtocol(Protocol):
 
 
 class GestureController:
+    """
+    Master class for gestrol library. Contains all components necessary to control machine with gestures.
+    """
+
     def __init__(
         self,
         frame_stream: FrameStream,
@@ -37,6 +41,17 @@ class GestureController:
         classification_regularizer: ClassificationRegularizerProtocol,
         fps_monitor: Optional[FPSMonitor] = None,
     ):
+        """
+        Initiate method.
+
+        Args:
+            frame_stream: frame stream object with active camera interface
+            frame_pipeline: pipeline for pre-processing frames including extractor
+            gesture_classifier: gesture classifier model
+            command_controller: command controller object
+            classification_regularizer: regularizer to prevent volatility in commands sent to command controller
+            fps_monitor: frames per second monitor. Defaults to None.
+        """
         self.frame_stream = frame_stream
         self.fp = frame_pipeline
         self.gc = gesture_classifier
@@ -45,12 +60,24 @@ class GestureController:
         self.fps_monitor = fps_monitor  # TODO: implement this
 
     def _coord_class_reg(self, inferred_label: int) -> Optional[int]:
+        """
+        Private method for coordinating classification regularizer.
+
+        Args:
+            inferred_label: labeled inferred by gesture classifier
+
+        Returns:
+            None if regularizer does not vote; highest voted label if it does
+        """
         self.class_reg.put(inferred_label)
         if self.class_reg.full():
             return self.class_reg.vote()
         return None
 
     def activate(self):
+        """
+        Activate gesture control interface.
+        """
         for frame in self.frame_stream.stream_frames():
             frame = self.fp.process_frame(frame)
             if frame is None:
