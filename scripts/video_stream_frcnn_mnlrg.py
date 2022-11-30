@@ -33,10 +33,14 @@ fpsm = FPSMonitor()
 
 cv2.namedWindow("preview")
 
+null_ctr = 0
 for frame in fs.stream_frames():
     procd_frame = frame_pipeline.process_frame(frame)
     fpsm.monitor_fps(frame)
     if procd_frame is None:
+        null_ctr += 1
+        if null_ctr >= 20:
+            break
         continue
     extr_frame = procd_frame.numpy()[0, :, :]  # TODO: need to solve this problem
     cv2.imshow("preview", extr_frame)

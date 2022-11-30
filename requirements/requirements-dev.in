@@ -17,5 +17,6 @@ pytest-cov~=3.0
 pdbpp~=0.10
 
 # modeling
+scikit-learn~=1.1
 matplotlib~=3.6
 pandas~=1.5

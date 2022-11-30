@@ -12,8 +12,9 @@ from gestrol.modifiers.base import Frame, FrameModifier
 class FrameExtractor(FrameModifier):
     def __init__(self, model: torch.nn.Module, device: torch.device):
         self.device = device
+        self.model = model
         self.model = self.model.to(self.device)
-        model.eval()  # ensure model in eval mode
+        self.model.eval()  # ensure model in eval mode
 
     @abstractmethod
     def __call__(self, frame: Frame) -> Optional[Frame]:
@@ -23,7 +24,8 @@ class FrameExtractor(FrameModifier):
             )
         prepped_frame = [frame.to(self.device)]
         with torch.no_grad():
-            boxes = self.model(prepped_frame)[0]["boxes"]
+            prediction = self.model(prepped_frame)
+            boxes = prediction[0]["boxes"]  # only 1 class so take 0; then take bounding boxes
         if len(boxes) < 1:
             return None
         boxes = boxes[0]  # top confidence prediction

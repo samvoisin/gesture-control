@@ -11,8 +11,10 @@ from torchvision.models.detection.faster_rcnn import FasterRCNN
 from gestrol.modifiers.base import Frame
 from gestrol.modifiers.extractors.base import FrameExtractor
 
-MODELS_DIR = Path(__file__).parents[2] / "models"
-FRCNN_MODEL_PATH = MODELS_DIR / "frcnn_hand_detect_mbn_v3_lrg.pt"
+MODELS_DIR = Path(__file__).parents[3] / "models"
+FRCNN_MODEL_PATH = (  # MODELS_DIR / "frcnn_hand_detect_mnlrg.pt"
+    "/home/svoisin/Projects/PythonProjects/mod/gesture-control/models/frcnn_hand_detect_mnlrg.pt"
+)
 
 GPU_DEVICE = torch.device("cuda")
 
@@ -27,8 +29,7 @@ def load_frcnn_model(model_path: Path) -> FasterRCNN:
     Returns:
         a `torch.nn.Module` instance
     """
-    model = fasterrcnn_mobilenet_v3_large_fpn()
-    # model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2) This is for the updated model which needs more training
+    model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2)
     model.load_state_dict(torch.load(model_path))
     return model
 

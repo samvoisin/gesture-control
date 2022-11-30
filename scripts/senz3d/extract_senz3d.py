@@ -6,6 +6,7 @@ from typing import List
 # external libraries
 import cv2
 import torch
+from tqdm import tqdm
 
 # gestrol library
 from gestrol import FramePipeline
@@ -13,29 +14,26 @@ from gestrol.frame_pipeline import FrameModifierCallable
 from gestrol.modifiers import (
     ChannelDimOrderModifier,
     ChannelSwapModifier,
-    FasterRCNNPreprocModifier,
-    ReverseNormalizeModifier,
     ScalarModifier,
-    convert_numpy_to_image,
+    convert_frame_to_tensor,
     convert_tensor_to_numpy,
 )
-from gestrol.modifiers.extractors.frcnn_extractor import SingleHandFRCNNExtractor, load_frcnn_model
+from gestrol.modifiers.extractors.frcnn_mnlrg_extractor import SingleHandMobileNetExtractor
 
 data_dir = Path("./data/senz3d_dataset").resolve()
 restructured_dir = data_dir / "restructured"
 extracted_dir = data_dir / "extracted"
-model_path = Path("./models/frcnn_hand_detect.pt")
+model_path = Path("./models/frcnn_hand_detect_mnlrg.pt")
 
 
-model = load_frcnn_model(model_path=model_path)
+# model = load_frcnn_model(model_path=model_path)
 
 
 # the actual frame pipeline to be used in controller
 mod_pipe: List[FrameModifierCallable] = [
     ChannelSwapModifier(),
-    convert_numpy_to_image,
-    FasterRCNNPreprocModifier(),
-    SingleHandFRCNNExtractor(model=model),
+    convert_frame_to_tensor,
+    SingleHandMobileNetExtractor(),
 ]
 
 fp = FramePipeline(modifier_pipeline=mod_pipe)
@@ -44,7 +42,7 @@ fp = FramePipeline(modifier_pipeline=mod_pipe)
 # revert image to be saved as `.png` for visual inspection
 viz_fp = FramePipeline(
     modifier_pipeline=[
-        ReverseNormalizeModifier(),
+        # ReverseNormalizeModifier(),
         convert_tensor_to_numpy,
         ChannelDimOrderModifier(mode="last"),
         ScalarModifier(),
@@ -54,7 +52,7 @@ viz_fp = FramePipeline(
 
 
 extracted_dir.mkdir(exist_ok=True)
-for src_gdir in restructured_dir.iterdir():
+for src_gdir in tqdm(restructured_dir.iterdir()):
     if not src_gdir.is_dir():
         continue
 

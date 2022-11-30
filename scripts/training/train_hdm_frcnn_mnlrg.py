@@ -25,7 +25,7 @@ test_data_image_dir = DATA_DIR / Path("./test/")
 train_labels_csv = DATA_DIR / Path("./train_labels.csv")
 test_labels_csv = DATA_DIR / Path("./test_labels.csv")
 
-MODEL_SAVE_PATH = Path("models/frcnn_hand_detect_mnlrg_upd.pt")
+MODEL_SAVE_PATH = Path("models/frcnn_hand_detect_mnlrg.pt")
 
 
 class HandDetectDataset(Dataset):
@@ -73,8 +73,12 @@ class HandDetectDataset(Dataset):
 data_transforms = {
     "train": transforms.Compose(
         [
+            transforms.RandomSolarize(threshold=192, p=0.5),  # can be PIL.Image
+            transforms.RandomEqualize(p=0.5),
             transforms.ToTensor(),
             transforms.ColorJitter(brightness=0.5, hue=0.3),
+            transforms.GaussianBlur(kernel_size=(5, 9)),
+            transforms.RandomInvert(),
         ]
     ),
     "test": transforms.Compose(
@@ -123,7 +127,6 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, sc
         loss_value = losses_reduced.item()
 
         if not math.isfinite(loss_value):
-            breakpoint()
             print(f"Loss is {loss_value}, stopping training")
             print(loss_dict_reduced)
             sys.exit(1)
@@ -173,7 +176,7 @@ def evaluate_model(model, data_loader, device):
     return avg_loss_dict
 
 
-def construct_model():
+def construct_model() -> torch.nn.Module:
     model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2)
     return model
 
@@ -183,7 +186,7 @@ def main():
 
     # (re)define or load the model
     model = construct_model()
-    # model.load_state_dict(torch.load(MODEL_SAVE_PATH))
+    model.load_state_dict(torch.load(MODEL_SAVE_PATH))
 
     # set up devices
     gpu_device = torch.device("cuda")
@@ -197,12 +200,12 @@ def main():
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+    optimizer = torch.optim.SGD(params, lr=0.0003, weight_decay=0.0005)
     # and a learning rate scheduler
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.01)
 
     # training loop
-    num_epochs = 15
+    num_epochs = 10
     test_losses = {
         "loss_classifier": [],
         "loss_box_reg": [],
@@ -225,10 +228,11 @@ def main():
             test_losses[loss_type].append(loss_val)
 
     fig, ax = plt.subplots(nrows=4, ncols=1)
+    fig.set_size_inches(18.5, 10.5)
     for i, loss_type in enumerate(test_losses):
         ax[i].plot(range(len(test_losses[loss_type])), test_losses[loss_type])
         ax[i].set_title(loss_type)
-    fig.savefig("data/hand_detect_model/frcnn_lrg_trng.png")
+    fig.savefig("data/hand_detect_model/frcnn_mnlrg_trng.png")
 
 
 if __name__ == "__main__":
