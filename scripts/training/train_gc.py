@@ -173,13 +173,11 @@ def train_one_epoch(model, optimizer, loss_function, data_loader, device, log_n_
     for i, (imgs, labels) in generator:
         imgs.to(device)
         labels.to(device)
-        one_hot_label = make_one_hot_vector(label)
 
         optimizer.zero_grad()
 
-        pred = model(imgs)
-        breakpoint()
-        loss = loss_function(pred, one_hot_label)
+        pred = model(imgs).reshape(1, -1)
+        loss = loss_function(pred, labels)
 
         loss.backward()
         optimizer.step()
@@ -200,7 +198,7 @@ def evaluate_model(model, data_loader, loss_function):
 
 
 def main():
-    device = torch.device("cuda")
+    device = torch.device("cpu")
     model = construct_model()
     loss_fcn = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
