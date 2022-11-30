@@ -17,6 +17,8 @@ from tqdm import tqdm
 GESTURE_CLASSES = ["G1", "G5", "G9"]  # G1 - fist; G5 - open palm; G9 - german 3
 SENZ3D_PATH = Path("data/senz3d_dataset")
 EXTRACTED_PATH = SENZ3D_PATH / "extracted"
+BEST_MODEL_PATH = Path("models/gc_cnn_best.pt")
+LAST_MODEL_PATH = Path("models/gc_cnn_last.pt")
 
 
 def _split_samples_list(samples: List[Any], split_frac: float, rng=np.random.Generator) -> Tuple[List[Any], List[Any]]:
@@ -168,11 +170,9 @@ def train_one_epoch(model, optimizer, loss_function, data_loader, device, log_n_
     model.train()
     running_loss = 0.0
 
-    generator = tqdm(enumerate(data_loader))
-
-    for i, (imgs, labels) in generator:
-        imgs.to(device)
-        labels.to(device)
+    for i, (imgs, labels) in enumerate(tqdm(data_loader)):
+        imgs = imgs.to(device)
+        labels = labels.to(device)
 
         optimizer.zero_grad()
 
@@ -185,32 +185,42 @@ def train_one_epoch(model, optimizer, loss_function, data_loader, device, log_n_
         running_loss += loss.item()
 
         if i % log_n_iters == 0:
-            logging.info(f"iteration {i}; Avg. loss over last {log_n_iters}: {running_loss / log_n_iters:f.4}")
+            logging.info(f"iteration {i}; Avg. loss over last {log_n_iters}: {running_loss / log_n_iters:.4f}")
             running_loss = 0.0
 
 
-def evaluate_model(model, data_loader, loss_function):
+def evaluate_model(model, data_loader, loss_function, device):
     model.eval()
+
+    tot_loss = 0
     with torch.no_grad():
         for imgs, labels in data_loader:
-            pred = model(imgs)
-            loss_function(pred, labels)
+            imgs = imgs.to(device)
+            labels = labels.to(device)
+            pred = model(imgs).reshape(1, -1)
+            loss = loss_function(pred, labels).item()
+            tot_loss += loss
+    mean_loss = tot_loss / len(data_loader)
+    return mean_loss
 
 
 def main():
-    device = torch.device("cpu")
+    device = torch.device("cuda")
     model = construct_model()
+    model.to(device)
     loss_fcn = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    epochs = 1
+    epochs = 25
 
+    best_loss = np.inf
     for epoch in range(epochs):
         train_one_epoch(model, optimizer, loss_fcn, data_loaders["train"], device)
-        # evaluate_model(model, data_loaders["test"])
-
-
-for sample, label in data_loaders["train"]:
-    continue
+        val_loss = evaluate_model(model, data_loaders["test"], loss_fcn, device)
+        if best_loss > val_loss:
+            best_loss = val_loss
+            torch.save(model.state_dict(), BEST_MODEL_PATH)
+        torch.save(model.state_dict(), LAST_MODEL_PATH)
+        logging.info(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss is {best_loss:.4f}.")
 
 
 if __name__ == "__main__":
