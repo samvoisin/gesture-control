@@ -29,7 +29,7 @@ class ReverseNormalizeModifier(FrameModifier):
 
     def __call__(self, frame: Frame) -> Tensor:
         if not isinstance(frame, Tensor):
-            raise TypeError(f"frame must have type {Tensor}, but has type {type(frame)}.")
+            raise TypeError(f"frame must be type {Tensor} but is type {type(frame)}.")
         for i in range(3):
             frame[i, :, :] = frame[i, :, :] * self.sigma[i] + self.mu[i]
         return frame
@@ -47,7 +47,7 @@ class ScalarModifier(FrameModifier):
         Args:
             scalar: scalar multiple. Defaults to 255.
         """
-        self._scalar = scalar
+        self.scalar = scalar
 
     def __call__(self, frame: Frame) -> Union[np.ndarray, Tensor]:
         """
@@ -64,4 +64,4 @@ class ScalarModifier(FrameModifier):
         """
         if isinstance(frame, Image):
             raise TypeError(f"frame must be {Tensor} or {np.ndarray} but is type {type(frame)}.")
-        return frame * self._scalar
+        return frame * self.scalar
