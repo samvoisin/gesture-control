@@ -3,7 +3,7 @@ import logging
 import math
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 # external libraries
 import matplotlib.pyplot as plt
@@ -176,8 +176,12 @@ def evaluate_model(model, data_loader, device):
     return avg_loss_dict
 
 
-def construct_model() -> torch.nn.Module:
+def construct_model(model_path: Optional[Path] = None) -> torch.nn.Module:
     model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2)
+
+    if model_path:
+        model.load_state_dict(torch.load(model_path))
+
     return model
 
 

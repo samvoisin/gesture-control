@@ -9,6 +9,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets.folder import DatasetFolder
@@ -21,15 +22,14 @@ BEST_MODEL_PATH = Path("models/gc_cnn_best.pt")
 LAST_MODEL_PATH = Path("models/gc_cnn_last.pt")
 
 
+logging.basicConfig(level=logging.INFO)
+
+
 def _split_samples_list(samples: List[Any], split_frac: float, rng=np.random.Generator) -> Tuple[List[Any], List[Any]]:
     n = int(len(samples) * split_frac)
     sampled = rng.choice(samples, replace=False, size=n)
     remaining = list(set(samples) - set(sampled))
     return sampled, remaining
-
-
-# def load_pt_file(path: str):
-#     return torch.load(path)
 
 
 def _copy_bulk(from_paths: List[Path], to_dir: Path):
@@ -166,11 +166,11 @@ def make_one_hot_vector(label: torch.Tensor, n_classes: int = 3) -> torch.Tensor
     return one_hot
 
 
-def train_one_epoch(model, optimizer, loss_function, data_loader, device, log_n_iters=100):
+def train_one_epoch(model, optimizer, loss_function, data_loader, device):
     model.train()
-    running_loss = 0.0
+    tot_trn_loss = 0.0
 
-    for i, (imgs, labels) in enumerate(tqdm(data_loader)):
+    for imgs, labels in tqdm(data_loader):
         imgs = imgs.to(device)
         labels = labels.to(device)
 
@@ -182,11 +182,9 @@ def train_one_epoch(model, optimizer, loss_function, data_loader, device, log_n_
         loss.backward()
         optimizer.step()
 
-        running_loss += loss.item()
+        tot_trn_loss += loss.item()
 
-        if i % log_n_iters == 0:
-            logging.info(f"iteration {i}; Avg. loss over last {log_n_iters}: {running_loss / log_n_iters:.4f}")
-            running_loss = 0.0
+    logging.info(f"Avg. training loss: {tot_trn_loss / len(data_loader):.4f}")
 
 
 def evaluate_model(model, data_loader, loss_function, device):
@@ -209,18 +207,21 @@ def main():
     model = construct_model()
     model.to(device)
     loss_fcn = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    epochs = 25
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.4)
+    scheduler = ReduceLROnPlateau(optimizer, patience=5)
+    epochs = 100
 
     best_loss = np.inf
     for epoch in range(epochs):
+        logging.info(f"Current learning rate: {optimizer.state_dict()['param_groups'][0]['lr']}")
         train_one_epoch(model, optimizer, loss_fcn, data_loaders["train"], device)
         val_loss = evaluate_model(model, data_loaders["test"], loss_fcn, device)
+        scheduler.step(val_loss)
         if best_loss > val_loss:
             best_loss = val_loss
             torch.save(model.state_dict(), BEST_MODEL_PATH)
         torch.save(model.state_dict(), LAST_MODEL_PATH)
-        logging.info(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss is {best_loss:.4f}.")
+        logging.info(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss: {best_loss:.4f}")
 
 
 if __name__ == "__main__":
