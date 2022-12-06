@@ -15,6 +15,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn
+from torchvision.models.detection.rpn import AnchorGenerator
 
 HAND_DETECT_DIR = Path("data/hand_detect_model").resolve()
 DATA_DIR = HAND_DETECT_DIR / "images"
@@ -25,7 +26,7 @@ test_data_image_dir = DATA_DIR / Path("./test/")
 train_labels_csv = DATA_DIR / Path("./train_labels.csv")
 test_labels_csv = DATA_DIR / Path("./test_labels.csv")
 
-MODEL_SAVE_PATH = Path("models/frcnn_hand_detect_mnlrg.pt")
+MODEL_SAVE_PATH = Path("models/frcnn_hand_detect_mnlrg_agbig.pt")
 
 
 class HandDetectDataset(Dataset):
@@ -178,6 +179,8 @@ def evaluate_model(model, data_loader, device):
 
 def construct_model(model_path: Optional[Path] = None) -> torch.nn.Module:
     model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2)
+    ag = AnchorGenerator(sizes=((128), (256), (512)), aspect_ratios=((0.5, 1.0, 1.5), (0.5, 1.0, 1.5), (0.5, 1.0, 1.5)))
+    model.rpn.anchor_generator = ag
 
     if model_path:
         model.load_state_dict(torch.load(model_path))
@@ -190,7 +193,6 @@ def main():
 
     # (re)define or load the model
     model = construct_model()
-    model.load_state_dict(torch.load(MODEL_SAVE_PATH))
 
     # set up devices
     gpu_device = torch.device("cuda")
@@ -209,7 +211,7 @@ def main():
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.01)
 
     # training loop
-    num_epochs = 10
+    num_epochs = 100
     test_losses = {
         "loss_classifier": [],
         "loss_box_reg": [],
