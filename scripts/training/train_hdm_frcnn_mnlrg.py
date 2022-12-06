@@ -26,7 +26,8 @@ test_data_image_dir = DATA_DIR / Path("./test/")
 train_labels_csv = DATA_DIR / Path("./train_labels.csv")
 test_labels_csv = DATA_DIR / Path("./test_labels.csv")
 
-MODEL_SAVE_PATH = Path("models/frcnn_hand_detect_mnlrg_agbig.pt")
+BEST_MODEL_PATH = Path("models/frcnn_hand_detect_mnlrg_best.pt")
+LAST_MODEL_PATH = Path("models/frcnn_hand_detect_mnlrg_last.pt")
 
 
 class HandDetectDataset(Dataset):
@@ -147,7 +148,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, sc
     return metric_logger
 
 
-def evaluate_model(model, data_loader, device):
+def evaluate_model(model, data_loader, device) -> Dict[str, float]:
     ctr = 0
     avg_loss_dict: Dict[str, float] = {
         "loss_classifier": 0.0,
@@ -168,10 +169,10 @@ def evaluate_model(model, data_loader, device):
 
     # calc and log mean losses for each loss type
     print("~" * 20)
-    logging.warn("Test losses for current epoch:")
+    logging.warning("Test losses for current epoch:")
     for loss_type in avg_loss_dict.keys():
         avg_loss_dict[loss_type] /= ctr
-        logging.warn(f"{loss_type} loss: {avg_loss_dict[loss_type]:.4f}")
+        logging.warning(f"{loss_type} loss: {avg_loss_dict[loss_type]:.4f}")
     print("~" * 20)
 
     return avg_loss_dict
@@ -190,48 +191,55 @@ def construct_model(model_path: Optional[Path] = None) -> torch.nn.Module:
 
 def main():
     torch.manual_seed(1)
-
-    # (re)define or load the model
     model = construct_model()
-
-    # set up devices
     gpu_device = torch.device("cuda")
-
-    # send model to GPU
     model = model.to(gpu_device)
-
-    # define training and validation data loaders
-    data_loader = data_loaders["train"]
-    data_loader_test = data_loaders["test"]
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.0003, weight_decay=0.0005)
+    optimizer = torch.optim.SGD(params, lr=0.001, weight_decay=0.0005)
     # and a learning rate scheduler
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.01)
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10)
 
     # training loop
     num_epochs = 100
+    overall_patience = 25  # end training if we hit this number of epochs w/out improvement
     test_losses = {
         "loss_classifier": [],
         "loss_box_reg": [],
         "loss_objectness": [],
         "loss_rpn_box_reg": [],
     }
-    for epoch in range(num_epochs):
-        # train for one epoch, printing every 10 iterations
-        train_one_epoch(model, optimizer, data_loader, gpu_device, epoch, print_freq=10)
-        # update the learning rate
-        lr_scheduler.step()
-        # evaluate on the test dataset
-        test_loss_dict = evaluate_model(model, data_loader_test, device=gpu_device)
 
-        print(f"Model saving to {MODEL_SAVE_PATH}")
-        print("-" * 20)
-        torch.save(model.state_dict(), MODEL_SAVE_PATH)
+    op_ctr = 0
+    best_loss = np.inf
+    for epoch in range(num_epochs):
+        logging.warning(f"Current learning rate: {optimizer.state_dict()['param_groups'][0]['lr']}")
+        train_one_epoch(model, optimizer, data_loaders["train"], gpu_device, epoch, print_freq=1000)
+
+        # evaluate on the test dataset
+        test_loss_dict = evaluate_model(model, data_loaders["test"], device=gpu_device)
+        val_loss = sum(test_loss_dict.values()) / len(test_loss_dict.values())
+        if val_loss < best_loss:
+            best_loss = val_loss
+            print(f"Model saving to {BEST_MODEL_PATH}")
+            print("-" * 20)
+            torch.save(model.state_dict(), BEST_MODEL_PATH)
+            op_ctr = 0
+
+        lr_scheduler.step(val_loss)
 
         for loss_type, loss_val in test_loss_dict.items():
             test_losses[loss_type].append(loss_val)
+
+        op_ctr += 1
+        if op_ctr >= overall_patience:
+            logging.warning(f"Overall patience threshold ({overall_patience}) hit. Ending Training.")
+            break
+
+        logging.warning(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss: {best_loss:.4f}")
+
+    torch.save(model.state_dict(), LAST_MODEL_PATH)
 
     fig, ax = plt.subplots(nrows=4, ncols=1)
     fig.set_size_inches(18.5, 10.5)

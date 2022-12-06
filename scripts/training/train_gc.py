@@ -15,7 +15,7 @@ from torchvision import transforms
 from torchvision.datasets.folder import DatasetFolder
 from tqdm import tqdm
 
-GESTURE_CLASSES = ["G1", "G5", "G9"]  # G1 - fist; G5 - open palm; G9 - german 3
+GESTURE_CLASSES = ["G2", "G4", "G5", "G9"]  # G2 - peace sign; G4 - open hand; G5 - closed fist; G9 - american 3
 SENZ3D_PATH = Path("data/senz3d_dataset")
 EXTRACTED_PATH = SENZ3D_PATH / "extracted"
 BEST_MODEL_PATH = Path("models/gc_cnn_best.pt")
@@ -39,6 +39,8 @@ def _copy_bulk(from_paths: List[Path], to_dir: Path):
 
 
 class TrainTestDataDirBuilder:
+    # TODO stop copying files. make 1 dataframe and do split there
+
     def __init__(
         self,
         extracted_path: Optional[Path] = None,
@@ -63,18 +65,18 @@ class TrainTestDataDirBuilder:
             self.tt_dirs[ds].mkdir()
 
         # sort samples
-        for gc in self.gesture_classes:
-            gc_extr_paths = list((self.extracted_path / gc).glob("*.pt"))
+        for gesture_class in self.gesture_classes:
+            gc_extr_paths = list((self.extracted_path / gesture_class).glob("*.pt"))
             train_paths, test_paths = _split_samples_list(
                 gc_extr_paths,
                 split_frac=self.split["train"],
                 rng=self.rng,
             )
             split_samples = {"train": train_paths, "test": test_paths}
-            for t in datasets:
-                t_dir = self.gc_training_dir / t / gc
-                t_dir.mkdir()
-                _copy_bulk(split_samples[t], t_dir)
+            for dataset in datasets:
+                dataset_dir = self.gc_training_dir / dataset / gesture_class
+                dataset_dir.mkdir()
+                _copy_bulk(split_samples[dataset], dataset_dir)
 
     def __del__(self):
         shutil.rmtree(self.gc_training_dir)
@@ -112,7 +114,8 @@ data_loaders = {
 
 
 class GestureClassifierCNN(nn.Module):
-    num_classes: int = 3
+    classes: List[str] = GESTURE_CLASSES
+    num_classes: int = len(classes)
     dropout: float = 0.5
 
     def __init__(self) -> None:
@@ -160,12 +163,6 @@ def construct_model(model_path: Optional[Path] = None) -> torch.nn.Module:
     return model
 
 
-def make_one_hot_vector(label: torch.Tensor, n_classes: int = 3) -> torch.Tensor:
-    one_hot = torch.zeros(n_classes)
-    one_hot[label] += 1
-    return one_hot
-
-
 def train_one_epoch(model, optimizer, loss_function, data_loader, device):
     model.train()
     tot_trn_loss = 0.0
@@ -207,10 +204,12 @@ def main():
     model = construct_model()
     model.to(device)
     loss_fcn = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.4)
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.4)
     scheduler = ReduceLROnPlateau(optimizer, patience=5)
     epochs = 100
+    overall_patience = 25  # end training if we hit this number of epochs w/out improvement
 
+    op_ctr = 0
     best_loss = np.inf
     for epoch in range(epochs):
         logging.info(f"Current learning rate: {optimizer.state_dict()['param_groups'][0]['lr']}")
@@ -220,8 +219,13 @@ def main():
         if best_loss > val_loss:
             best_loss = val_loss
             torch.save(model.state_dict(), BEST_MODEL_PATH)
-        torch.save(model.state_dict(), LAST_MODEL_PATH)
+            op_ctr = 0
+        op_ctr += 1
+        if op_ctr >= overall_patience:
+            logging.info(f"Overall patience threshold ({overall_patience}) hit. Ending Training.")
+            break
         logging.info(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss: {best_loss:.4f}")
+    torch.save(model.state_dict(), LAST_MODEL_PATH)
 
 
 if __name__ == "__main__":
