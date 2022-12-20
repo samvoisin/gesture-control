@@ -13,7 +13,7 @@ from gestrol.modifiers.extractors.base import FrameExtractor
 
 MODELS_DIR = Path(__file__).parents[3] / "models"
 FRCNN_MODEL_PATH = (  # MODELS_DIR / "frcnn_hand_detect_mnlrg.pt"
-    "/home/svoisin/Projects/PythonProjects/mod/gesture-control/models/frcnn_hand_detect_mnlrg.pt"
+    "/home/svoisin/Projects/PythonProjects/mod/gesture-control/models/frcnn_hand_detect_mnlrg_best.pt"
 )
 
 GPU_DEVICE = torch.device("cuda")

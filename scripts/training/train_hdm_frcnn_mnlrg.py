@@ -26,12 +26,19 @@ test_data_image_dir = DATA_DIR / Path("./test/")
 train_labels_csv = DATA_DIR / Path("./train_labels.csv")
 test_labels_csv = DATA_DIR / Path("./test_labels.csv")
 
-BEST_MODEL_PATH = Path("models/frcnn_hand_detect_mnlrg_best.pt")
-LAST_MODEL_PATH = Path("models/frcnn_hand_detect_mnlrg_last.pt")
+MODEL_DIR = Path("models")
+BEST_MODEL_PATH = MODEL_DIR / "frcnn_hand_detect_mnlrg_best.pt"
+LAST_MODEL_PATH = MODEL_DIR / "frcnn_hand_detect_mnlrg_last.pt"
+
+
+logging.basicConfig(filename="hdm_train.log", level=logging.INFO)
 
 
 class HandDetectDataset(Dataset):
+    """Hand detect dataset"""
+
     def __init__(self, csv_file: Path, image_dir: Path, transform: transforms.Compose = None):
+        """Instantiate"""
         self.labels_frame = pd.read_csv(csv_file)
         self.labels_frame.drop("class", axis=1, inplace=True)
         self.image_dir = image_dir
@@ -41,7 +48,7 @@ class HandDetectDataset(Dataset):
     def __len__(self) -> int:
         return len(self.unq_files)
 
-    def get_bboxes_from_filename(self, filename: str):
+    def _get_bboxes_from_filename(self, filename: str):
         bboxes = self.labels_frame.loc[self.labels_frame["filename"] == filename, ["xmin", "ymin", "xmax", "ymax"]]
         return bboxes.values
 
@@ -53,7 +60,7 @@ class HandDetectDataset(Dataset):
         img_path = self.image_dir / filename
         img = Image.open(img_path).convert("RGB")
 
-        bboxes = self.get_bboxes_from_filename(filename)
+        bboxes = self._get_bboxes_from_filename(filename)
 
         if self.transform:
             img = self.transform(img)
@@ -161,26 +168,27 @@ def evaluate_model(model, data_loader, device) -> Dict[str, float]:
         images = [image.to(device) for image in images]
         targets = [{t: v[i].to(device) for t, v in targets.items()} for i, _ in enumerate(images)]
 
-        loss_dict = model(images, targets)
+        with torch.no_grad():
+            loss_dict = model(images, targets)
         for loss_type, loss_val in loss_dict.items():
             avg_loss_dict[loss_type] += loss_val.item()
 
         ctr += 1
 
     # calc and log mean losses for each loss type
-    print("~" * 20)
-    logging.warning("Test losses for current epoch:")
+    logging.info("Test losses for current epoch:")
     for loss_type in avg_loss_dict.keys():
         avg_loss_dict[loss_type] /= ctr
-        logging.warning(f"{loss_type} loss: {avg_loss_dict[loss_type]:.4f}")
-    print("~" * 20)
+        logging.info(f"\t{loss_type} loss: {avg_loss_dict[loss_type]:.4f}")
 
     return avg_loss_dict
 
 
-def construct_model(model_path: Optional[Path] = None) -> torch.nn.Module:
+def construct_model(model_path: Optional[Path] = BEST_MODEL_PATH) -> torch.nn.Module:
     model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2)
-    ag = AnchorGenerator(sizes=((128), (256), (512)), aspect_ratios=((0.5, 1.0, 1.5), (0.5, 1.0, 1.5), (0.5, 1.0, 1.5)))
+    ag = AnchorGenerator(
+        sizes=((128), (256), (512)), aspect_ratios=((0.75, 1.0, 1.25), (0.75, 1.0, 1.25), (0.75, 1.0, 1.25))
+    )
     model.rpn.anchor_generator = ag
 
     if model_path:
@@ -197,7 +205,7 @@ def main():
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.001, weight_decay=0.0005)
+    optimizer = torch.optim.SGD(params, lr=0.001, weight_decay=5e-4)
     # and a learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10)
 
@@ -214,7 +222,7 @@ def main():
     op_ctr = 0
     best_loss = np.inf
     for epoch in range(num_epochs):
-        logging.warning(f"Current learning rate: {optimizer.state_dict()['param_groups'][0]['lr']}")
+        logging.info(f"Current learning rate: {optimizer.state_dict()['param_groups'][0]['lr']}")
         train_one_epoch(model, optimizer, data_loaders["train"], gpu_device, epoch, print_freq=1000)
 
         # evaluate on the test dataset
@@ -222,8 +230,7 @@ def main():
         val_loss = sum(test_loss_dict.values()) / len(test_loss_dict.values())
         if val_loss < best_loss:
             best_loss = val_loss
-            print(f"Model saving to {BEST_MODEL_PATH}")
-            print("-" * 20)
+            logging.info(f"Model saving to {BEST_MODEL_PATH}")
             torch.save(model.state_dict(), BEST_MODEL_PATH)
             op_ctr = 0
 
@@ -234,10 +241,10 @@ def main():
 
         op_ctr += 1
         if op_ctr >= overall_patience:
-            logging.warning(f"Overall patience threshold ({overall_patience}) hit. Ending Training.")
+            logging.info(f"Overall patience threshold ({overall_patience}) hit. Ending Training.")
             break
 
-        logging.warning(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss: {best_loss:.4f}")
+        logging.info(f"Epoch {epoch} validation loss: {val_loss:.4f}; best loss: {best_loss:.4f}")
 
     torch.save(model.state_dict(), LAST_MODEL_PATH)
 

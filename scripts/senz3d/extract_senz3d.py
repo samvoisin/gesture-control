@@ -23,7 +23,7 @@ from gestrol.modifiers.extractors.frcnn_mnlrg_extractor import SingleHandMobileN
 data_dir = Path("./data/senz3d_dataset").resolve()
 restructured_dir = data_dir / "restructured"
 extracted_dir = data_dir / "extracted"
-model_path = Path("./models/frcnn_hand_detect_mnlrg.pt")
+model_path = Path("./models/frcnn_hand_detect_mnlrg_best.pt")
 
 
 # model = load_frcnn_model(model_path=model_path)
