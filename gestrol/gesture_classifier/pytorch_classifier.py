@@ -11,7 +11,7 @@ class PytorchGestureClassifier(GestureClassifier):
         super().__init__(model=model)
         self.device = device
         self.model = self.model.to(self.device)
-        model.eval()  # ensure model in eval mode
+        self.model.eval()  # ensure model in eval mode
 
     def infer_gesture(self, frame: Frame) -> int:
         if not isinstance(frame, torch.Tensor):
