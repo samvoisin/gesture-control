@@ -6,15 +6,14 @@ from typing import Optional
 import torch
 from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn
 from torchvision.models.detection.faster_rcnn import FasterRCNN
+from torchvision.models.detection.rpn import AnchorGenerator
 
 # gestrol library
 from gestrol.modifiers.base import Frame
 from gestrol.modifiers.extractors.base import FrameExtractor
 
-MODELS_DIR = Path(__file__).parents[3] / "models"
-FRCNN_MODEL_PATH = (  # MODELS_DIR / "frcnn_hand_detect_mnlrg.pt"
-    "/home/svoisin/Projects/PythonProjects/mod/gesture-control/models/frcnn_hand_detect_mnlrg_best.pt"
-)
+MODELS_DIR = Path("models")
+FRCNN_MODEL_PATH = MODELS_DIR / "frcnn_hand_detect_mnlrg_best.pt"
 
 GPU_DEVICE = torch.device("cuda")
 
@@ -31,6 +30,10 @@ def load_frcnn_model(model_path: Path) -> FasterRCNN:
     """
     model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=2)
     model.load_state_dict(torch.load(model_path))
+    ag = AnchorGenerator(
+        sizes=((128), (256), (512)), aspect_ratios=((0.75, 1.0, 1.25), (0.75, 1.0, 1.25), (0.75, 1.0, 1.25))
+    )
+    model.rpn.anchor_generator = ag
     return model
 
 

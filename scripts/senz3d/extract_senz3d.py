@@ -63,7 +63,7 @@ for src_gdir in tqdm(restructured_dir.iterdir()):
         img = cv2.imread(str(img_path))
         img = fp.process_frame(img)
         if img is None:
-            logging.warn(f"Extraction failure on {img_path}.")
+            logging.warning(f"Extraction failure on {img_path}.")
             continue
         img_write_path = dst_gdir / (img_path.stem + ".pt")
         torch.save(img, img_write_path)  # save the tensor as `.pt` file
