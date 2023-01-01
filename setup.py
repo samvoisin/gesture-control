@@ -1,5 +1,3 @@
-# https://github.com/kennethreitz/setup.py
-
 # standard libraries
 import io
 import os
