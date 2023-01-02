@@ -1,7 +1,6 @@
 # standard libraries
 import logging
 from pathlib import Path
-from typing import List
 
 # external libraries
 import cv2
@@ -10,13 +9,12 @@ from tqdm import tqdm
 
 # gestrol library
 from gestrol import FramePipeline
-from gestrol.frame_pipeline import FrameModifierCallable
 from gestrol.modifiers import (
     ChannelDimOrderModifier,
     ChannelSwapModifier,
+    FrameToTensorModifier,
     ScalarModifier,
-    convert_frame_to_tensor,
-    convert_tensor_to_numpy,
+    TensorToNumpyModifier,
 )
 from gestrol.modifiers.extractors.frcnn_mnlrg_extractor import SingleHandMobileNetExtractor
 
@@ -30,9 +28,9 @@ model_path = Path("./models/frcnn_hand_detect_mnlrg_best.pt")
 
 
 # the actual frame pipeline to be used in controller
-mod_pipe: List[FrameModifierCallable] = [
+mod_pipe = [
     ChannelSwapModifier(),
-    convert_frame_to_tensor,
+    FrameToTensorModifier(),
     SingleHandMobileNetExtractor(),
 ]
 
@@ -42,7 +40,7 @@ fp = FramePipeline(modifier_pipeline=mod_pipe)
 # revert image to be saved as `.png` for visual inspection
 viz_fp = FramePipeline(
     modifier_pipeline=[
-        convert_tensor_to_numpy,
+        TensorToNumpyModifier(),
         ChannelDimOrderModifier(mode="last"),
         ScalarModifier(),
         ChannelSwapModifier(),

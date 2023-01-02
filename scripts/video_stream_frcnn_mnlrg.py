@@ -1,16 +1,15 @@
 # standard libraries
 from pathlib import Path
-from typing import Sequence
 
 # external libraries
 import cv2
 
 # gestrol library
+from gestrol import FramePipeline
 from gestrol.camera import VideoLoaderInterface
 from gestrol.fps_monitor import FPSMonitor
-from gestrol.frame_pipeline import FrameModifierCallable, FramePipeline
 from gestrol.frame_stream import FrameStream
-from gestrol.modifiers import ChannelSwapModifier, convert_frame_to_tensor
+from gestrol.modifiers import ChannelSwapModifier, FrameToTensorModifier
 from gestrol.modifiers.extractors.frcnn_mnlrg_extractor import SingleHandMobileNetExtractor, load_frcnn_model
 
 vp = Path("./").resolve() / "data" / "videos" / "hand_test_vid.webm"
@@ -21,9 +20,9 @@ fs = FrameStream(camera=vli)
 mp = Path("./").resolve() / "models" / "frcnn_hand_detect_mnlrg.pt"
 model = load_frcnn_model(mp)
 
-mod_pipe: Sequence[FrameModifierCallable] = [
+mod_pipe = [
     ChannelSwapModifier(),
-    convert_frame_to_tensor,
+    FrameToTensorModifier(),
     SingleHandMobileNetExtractor(model=model),
 ]
 

@@ -1,10 +1,8 @@
 # standard libraries
-from typing import Callable, Optional, Sequence
+from typing import Optional, Sequence
 
 # gestrol library
-from gestrol.modifiers.base import Frame
-
-FrameModifierCallable = Callable[[Frame], Optional[Frame]]
+from gestrol.modifiers.base import Frame, FrameModifier
 
 
 class FramePipeline:
@@ -12,7 +10,7 @@ class FramePipeline:
     Modular pipeline for concatenating and applying FrameModifiers.
     """
 
-    def __init__(self, modifier_pipeline: Optional[Sequence[FrameModifierCallable]] = None):
+    def __init__(self, modifier_pipeline: Optional[Sequence[FrameModifier]] = None):
         """
         Initiate method.
 
