@@ -42,7 +42,6 @@ fp = FramePipeline(modifier_pipeline=mod_pipe)
 # revert image to be saved as `.png` for visual inspection
 viz_fp = FramePipeline(
     modifier_pipeline=[
-        # ReverseNormalizeModifier(),
         convert_tensor_to_numpy,
         ChannelDimOrderModifier(mode="last"),
         ScalarModifier(),

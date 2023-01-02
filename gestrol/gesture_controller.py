@@ -15,7 +15,7 @@ class ClassificationRegularizerProtocol(Protocol):
     def put(self, item: Any):
         ...
 
-    def vote(self):
+    def vote(self) -> int:
         ...
 
 
