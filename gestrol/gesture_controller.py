@@ -87,3 +87,6 @@ class GestureController:
             if ctrl_signal is None:
                 continue
             self.cc.execute_command(ctrl_signal)
+
+    def build_from_config(self):
+        raise NotImplementedError()

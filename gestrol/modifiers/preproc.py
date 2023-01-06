@@ -6,23 +6,6 @@ from torchvision import transforms
 from gestrol.modifiers.base import Frame, FrameModifier
 
 
-class SSDPreprocModifier(FrameModifier):
-    """
-    preprocess a frame before feeding into SSD hand identifier.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.fcn_composition = transforms.Compose(
-            [
-                transforms.ToTensor(),
-            ]
-        )
-
-    def __call__(self, frame: Frame) -> Tensor:
-        return self.fcn_composition(frame)
-
-
 class FasterRCNNPreprocModifier(FrameModifier):
     """
     preprocess a frame before feeding into Faster R-CNN hand identifier.

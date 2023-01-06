@@ -20,5 +20,6 @@ class PytorchGestureClassifier(GestureClassifier):
             )
         frame = frame.to(self.device)
         with torch.inference_mode():
-            gesture_label = self.model(frame)
+            pred = self.model(frame)
+        gesture_label = pred.argmax().item()
         return gesture_label
