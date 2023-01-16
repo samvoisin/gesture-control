@@ -1,23 +1,31 @@
 # standard libraries
+from collections import Counter
 from queue import Queue
-from typing import Any, Dict
 
 
 class QueueError(Exception):
     pass
 
 
-class VotingQueue(Queue):
+class PopVoteCounter(Counter):
+    def popular_vote(self) -> int:
+        pop_vote = self.most_common(1)
+        return pop_vote[0][0]
+
+
+class PopularVoteQueue:
     """
     A Queue where a popular vote is taken on labeled elements and the most popular label is popped from the queue.
     """
 
     def __init__(self, maxsize: int) -> None:
-        super().__init__(maxsize)
-        self.vote_tally: Dict[int, int] = dict()
-        self.curr_lab = None
+        self.queue: Queue = Queue(maxsize=maxsize)
+        self.vote_counter = PopVoteCounter()
 
-    def put(self, item: Any):
+    def __repr__(self) -> str:
+        return str(self.queue.queue)
+
+    def put(self, item: int):
         """
         Custom put implementation to avoid overfilling the queue.
 
@@ -27,35 +35,27 @@ class VotingQueue(Queue):
         Raises:
             QueueError: raised if voting queue is full.
         """
-        if self.full():
-            raise QueueError("Queue is full. Cannot put another element.")
+        if self.queue.full():
+            raise QueueError("Voting queue is full. Cannot put another element.")
         else:
-            super().put(item)
+            self.queue.put(item)
 
     def vote(self) -> int:
         """
         Tally popular vote of all entities in the queue. Items are removed from the queue in the process.
 
         Raises:
-            QueueError: raised if `vote` is called when queue is empty
+            QueueError: Raised if called when queue is empty
 
         Returns:
-            int: Most popular label
+            int: most popular value
         """
-        self.vote_tally = dict()  # reset tally
+        self.vote_counter.clear()
 
-        if self.empty():
+        if self.queue.empty():
             raise QueueError("Voting queue is empty.")
 
-        while not self.empty():
-            lab = self.get()
-            lab_count = self.vote_tally.get(lab, 0)
-            lab_count += 1
-            self.vote_tally[lab] = lab_count
+        while not self.queue.empty():
+            self.vote_counter[self.queue.get()] += 1
 
-        pop_vote = None
-        pop_vote_ct = 0
-        for k, v in self.vote_tally.items():
-            if v > pop_vote_ct:
-                pop_vote = k
-        return pop_vote
+        return self.vote_counter.popular_vote()

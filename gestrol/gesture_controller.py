@@ -1,18 +1,26 @@
 # standard libraries
-from typing import Any, Optional, Protocol
+from queue import Queue
+from typing import Optional, Protocol
 
 # gestrol library
 from gestrol.fps_monitor import FPSMonitor
 from gestrol.frame_pipeline import FramePipeline
 from gestrol.frame_stream import FrameStream
-from gestrol.gesture_classifier.base import GestureClassifier
+from gestrol.modifiers.base import Frame
+from gestrol.utils.logging import configure_logging
+
+configure_logging()
+
+
+class GestureClassifierProtocol(Protocol):
+    def infer_gesture(self, frame: Frame) -> Optional[int]:
+        ...
 
 
 class ClassificationRegularizerProtocol(Protocol):
-    def full(self) -> bool:
-        ...
+    queue: Queue
 
-    def put(self, item: Any):
+    def put(self, item: int):
         ...
 
     def vote(self) -> int:
@@ -36,7 +44,7 @@ class GestureController:
         self,
         frame_stream: FrameStream,
         frame_pipeline: FramePipeline,
-        gesture_classifier: GestureClassifier,
+        gesture_classifier: GestureClassifierProtocol,
         command_controller: CommandControllerProtocol,
         classification_regularizer: ClassificationRegularizerProtocol,
         fps_monitor: Optional[FPSMonitor] = None,
@@ -70,7 +78,7 @@ class GestureController:
             None if regularizer does not vote; highest voted label if it does
         """
         self.class_reg.put(inferred_label)
-        if self.class_reg.full():
+        if self.class_reg.queue.full():
             return self.class_reg.vote()
         return None
 

@@ -7,8 +7,12 @@ from gestrol.modifiers.base import Frame
 
 
 class PytorchGestureClassifier(GestureClassifier):
-    def __init__(self, model: torch.nn.Module, device: torch.device):
-        super().__init__(model=model)
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        device: torch.device,
+    ):
+        self.model = model
         self.device = device
         self.model = self.model.to(self.device)
         self.model.eval()  # ensure model in eval mode

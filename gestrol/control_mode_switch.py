@@ -11,8 +11,6 @@ configure_logging()
 class ControlModeSwitch:
     """
     Switch to toggle gesture classifier with control interface.
-
-    TODO: Does this live on it's own? or is does it belong to control interface?
     """
 
     def __init__(self, control_mode_signal: int):
