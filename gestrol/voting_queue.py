@@ -1,4 +1,5 @@
 # standard libraries
+import logging
 from collections import Counter
 from queue import Queue
 
@@ -55,6 +56,7 @@ class PopularVoteQueue:
         if self.queue.empty():
             raise QueueError("Voting queue is empty.")
 
+        logging.info("Voting on queue: %s", self.queue.queue)
         while not self.queue.empty():
             self.vote_counter[self.queue.get()] += 1
 

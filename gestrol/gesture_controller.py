@@ -65,7 +65,12 @@ class GestureController:
         self.gc = gesture_classifier
         self.class_reg = classification_regularizer
         self.cc = command_controller
-        self.fps_monitor = fps_monitor  # TODO: implement this
+
+        if fps_monitor:
+            self.fps_monitor = fps_monitor
+            self.monitor_fps = self.fps_monitor.monitor_fps
+        else:
+            self.monitor_fps = lambda frame: frame
 
     def _coord_class_reg(self, inferred_label: int) -> Optional[int]:
         """
@@ -87,6 +92,7 @@ class GestureController:
         Activate gesture control interface.
         """
         for frame in self.frame_stream.stream_frames():
+            frame = self.monitor_fps(frame)
             frame = self.fp.process_frame(frame)
             if frame is None:
                 continue
