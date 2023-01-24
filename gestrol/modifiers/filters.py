@@ -6,7 +6,17 @@ from gestrol.modifiers.base import Frame, FrameModifier
 
 
 class FrameSizeFilter(FrameModifier):
+    """Filter frames based on their size."""
+
     def __init__(self, min_height: int, min_width: int, n_channels: Optional[int] = None) -> None:
+        """
+        Initiate method.
+
+        Args:
+            min_height (int): Minimum allowable height of frame.
+            min_width (int): Minimum allowable width of frame.
+            n_channels (Optional[int], optional): Number of allowable channels in frame. Defaults to None.
+        """
         self.min_height = min_height
         self.min_width = min_width
 
@@ -26,9 +36,6 @@ class FrameSizeFilter(FrameModifier):
         self.size_check = frame_size_check
 
     def __call__(self, frame: Frame) -> Optional[Frame]:
-        if not hasattr(frame, "shape"):
-            raise ValueError(f"{type(frame)} has no shape attribute.")
-
         if self.size_check(*frame.shape):
             return frame
         return None

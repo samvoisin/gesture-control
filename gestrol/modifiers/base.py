@@ -1,13 +1,9 @@
 # standard libraries
 import abc
-from typing import Optional, Union
+from typing import Optional
 
-# external libraries
-import numpy as np
-from PIL.Image import Image
-from torch import Tensor
-
-Frame = Union[Tensor, np.ndarray, Image]
+# gestrol library
+from gestrol import Frame
 
 
 class FrameModifier(abc.ABC):
@@ -27,9 +23,9 @@ class FrameModifier(abc.ABC):
         `Frame` or `None` type object as output.
 
         Args:
-            frame: a `Frame` type. `None` is handled in `__call__` method and is thus not a valid input.
+            frame: `Frame` object.
 
-        Returns: a `Frame` type or `None` depending on the subclass's function
+        Returns: Modified `Frame` object or `None` depending on the subclass's function
 
         """
         pass
