@@ -4,9 +4,9 @@ from pathlib import Path
 
 # external libraries
 import cv2
-import numpy as np
 
 # gestrol library
+from gestrol import Frame
 from gestrol.camera.base import CameraInterface
 from gestrol.utils.logging import configure_logging
 
@@ -26,6 +26,6 @@ class VideoLoaderInterface(CameraInterface):
         self.camera.release()
         logging.info("Video ended")
 
-    def get_frame(self) -> np.ndarray:
-        _, frame = self.camera.read()
-        return frame
+    def get_frame(self) -> Frame:
+        _, arr = self.camera.read()
+        return Frame.from_numpy(arr)

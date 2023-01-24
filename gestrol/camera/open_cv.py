@@ -7,9 +7,9 @@ from typing import Optional
 
 # external libraries
 import cv2
-import numpy as np
 
 # gestrol library
+from gestrol import Frame
 from gestrol.camera.base import CameraInterface
 
 logging.basicConfig(
@@ -43,15 +43,15 @@ class OpenCVCameraInterface(CameraInterface):
         self.camera.release()
         logger.info("Camera released")
 
-    def get_frame(self) -> np.ndarray:
+    def get_frame(self) -> Frame:
         """
         Capture frame from camera.
 
         Returns:
             numpy array with dimensions (width, height, number of channels)
         """
-        _, frame = self.camera.read()
-        return frame
+        _, arr = self.camera.read()
+        return Frame.from_numpy(arr)
 
     def record_video(
         self,

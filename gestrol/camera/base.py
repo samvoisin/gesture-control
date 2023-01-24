@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 # gestrol library
-from gestrol.modifiers.base import Frame
+from gestrol import Frame
 
 
 class CameraInterface(ABC):
