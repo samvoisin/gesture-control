@@ -18,10 +18,6 @@ class FrameExtractor(FrameModifier):
 
     @abstractmethod
     def __call__(self, frame: Frame) -> Optional[Frame]:
-        if not isinstance(frame, torch.Tensor):
-            raise TypeError(
-                f"{self.__class__.__name__}.modify_frame requires `torch.Tensor` input but received {type(frame)}."
-            )
         prepped_frame = [frame.to(self.device)]
         with torch.inference_mode():
             prediction = self.model(prepped_frame)
@@ -31,5 +27,4 @@ class FrameExtractor(FrameModifier):
         boxes = boxes[0]  # top confidence prediction
         boxes = boxes.to(int)
         x0, y0, x1, y1 = boxes
-        frame = frame[:, y0:y1, x0:x1]
-        return frame
+        return Frame(frame[:, y0:y1, x0:x1])
