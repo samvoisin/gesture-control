@@ -2,7 +2,7 @@
 from typing import Optional, Protocol, Sequence
 
 # gestrol library
-from gestrol.modifiers.base import Frame
+from gestrol import Frame
 
 
 class FrameModifierProtocol(Protocol):
