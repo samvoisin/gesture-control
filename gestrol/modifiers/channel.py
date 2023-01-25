@@ -2,7 +2,7 @@
 from typing import Literal, Sequence
 
 # external libraries
-import numpy as np
+from torch import Tensor
 
 # gestrol library
 from gestrol.modifiers.base import Frame, FrameModifier
@@ -10,7 +10,7 @@ from gestrol.modifiers.base import Frame, FrameModifier
 
 class SingleChannelSelectorModifier(FrameModifier):
     """
-    Select single color channel from 3-channel image as a numpy array. Requires (h, w, 3) input dims.
+    Select single color channel from 3-channel Frame. Requires (h, w, 3) input dims.
     """
 
     def __init__(self, channel: int = 0):
@@ -18,26 +18,21 @@ class SingleChannelSelectorModifier(FrameModifier):
         Initiate method.
 
         Args:
-            channel: channel to select from image array. Defaults to 0.
+            channel: Channel to select from Frame. Defaults to 0.
         """
         self.channel = channel
 
-    def __call__(self, frame: Frame) -> np.ndarray:
+    def __call__(self, frame: Frame) -> Frame:
         """
         Select single channel.
 
         Args:
-            frame: three channel numpy array
-
-        Raises:
-            TypeError: raised if `frame` is not np.ndarray
+            frame: Three channel Frame
 
         Returns:
-            single channel numpy array
+            Single channel Frame
         """
-        if not isinstance(frame, np.ndarray):
-            raise TypeError(f"{self.__class__.__name__} takes {np.ndarray} as input, but has type {type(frame)}.")
-        return frame[:, :, self.channel]
+        return Frame(frame[:, :, self.channel])
 
 
 class ChannelSwapModifier(FrameModifier):
@@ -54,27 +49,25 @@ class ChannelSwapModifier(FrameModifier):
         """
         self.channel_order = channel_order
 
-    def __call__(self, frame: Frame) -> np.ndarray:
+    def __call__(self, frame: Frame) -> Frame:
         """
         Reorder channels.
 
         Args:
-            frame: three channel numpy array
+            frame: Three channel Frame
 
         Raises:
             TypeError: raised if `frame` is not np.ndarray
 
         Returns:
-            three channel numpy array
+            Frame with swapped channels
         """
-        if not isinstance(frame, np.ndarray):
-            raise TypeError(f"{self.__class__.__name__} takes {np.ndarray} as input, but has type {type(frame)}.")
-        return frame[:, :, self.channel_order]
+        return Frame(frame[:, :, self.channel_order])
 
 
 class ChannelDimOrderModifier(FrameModifier):
     """
-    Change the channel dimension of an array (i.e. element of the array.shape tuple that specifies number of channels).
+    Change the channel dimension of an Frame to be first dimension or last.
     """
 
     def __init__(self, mode: Literal["first", "last"] = "last"):
@@ -94,25 +87,23 @@ class ChannelDimOrderModifier(FrameModifier):
         else:
             raise ValueError("Invalid argument to `channel_order` param. Must be 'first' or 'last'.")
 
-    def _first_mode(self, frame: np.ndarray) -> np.ndarray:
-        return np.rollaxis(frame, 2, 0)
+    def _first_mode(self, frame: Frame) -> Tensor:
+        """Move channels dim to first dimension."""
+        return frame.permute(2, 0, 1)
 
-    def _last_mode(self, frame: np.ndarray) -> np.ndarray:
-        return np.rollaxis(frame, 0, 3)
+    def _last_mode(self, frame: Frame) -> Tensor:
+        """Move channels dim to last dimension."""
+        return frame.permute(1, 2, 0)
 
-    def __call__(self, frame: Frame) -> np.ndarray:
+    def __call__(self, frame: Frame) -> Frame:
         """
         Swap first and last axes of an array.
 
         Args:
             frame: three channel numpy array
 
-        Raises:
-            TypeError: raised if `frame` is not np.ndarray
-
         Returns:
             three channel numpy array
         """
-        if not isinstance(frame, np.ndarray):
-            raise TypeError(f"{self.__class__.__name__} takes {np.ndarray} as input, but has type {type(frame)}.")
-        return self._dim_order_modifier(frame)
+        frame = Frame(self._dim_order_modifier(frame))
+        return frame
