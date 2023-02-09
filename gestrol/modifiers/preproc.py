@@ -1,8 +1,9 @@
 # external libraries
+from torch import Tensor
 from torchvision import transforms
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class FasterRCNNPreprocModifier(FrameModifier):
@@ -16,5 +17,5 @@ class FasterRCNNPreprocModifier(FrameModifier):
             ]
         )
 
-    def __call__(self, frame: Frame) -> Frame:
+    def __call__(self, frame: Tensor) -> Tensor:
         return self.fcn_composition(frame)

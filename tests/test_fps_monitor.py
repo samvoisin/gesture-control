@@ -4,10 +4,10 @@ from time import sleep
 
 # external libraries
 import pytest
+from torch import Tensor
 
 # gestrol library
 from gestrol.fps_monitor import FPSMonitor
-from gestrol.modifiers.base import Frame
 
 
 class TestFPSMonitor:
@@ -15,7 +15,7 @@ class TestFPSMonitor:
     Class of tests for FPSMonitor.
     """
 
-    def test_active_flag(self, dummy_frame: Frame):
+    def test_active_flag(self, dummy_frame: Tensor):
         """
         Test that active_flag is flipped when first frame is passed in.
         """
@@ -25,7 +25,7 @@ class TestFPSMonitor:
         assert monitor._active_flag
 
     @pytest.mark.xfail(reason="This test must be improved.")
-    def test_monitor_fps(self, dummy_frame: Frame):
+    def test_monitor_fps(self, dummy_frame: Tensor):
         """
         Test fps calculation on a few iterations with a delay built in.
         """

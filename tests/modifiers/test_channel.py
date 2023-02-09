@@ -1,9 +1,10 @@
 # standard libraries
-from typing import cast
+from copy import copy
 
 # external libraries
-import numpy as np
 import pytest
+import torch
+from torch import Tensor
 
 # gestrol library
 from gestrol.modifiers.channel import ChannelDimOrderModifier, ChannelSwapModifier, SingleChannelSelectorModifier
@@ -13,7 +14,7 @@ from gestrol.modifiers.channel import ChannelDimOrderModifier, ChannelSwapModifi
     "channel",
     [0, 1, 2],
 )
-def test_single_channel_modifier(channel: int, dummy_frame_dim: int, dummy_frame: np.ndarray):
+def test_single_channel_modifier(channel: int, dummy_frame_dim: int, dummy_frame: Tensor):
     """
     Test for `SingleChannelModifier` class.
 
@@ -23,13 +24,13 @@ def test_single_channel_modifier(channel: int, dummy_frame_dim: int, dummy_frame
         3. correct channel is selected
     """
     single_channel_modifier = SingleChannelSelectorModifier(channel=channel)
-    one_channel_array = cast(np.ndarray, single_channel_modifier(dummy_frame))
+    one_channel_array = single_channel_modifier(dummy_frame)
     assert one_channel_array is not None
     assert one_channel_array.shape == (dummy_frame_dim, dummy_frame_dim)
-    assert np.all(channel == one_channel_array)
+    assert torch.all(channel == one_channel_array)
 
 
-def test_channel_swap_modifier(dummy_frame: np.ndarray):
+def test_channel_swap_modifier(dummy_frame: Tensor):
     """
     Test for ChannelSwapModifier class.
 
@@ -39,26 +40,26 @@ def test_channel_swap_modifier(dummy_frame: np.ndarray):
     """
     co = (2, 1, 0)
     channel_swap_modifier = ChannelSwapModifier(channel_order=co)
-    swapped_array = cast(np.ndarray, channel_swap_modifier(dummy_frame))
+    swapped_array = channel_swap_modifier(dummy_frame)
     assert swapped_array is not None
     for i, channel in enumerate(co):
-        assert np.all(swapped_array[:, :, i] == channel)
+        assert torch.all(swapped_array[:, :, i] == channel)
 
 
-def test_channel_dim_order_modifier(dummy_frame: np.ndarray):
+def test_channel_dim_order_modifier(dummy_frame: Tensor):
     """
     Test to ensure `ChannelDimOrderModifier` swaps the channel dimension to first and last dimension.
     """
     mod = ChannelDimOrderModifier(mode="first")
-    frame = dummy_frame.copy()
-    frame = cast(np.ndarray, mod(frame))
+    frame = copy(dummy_frame)
+    frame = mod(frame)
 
     assert frame.shape[0] == 3
     assert frame.shape[-1] != 3
 
     mod = ChannelDimOrderModifier()  # defaults to "last" mode
-    frame = cast(np.ndarray, mod(frame))
+    frame = mod(frame)
     assert frame.shape[0] != 3
     assert frame.shape[-1] == 3
 
-    assert np.all(frame == dummy_frame)
+    assert torch.equal(frame, dummy_frame)

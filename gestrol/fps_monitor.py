@@ -2,8 +2,10 @@
 import logging
 from time import time
 
+# external libraries
+from torch import Tensor
+
 # gestrol library
-from gestrol.modifiers.base import Frame
 from gestrol.utils.logging import configure_logging
 
 configure_logging()
@@ -37,7 +39,7 @@ class FPSMonitor:
         avg_fps = self.frame_count / duration
         return avg_fps
 
-    def monitor_fps(self, frame: Frame) -> Frame:
+    def monitor_fps(self, frame: Tensor) -> Tensor:
         """
         Continuously monitor frames per second.
 

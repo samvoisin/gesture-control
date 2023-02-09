@@ -3,9 +3,10 @@ from typing import Sequence
 
 # external libraries
 import torch
+from torch import Tensor
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class TensorDimensionSwapModifier(FrameModifier):
@@ -23,9 +24,7 @@ class TensorDimensionSwapModifier(FrameModifier):
         """
         self.dimension_swaps = dimension_swaps
 
-    def __call__(self, frame: Frame) -> torch.Tensor:
-        if not isinstance(frame, torch.Tensor):
-            frame = torch.Tensor(frame)
+    def __call__(self, frame: Tensor) -> Tensor:
         for dimension_swap in self.dimension_swaps:
             frame = torch.swapaxes(frame, dimension_swap[0], dimension_swap[1])
         return frame

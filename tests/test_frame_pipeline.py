@@ -4,12 +4,13 @@ from typing import Callable, Optional, cast
 # external libraries
 import numpy as np
 import pytest
+from torch import Tensor
 
 # gestrol library
 from gestrol.frame_pipeline import FramePipeline
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
-DummyFrameModifier = Callable[[Frame], Optional[Frame]]
+DummyFrameModifier = Callable[[Tensor], Optional[Tensor]]
 
 
 @pytest.fixture
@@ -20,19 +21,19 @@ def dummy_frame() -> np.ndarray:
 class TestFramePipeline:
     @pytest.fixture
     def pass_through_modifier(self) -> DummyFrameModifier:
-        def pt(frame: Frame) -> Frame:
+        def pt(frame: Tensor) -> Tensor:
             return frame
 
         return pt
 
     @pytest.fixture
     def null_modifier(self) -> DummyFrameModifier:
-        def nm(_: Frame) -> None:
+        def nm(_: Tensor) -> None:
             return None
 
         return nm
 
-    def test_frame_passthrough(self, dummy_frame: Frame, pass_through_modifier: DummyFrameModifier):
+    def test_frame_passthrough(self, dummy_frame: Tensor, pass_through_modifier: DummyFrameModifier):
         frame_pass = [
             cast(FrameModifier, pass_through_modifier),
             cast(FrameModifier, pass_through_modifier),
@@ -44,7 +45,7 @@ class TestFramePipeline:
 
     def test_null_frame(
         self,
-        dummy_frame: Frame,
+        dummy_frame: Tensor,
         pass_through_modifier: DummyFrameModifier,
         null_modifier: DummyFrameModifier,
     ):

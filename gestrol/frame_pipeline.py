@@ -1,14 +1,14 @@
 # standard libraries
 from typing import Optional, Protocol, Sequence
 
-# gestrol library
-from gestrol import Frame
+# external libraries
+from torch import Tensor
 
 
 class FrameModifierProtocol(Protocol):
     """Protocol for objects that modify frames. To be used in frame pipeline."""
 
-    def __call__(self, frame: Frame) -> Optional[Frame]:
+    def __call__(self, frame: Tensor) -> Optional[Tensor]:
         ...
 
 
@@ -26,7 +26,7 @@ class FramePipeline:
         """
         self.modifier_pipeline = modifier_pipeline or []
 
-    def process_frame(self, frame: Optional[Frame]) -> Optional[Frame]:
+    def process_frame(self, frame: Optional[Tensor]) -> Optional[Tensor]:
         """
         Modify frame by sequentially calling modifiers.
 

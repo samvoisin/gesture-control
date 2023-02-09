@@ -10,7 +10,7 @@ from torchvision.models.detection.anchor_utils import AnchorGenerator
 from torchvision.models.detection.faster_rcnn import FasterRCNN
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 MODELS_DIR = Path(__file__).parents[2] / "models"
 FRCNN_MODEL_PATH = MODELS_DIR / "frcnn_hand_detect.pt"
@@ -64,7 +64,7 @@ class SingleHandFRCNNExtractor(FrameModifier):
         self.model = model or load_frcnn_model(model_path=FRCNN_MODEL_PATH)
         self.model = self.model.to(self.device)
 
-    def __call__(self, frame: Frame) -> Optional[Tensor]:
+    def __call__(self, frame: Tensor) -> Optional[Tensor]:
         if not isinstance(frame, Tensor):
             raise TypeError(
                 f"{self.__class__.__name__}.modify_frame requires `torch.Tensor` input but received {type(frame)}."

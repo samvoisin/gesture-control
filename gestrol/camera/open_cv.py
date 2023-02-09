@@ -7,9 +7,9 @@ from typing import Optional
 
 # external libraries
 import cv2
+from torch import Tensor
 
 # gestrol library
-from gestrol import Frame
 from gestrol.camera.base import CameraInterface
 
 logging.basicConfig(
@@ -43,7 +43,7 @@ class OpenCVCameraInterface(CameraInterface):
         self.camera.release()
         logger.info("Camera released")
 
-    def get_frame(self) -> Frame:
+    def get_frame(self) -> Tensor:
         """
         Capture frame from camera.
 
@@ -51,7 +51,7 @@ class OpenCVCameraInterface(CameraInterface):
             numpy array with dimensions (width, height, number of channels)
         """
         _, arr = self.camera.read()
-        return Frame.from_numpy(arr)
+        return Tensor(arr)
 
     def record_video(
         self,

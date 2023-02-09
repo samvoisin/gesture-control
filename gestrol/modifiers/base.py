@@ -2,8 +2,8 @@
 import abc
 from typing import Optional
 
-# gestrol library
-from gestrol import Frame
+# external libraries
+from torch import Tensor
 
 
 class FrameModifier(abc.ABC):
@@ -15,7 +15,7 @@ class FrameModifier(abc.ABC):
         return "<%s>" % self.__class__.__name__
 
     @abc.abstractmethod
-    def __call__(self, frame: Frame) -> Optional[Frame]:
+    def __call__(self, frame: Tensor) -> Optional[Tensor]:
         """
         Abstract call method for modifying a `Frame` input.
 

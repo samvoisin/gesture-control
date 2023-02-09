@@ -1,8 +1,8 @@
 # standard libraries
 from abc import ABC, abstractmethod
 
-# gestrol library
-from gestrol import Frame
+# external libraries
+from torch import Tensor
 
 
 class CameraInterface(ABC):
@@ -25,7 +25,7 @@ class CameraInterface(ABC):
         pass
 
     @abstractmethod
-    def get_frame(self) -> Frame:
+    def get_frame(self) -> Tensor:
         """
         Method for capturing and returning a single frame.
         """

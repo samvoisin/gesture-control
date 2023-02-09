@@ -6,14 +6,14 @@ from typing import Optional, Protocol
 from gestrol.fps_monitor import FPSMonitor
 from gestrol.frame_pipeline import FramePipeline
 from gestrol.frame_stream import FrameStream
-from gestrol.modifiers.base import Frame
+from gestrol.modifiers.base import Tensor
 from gestrol.utils.logging import configure_logging
 
 configure_logging()
 
 
 class GestureClassifierProtocol(Protocol):
-    def infer_gesture(self, frame: Frame) -> Optional[int]:
+    def infer_gesture(self, frame: Tensor) -> Optional[int]:
         ...
 
 

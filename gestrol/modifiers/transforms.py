@@ -3,11 +3,10 @@ from typing import List, Optional, Union
 
 # external libraries
 import numpy as np
-from PIL.Image import Image
 from torch import Tensor
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class ReverseNormalizeModifier(FrameModifier):
@@ -27,9 +26,7 @@ class ReverseNormalizeModifier(FrameModifier):
         self.mu = mu or [0.485, 0.456, 0.406]
         self.sigma = sigma or [0.229, 0.224, 0.225]
 
-    def __call__(self, frame: Frame) -> Tensor:
-        if not isinstance(frame, Tensor):
-            raise TypeError(f"frame must be type {Tensor} but is type {type(frame)}.")
+    def __call__(self, frame: Tensor) -> Tensor:
         for i in range(3):
             frame[i, :, :] = frame[i, :, :] * self.sigma[i] + self.mu[i]
         return frame
@@ -49,7 +46,7 @@ class ScalarModifier(FrameModifier):
         """
         self.scalar = scalar
 
-    def __call__(self, frame: Frame) -> Union[np.ndarray, Tensor]:
+    def __call__(self, frame: Tensor) -> Union[np.ndarray, Tensor]:
         """
         Multiply frame by a scalar.
 
@@ -62,6 +59,4 @@ class ScalarModifier(FrameModifier):
         Returns:
             numpy array or Tensor
         """
-        if isinstance(frame, Image):
-            raise TypeError(f"frame must be {Tensor} or {np.ndarray} but is type {type(frame)}.")
         return frame * self.scalar

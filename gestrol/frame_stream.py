@@ -3,7 +3,7 @@ from typing import Generator
 
 # gestrol library
 from gestrol.camera.base import CameraInterface
-from gestrol.modifiers.base import Frame
+from gestrol.modifiers.base import Tensor
 
 
 class FrameStream:
@@ -20,7 +20,7 @@ class FrameStream:
         """
         self.camera = camera
 
-    def stream_frames(self) -> Generator[Frame, None, None]:
+    def stream_frames(self) -> Generator[Tensor, None, None]:
         """
         Stream frames from camera.
 

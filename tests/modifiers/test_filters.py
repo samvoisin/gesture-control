@@ -4,9 +4,9 @@ from typing import Optional
 # external libraries
 import pytest
 import torch
+from torch import Tensor
 
 # gestrol library
-from gestrol.frame import Frame
 from gestrol.modifiers.filters import FrameSizeFilter
 
 
@@ -22,7 +22,7 @@ class TestFrameSizeFilter:
             (torch.ones(9, 9), None),
         ],
     )
-    def test_frame_size_filter_2d(self, frame: Frame, exp_res: Optional[Frame]):
+    def test_frame_size_filter_2d(self, frame: Tensor, exp_res: Optional[Tensor]):
         filter = FrameSizeFilter(10, 10)
         res = filter(frame)
         assert type(res) == type(exp_res)
@@ -37,7 +37,7 @@ class TestFrameSizeFilter:
             (torch.ones(1, 10, 10), None),
         ],
     )
-    def test_frame_size_filter_3d(self, frame: Frame, exp_res: Optional[Frame]):
+    def test_frame_size_filter_3d(self, frame: Tensor, exp_res: Optional[Tensor]):
         filter = FrameSizeFilter(10, 10, 3)
         res = filter(frame)
         assert type(res) == type(exp_res)

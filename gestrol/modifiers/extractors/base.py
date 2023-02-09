@@ -4,9 +4,10 @@ from typing import Optional
 
 # external libraries
 import torch
+from torch import Tensor
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class FrameExtractor(FrameModifier):
@@ -17,7 +18,7 @@ class FrameExtractor(FrameModifier):
         self.model.eval()  # ensure model in eval mode
 
     @abstractmethod
-    def __call__(self, frame: Frame) -> Optional[Frame]:
+    def __call__(self, frame: Tensor) -> Optional[Tensor]:
         prepped_frame = [frame.to(self.device)]
         with torch.inference_mode():
             prediction = self.model(prepped_frame)
@@ -27,4 +28,4 @@ class FrameExtractor(FrameModifier):
         boxes = boxes[0]  # top confidence prediction
         boxes = boxes.to(int)
         x0, y0, x1, y1 = boxes
-        return Frame(frame[:, y0:y1, x0:x1])
+        return Tensor(frame[:, y0:y1, x0:x1])

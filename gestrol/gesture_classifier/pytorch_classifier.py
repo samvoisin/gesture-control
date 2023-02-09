@@ -1,9 +1,9 @@
 # external libraries
 import torch
+from torch import Tensor
 
 # gestrol library
 from gestrol.gesture_classifier.base import GestureClassifier
-from gestrol.modifiers.base import Frame
 
 
 class PytorchGestureClassifier(GestureClassifier):
@@ -17,11 +17,7 @@ class PytorchGestureClassifier(GestureClassifier):
         self.model = self.model.to(self.device)
         self.model.eval()  # ensure model in eval mode
 
-    def infer_gesture(self, frame: Frame) -> int:
-        if not isinstance(frame, torch.Tensor):
-            raise TypeError(
-                f"{self.__class__.__name__}.modify_frame requires `torch.Tensor` input but received {type(frame)}."
-            )
+    def infer_gesture(self, frame: Tensor) -> int:
         frame = frame.to(self.device)
         with torch.inference_mode():
             pred = self.model(frame)

@@ -5,12 +5,12 @@ from typing import Literal, Sequence
 from torch import Tensor
 
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class SingleChannelSelectorModifier(FrameModifier):
     """
-    Select single color channel from 3-channel Frame. Requires (h, w, 3) input dims.
+    Select single color channel from 3-channel frame. Requires (h, w, 3) input dims.
     """
 
     def __init__(self, channel: int = 0):
@@ -18,21 +18,21 @@ class SingleChannelSelectorModifier(FrameModifier):
         Initiate method.
 
         Args:
-            channel: Channel to select from Frame. Defaults to 0.
+            channel: Channel to select from frame. Defaults to 0.
         """
         self.channel = channel
 
-    def __call__(self, frame: Frame) -> Frame:
+    def __call__(self, frame: Tensor) -> Tensor:
         """
         Select single channel.
 
         Args:
-            frame: Three channel Frame
+            frame: Three channel frame
 
         Returns:
-            Single channel Frame
+            Single channel frame
         """
-        return Frame(frame[:, :, self.channel])
+        return Tensor(frame[:, :, self.channel])
 
 
 class ChannelSwapModifier(FrameModifier):
@@ -49,25 +49,25 @@ class ChannelSwapModifier(FrameModifier):
         """
         self.channel_order = channel_order
 
-    def __call__(self, frame: Frame) -> Frame:
+    def __call__(self, frame: Tensor) -> Tensor:
         """
         Reorder channels.
 
         Args:
-            frame: Three channel Frame
+            frame: Three channel frame
 
         Raises:
             TypeError: raised if `frame` is not np.ndarray
 
         Returns:
-            Frame with swapped channels
+            frame with swapped channels
         """
-        return Frame(frame[:, :, self.channel_order])
+        return Tensor(frame[:, :, self.channel_order])
 
 
 class ChannelDimOrderModifier(FrameModifier):
     """
-    Change the channel dimension of an Frame to be first dimension or last.
+    Change the channel dimension of an frame to be first dimension or last.
     """
 
     def __init__(self, mode: Literal["first", "last"] = "last"):
@@ -87,15 +87,15 @@ class ChannelDimOrderModifier(FrameModifier):
         else:
             raise ValueError("Invalid argument to `channel_order` param. Must be 'first' or 'last'.")
 
-    def _first_mode(self, frame: Frame) -> Tensor:
+    def _first_mode(self, frame: Tensor) -> Tensor:
         """Move channels dim to first dimension."""
         return frame.permute(2, 0, 1)
 
-    def _last_mode(self, frame: Frame) -> Tensor:
+    def _last_mode(self, frame: Tensor) -> Tensor:
         """Move channels dim to last dimension."""
         return frame.permute(1, 2, 0)
 
-    def __call__(self, frame: Frame) -> Frame:
+    def __call__(self, frame: Tensor) -> Tensor:
         """
         Swap first and last axes of an array.
 
@@ -105,5 +105,5 @@ class ChannelDimOrderModifier(FrameModifier):
         Returns:
             three channel numpy array
         """
-        frame = Frame(self._dim_order_modifier(frame))
+        frame = Tensor(self._dim_order_modifier(frame))
         return frame

@@ -1,8 +1,11 @@
 # standard libraries
 from typing import Optional
 
+# external libraries
+from torch import Tensor
+
 # gestrol library
-from gestrol.modifiers.base import Frame, FrameModifier
+from gestrol.modifiers.base import FrameModifier
 
 
 class FrameSizeFilter(FrameModifier):
@@ -35,7 +38,7 @@ class FrameSizeFilter(FrameModifier):
 
         self.size_check = frame_size_check
 
-    def __call__(self, frame: Frame) -> Optional[Frame]:
+    def __call__(self, frame: Tensor) -> Optional[Tensor]:
         if self.size_check(*frame.shape):
             return frame
         return None

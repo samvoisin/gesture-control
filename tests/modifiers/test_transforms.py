@@ -8,7 +8,7 @@ import torch
 
 # gestrol library
 from gestrol.modifiers import ReverseNormalizeModifier, ScalarModifier
-from gestrol.modifiers.base import Frame
+from gestrol.modifiers.base import Tensor
 
 
 def test_reverse_normalizer_modifier():
@@ -27,6 +27,6 @@ def test_reverse_normalizer_modifier():
         (torch.ones(10, 10), torch.all),
     ],
 )
-def test_scalar_modifier(frame: Frame, allfcn: Callable):
+def test_scalar_modifier(frame: Tensor, allfcn: Callable):
     sm = ScalarModifier(scalar=2)
     assert allfcn(sm(frame) == 2)

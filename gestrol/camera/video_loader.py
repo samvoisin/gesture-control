@@ -4,9 +4,9 @@ from pathlib import Path
 
 # external libraries
 import cv2
+from torch import Tensor
 
 # gestrol library
-from gestrol import Frame
 from gestrol.camera.base import CameraInterface
 from gestrol.utils.logging import configure_logging
 
@@ -26,6 +26,6 @@ class VideoLoaderInterface(CameraInterface):
         self.camera.release()
         logging.info("Video ended")
 
-    def get_frame(self) -> Frame:
+    def get_frame(self) -> Tensor:
         _, arr = self.camera.read()
-        return Frame.from_numpy(arr)
+        return Tensor(arr)

@@ -1,6 +1,6 @@
 # external libraries
-import numpy as np
 import pytest
+from torch import Tensor
 
 # gestrol library
 from gestrol.frame_stream import FrameStream
@@ -13,4 +13,4 @@ def frame_stream(dummy_camera_interface) -> FrameStream:
 
 def test_frame_stream(frame_stream: FrameStream):
     frame = next(frame_stream.stream_frames())
-    assert isinstance(frame, np.ndarray)
+    assert isinstance(frame, Tensor)

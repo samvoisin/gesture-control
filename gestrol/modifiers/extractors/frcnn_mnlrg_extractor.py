@@ -4,12 +4,12 @@ from typing import Optional
 
 # external libraries
 import torch
+from torch import Tensor
 from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn
 from torchvision.models.detection.faster_rcnn import FasterRCNN
 from torchvision.models.detection.rpn import AnchorGenerator
 
 # gestrol library
-from gestrol.modifiers.base import Frame
 from gestrol.modifiers.extractors.base import FrameExtractor
 
 MODELS_DIR = Path("models")
@@ -54,5 +54,5 @@ class SingleHandMobileNetExtractor(FrameExtractor):
         model = model or load_frcnn_model(model_path=FRCNN_MODEL_PATH)
         super().__init__(model, device)
 
-    def __call__(self, frame: Frame) -> Optional[Frame]:
+    def __call__(self, frame: Tensor) -> Optional[Tensor]:
         return super().__call__(frame)
