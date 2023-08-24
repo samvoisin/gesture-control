@@ -141,3 +141,6 @@ dmypy.json
 # data files
 *.zip
 *.mat
+
+# MacOS
+.DS_Store
