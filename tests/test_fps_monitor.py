@@ -1,13 +1,8 @@
-# standard libraries
-from math import isclose
-from time import sleep
-
 # external libraries
-import pytest
-from torch import Tensor
+import numpy as np
 
 # gestrol library
-from gestrol.fps_monitor import FPSMonitor
+from gesturemote.fps_monitor import FPSMonitor
 
 
 class TestFPSMonitor:
@@ -15,23 +10,12 @@ class TestFPSMonitor:
     Class of tests for FPSMonitor.
     """
 
-    def test_active_flag(self, dummy_frame: Tensor):
+    def test_active_flag(self):
         """
         Test that active_flag is flipped when first frame is passed in.
         """
         monitor = FPSMonitor()
+        dummy_frame = np.zeros((100, 100, 3), dtype=np.uint8)
         assert not monitor._active_flag
         monitor.monitor_fps(dummy_frame)
         assert monitor._active_flag
-
-    @pytest.mark.xfail(reason="This test must be improved.")
-    def test_monitor_fps(self, dummy_frame: Tensor):
-        """
-        Test fps calculation on a few iterations with a delay built in.
-        """
-        monitor = FPSMonitor()
-        for _ in range(3):
-            monitor.monitor_fps(dummy_frame)
-            sleep(1)
-        res = monitor._calculate_mean()
-        assert isclose(res, 1, rel_tol=2e-3)  # res is approx. 0.99895729; close enough for small sample

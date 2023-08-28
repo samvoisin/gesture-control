@@ -5,7 +5,7 @@ from typing import List, Optional
 import pytest
 
 # gestrol library
-from gestrol.voting_queue import PopularVoteQueue, QueueError
+from gesturemote.voting_queue import PopularVoteQueue, QueueError
 
 
 def test_empty_voting_behavior():
