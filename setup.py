@@ -7,7 +7,7 @@ from typing import Dict, List
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = "gestrol"
+NAME = "gesturemote"
 DESCRIPTION = "gesture-based interface"
 URL = "https://github.com/samvoisin/gesture-control"
 EMAIL = "samvoisin@protonmail.com"
@@ -18,11 +18,11 @@ VERSION = "0.1.0"
 # required packages
 # cu113 part is required bc current GPU is sm_86 and pytorch only supports sm_70
 REQUIRED: List[str] = [
-    "numpy~=1.22",
-    "opencv-python~=4.5",
-    "Pillow~=9.1",
-    "torch==1.11.0+cu113",
-    "torchvision==0.12.0+cu113",
+    "numpy~=1.25",
+    "opencv-python~=4.8",
+    "Pillow~=9.5",
+    "torch~=1.13",
+    "torchvision~=0.14",
 ]
 
 # optional extras
@@ -110,7 +110,7 @@ setup(
     install_requires=REQUIRED,
     # extras_require=EXTRAS,
     include_package_data=True,
-    license="GNU"
+    license="GNU",
     # $ setup.py publish support.
     # cmdclass={
     #    "upload": UploadCommand,

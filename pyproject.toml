@@ -9,7 +9,7 @@
 line-length = 120
 target-version = ['py38']
 include = '\.pyi?$'
-exclude='''
+exclude = '''
 (
     /(
         \.eggs
@@ -29,7 +29,7 @@ preview = true
 # NOTE: You don't need this in your own Black configuration.
 
 [build-system]
-requires = ["setuptools>=45.0", "setuptools_scm[toml]>=6.3.1", "wheel"]
+requires = ["setuptools>=45.0", "setuptools_scm[toml]>=6.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.isort]
@@ -47,21 +47,12 @@ optional-tests = [
   "no_blackd: run when `d` extra NOT installed",
   "no_jupyter: run when `jupyter` extra NOT installed",
 ]
-markers = [
-  "incompatible_with_mypyc: run when testing mypyc compiled black"
-]
+markers = ["incompatible_with_mypyc: run when testing mypyc compiled black"]
 
 [tool.coverage.run]
 omit = ['**/__init__.py']
 
 [tool.mypy]
 [[tool.mypy.overrides]]
-module = [
-  'cv2',
-  'PIL',
-  'PIL.*',
-  'setuptools',
-  'torchvision',
-  'torchvision.*',
-]
+module = ['cv2', 'PIL', 'PIL.*', 'setuptools', 'torchvision', 'torchvision.*']
 ignore_missing_imports = true
