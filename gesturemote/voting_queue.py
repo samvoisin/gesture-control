@@ -2,9 +2,7 @@
 import logging
 from collections import Counter
 from queue import Queue
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+from typing import Any
 
 
 class QueueError(Exception):
@@ -17,15 +15,17 @@ class PopVoteCounter(Counter):
         return pop_vote[0][0]
 
 
-class PopularVoteQueue:
+class VoteQueue:
     """
-    A Queue where a popular vote is taken on labeled elements and the most popular label is popped from the queue.
+    A Queue where a vote is taken on labeled elements and the most voted label is popped from the queue.
     """
 
     def __init__(self, maxsize: int, verbose: bool = False) -> None:
         self.queue: Queue = Queue(maxsize=maxsize)
         self.vote_counter = PopVoteCounter()
-        self.verbose = verbose
+        self.logger = logging.getLogger(__name__)
+        if verbose:
+            self.logger.setLevel(logging.INFO)
 
     def __repr__(self) -> str:
         return str(self.queue.queue)
@@ -33,7 +33,7 @@ class PopularVoteQueue:
     def is_full(self) -> bool:
         return self.queue.full()
 
-    def put(self, item: int):
+    def put(self, item: Any):
         """
         Custom put implementation to avoid overfilling the queue.
 
@@ -47,9 +47,7 @@ class PopularVoteQueue:
             raise QueueError("Voting queue is full. Cannot put another element.")
         else:
             self.queue.put(item)
-
-        if self.verbose:
-            logger.info(f"Voting queue status: {self}")
+            self.logger.info(f"Voting queue status: {self}")
 
     def vote(self) -> int:
         """
@@ -66,8 +64,7 @@ class PopularVoteQueue:
 
         self.vote_counter.clear()
 
-        if self.verbose:
-            logger.info("Voting on queue: %s", self.queue.queue)
+        self.logger.info("Voting on queue: %s", self.queue.queue)
         while not self.queue.empty():
             self.vote_counter[self.queue.get()] += 1
 

@@ -1,19 +1,20 @@
 # standard libraries
 import logging
-from typing import Callable, Dict
+from time import sleep
+from typing import Dict, List
 
 # external libraries
 import cv2
 import numpy as np
-import torch
+import pandas as pd
+import pyautogui as pag
 from PIL import Image
 
-# gestrol library
+# gesturemote library
 from gesturemote.camera import OpenCVCameraInterface
-from gesturemote.detector import TARGETS, build_mobilenet_small, preprocess_mobilenet_small
+from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
-from gesturemote.state_controller import StateController
-from gesturemote.voting_queue import PopularVoteQueue
+from gesturemote.voting_queue import VoteQueue
 
 
 class GestureController:
@@ -23,8 +24,6 @@ class GestureController:
 
     def __init__(
         self,
-        routines: Dict[str, Callable[[], None]],
-        device: str = "cpu",
         monitor_fps: bool = False,
         verbose: bool = False,
     ):
@@ -34,138 +33,85 @@ class GestureController:
         Args:
             fps_monitor: frames per second monitor. Defaults to None.
         """
+        self.recognizer = LandmarkGestureDetector()
+
         self.monitor_fps = monitor_fps
         if self.monitor_fps:
             self.fps_monitor = FPSMonitor()
-        self._device = torch.device(device)
-        self.verbose = verbose
-        if self.verbose:
-            logging.basicConfig(level=logging.INFO)
-
-        self.model = build_mobilenet_small()
-        self.model = self.model.to(self._device)
-        self.camera = OpenCVCameraInterface(0)
-        self.voting_queue = PopularVoteQueue(maxsize=3, verbose=self.verbose)
-        self.state_controller = StateController(verbose=self.verbose)
-
-        state_routine = {
-            "0303": self.state_controller,  # fist, fist
-        }
-
-        self._routines: Dict[str, Callable[[], None]] = {**routines, **state_routine}
-        self._max_routine_length = max(len(routine) for routine in self._routines.keys())
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+        if verbose:
+            logging.basicConfig(level=logging.INFO)
+
+        self.camera = OpenCVCameraInterface()
+        self.voting_queue = VoteQueue(maxsize=4, verbose=verbose)
+        self.is_active = False
+
+        self.screen_width, self.screen_height = pag.size()
+
+        self.df: Dict[str, List[float]] = {"x": [], "y": [], "z": []}
 
     def activate(self, video_preview: bool = False):
         """
         Activate the gesture controller.
         """
-
-        gesture_stream = ""
-        num_hands = 1
         prvw_img_size = 320
-        threshold = 0.8
-        GREEN = (0, 255, 0)
         RED = (0, 0, 255)
 
+        sleep(3)  # wait for camera to initialize
+        self.logger.info("Gesture controller initialized.")
         for frame in self.camera.stream_frames():
             if self.monitor_fps:
                 frame = self.fps_monitor.monitor_fps(frame)
 
-            procd_img = preprocess_mobilenet_small(frame)
+            prediction = self.recognizer.predict(frame)
+            if prediction is None:
+                continue
 
-            with torch.no_grad():
-                model_output = self.model(procd_img.to(self._device))[0]
+            gesture_class, index_finger_coords = prediction
+            self.voting_queue.put(gesture_class)
+            finger1_x, finger1_y, finger1_z = index_finger_coords
 
-            scores = model_output["scores"][:num_hands]
-            boxes = model_output["boxes"][:num_hands]
-            labels = model_output["labels"][:num_hands]
+            self.logger.info(f"x={finger1_x:.2f}, y={finger1_y:.2f}, z={finger1_z:.2f}")
+
+            if self.voting_queue.is_full():
+                gesture_class_label = self.voting_queue.vote()
+
+                if gesture_class_label == "Closed_Fist":
+                    self.is_active = not self.is_active
+                    self.logger.info(f"control mode is {self.is_active}")
+                    continue
+
+            if self.is_active:
+                pag.moveTo(
+                    (1 - finger1_x) * self.screen_width,
+                    finger1_y * self.screen_height,
+                )
+
+            # collect diagnostics
+            self.df["x"].append(finger1_x)
+            self.df["y"].append(finger1_y)
+            self.df["z"].append(finger1_z)
 
             if video_preview:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                prvw_img = Image.fromarray(prvw_img)
-                prvw_img = prvw_img.resize((prvw_img_size, prvw_img_size))
+                prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
                 prvw_img = np.array(prvw_img)
 
-            for i in range(min(num_hands, len(boxes))):
-                if scores[i] > threshold:
-                    self.voting_queue.put(int(labels[i]))
-
-                    if self.voting_queue.is_full():
-                        gesture_class_label = self.voting_queue.vote()
-                        gesture: str = (
-                            str(gesture_class_label)
-                            if len(str(gesture_class_label)) == 2
-                            else f"0{gesture_class_label}"
-                        )
-
-                        if self.verbose:
-                            self.logger.info(f"gesture class is {gesture}")
-
-                        gesture_stream += gesture
-                        if len(gesture_stream) > self._max_routine_length:
-                            gesture_stream = ""
-                            continue
-
-                        if self.verbose:
-                            self.logger.info(f"gesture stream is {gesture_stream}")
-
-                        if gesture_stream in self._routines.keys():
-                            routine = self._routines[gesture_stream]
-
-                            if self.verbose:
-                                self.logger.info(f"Routine is {routine}")
-
-                            if routine == self.state_controller:
-                                if self.verbose:
-                                    self.logger.info("Toggling controller state")
-
-                                routine()
-
-                            elif self.state_controller.active:
-                                if self.verbose:
-                                    self.logger.info(f"Executing routine {routine}")
-
-                                routine()
-
-                                gesture_stream = ""
-
-                    if video_preview:
-                        x1 = int((boxes[i][0]))
-                        y1 = int((boxes[i][1]))
-                        x2 = int((boxes[i][2]))
-                        y2 = int((boxes[i][3]))
-                        cv2.rectangle(prvw_img, (x1, y1), (x2, y2), GREEN, thickness=3)
-
-                        cv2.putText(
-                            prvw_img,
-                            TARGETS[int(labels[i])],
-                            (x1, y1 - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            2,
-                            RED,
-                            thickness=3,
-                        )
-
-            if self.state_controller.active and video_preview:
-                cv2.rectangle(prvw_img, (0, 0), (prvw_img_size, prvw_img_size), RED, thickness=3)
                 cv2.putText(
                     prvw_img,
-                    "CONTROL MODE",
-                    (10, 310),
+                    f"x={finger1_x * self.screen_width:.2f}, y={finger1_y * self.screen_height:.2f}, z={finger1_z:.2f}",
+                    (10, 20),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
                     RED,
-                    thickness=3,
+                    thickness=1,
                 )
-            elif not self.state_controller.active and video_preview:
-                cv2.rectangle(prvw_img, (0, 0), (prvw_img_size, prvw_img_size), GREEN, thickness=3)
 
-            if video_preview:
                 cv2.imshow("Frame", prvw_img)
 
-            key = cv2.waitKey(1)
-            if key == ord("q"):
-                return
+                key = cv2.waitKey(1)
+                if key == ord("q"):
+                    df = pd.DataFrame(self.df)
+                    df.to_csv("data.csv", index=False)
+                    return

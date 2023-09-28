@@ -18,9 +18,6 @@ class StateController:
         self.active = False
         self.verbose = verbose
 
-    def __call__(self):
-        self.toggle_state()
-
     def toggle_state(self):
         """
         Toggle the state of the controller.

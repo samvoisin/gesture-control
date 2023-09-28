@@ -11,9 +11,11 @@ import torch
 import torchvision
 from PIL import Image, ImageOps
 from torch import nn
+from torchvision.models.detection.ssdlite import SSDLiteClassificationHead
 from torchvision.transforms import functional as f
 
-MODEL_WEIGHTS_PATH = Path("models/SSDLite_MobilenetV3_small.pth")
+SM_MODEL_WEIGHTS_PATH = Path("models/SSDLite_MobilenetV3_small.pth")
+LG_MODEL_WEIGHTS_PATH = Path("models/SSDLite_MobilenetV3_large.pth")
 
 
 TARGETS = {
@@ -51,7 +53,6 @@ def retrieve_out_channels(model: nn.Module, size: Tuple[int, int]) -> List[int]:
     Returns:
         out_channels (List[int]): A list of the output channels of the model.
     """
-    in_training = model.training
     model.eval()
 
     with torch.no_grad():
@@ -63,13 +64,10 @@ def retrieve_out_channels(model: nn.Module, size: Tuple[int, int]) -> List[int]:
             features = OrderedDict([("0", features)])
         out_channels = [x.size(1) for x in features.values()]
 
-    if in_training:
-        model.train()
-
     return out_channels
 
 
-def preprocess_mobilenet_small(img: np.ndarray) -> torch.Tensor:
+def preprocess_mobilenet(img: np.ndarray) -> torch.Tensor:
     """
     Preproc image for model input
     Parameters
@@ -90,16 +88,37 @@ def preprocess_mobilenet_small(img: np.ndarray) -> torch.Tensor:
     return img_tensor
 
 
-def build_mobilenet_small(checkpoint_fp: Path = MODEL_WEIGHTS_PATH) -> nn.Module:
+def build_mobilenet_large(checkpoint_fp: Path = LG_MODEL_WEIGHTS_PATH) -> nn.Module:
+    num_classes = 20
+    device = "cpu"
+
+    model = torchvision.models.detection.ssdlite320_mobilenet_v3_large(pretrained=True)
+
+    in_channels = retrieve_out_channels(model.backbone, (320, 320))
+    num_anchors = model.anchor_generator.num_anchors_per_location()
+    norm_layer = partial(torch.nn.BatchNorm2d, eps=0.001, momentum=0.03)
+
+    model.head.classification_head = SSDLiteClassificationHead(in_channels, num_anchors, num_classes, norm_layer)
+
+    # load weights from checkpoint
+    checkpoint_fp = checkpoint_fp.expanduser()
+    if checkpoint_fp.exists():
+        checkpoint = torch.load(checkpoint_fp, map_location=torch.device(device))
+        if "state_dict" in checkpoint.keys():
+            model.load_state_dict(checkpoint["state_dict"])
+        else:
+            model.load_state_dict(checkpoint)
+
+    return model.eval()
+
+
+def build_mobilenet_small(checkpoint_fp: Path = SM_MODEL_WEIGHTS_PATH) -> nn.Module:
     num_classes = 20
     device = "cpu"
 
     norm_layer = partial(nn.BatchNorm2d, eps=0.001, momentum=0.03)
 
-    backbone = torchvision.models.mobilenet_v3_small(
-        pretrained=False, progress=True, norm_layer=norm_layer, reduced_tail=True
-    )
-
+    backbone = torchvision.models.mobilenet_v3_small(pretrained=False, norm_layer=norm_layer, reduced_tail=True)
     backbone = torchvision.models.detection.ssdlite._mobilenet_extractor(
         backbone,
         0,
@@ -145,3 +164,18 @@ def build_mobilenet_small(checkpoint_fp: Path = MODEL_WEIGHTS_PATH) -> nn.Module
             model.load_state_dict(checkpoint)
 
     return model.eval()
+
+
+class GestureRecognizerMobilenetSmall:
+    def __init__(self, device: str = "cpu"):
+        self.model = build_mobilenet_small()
+        self.device = torch.device(device)
+
+    def preprocess(self, frame: np.ndarray):
+        return preprocess_mobilenet(frame)
+
+    def predict(self, frame: np.ndarray) -> int:
+        with torch.no_grad():
+            tensor_frame = torch.Tensor(frame)
+            model_output = self.model(tensor_frame.to(self.device))[0]
+            return model_output
