@@ -4,15 +4,16 @@ from typing import List, Optional
 # external libraries
 import pytest
 
+# gesturemote library
 # gestrol library
-from gesturemote.voting_queue import PopularVoteQueue, QueueError
+from gesturemote.voting_queue import QueueError, VoteQueue
 
 
 def test_empty_voting_behavior():
     """
     Test error raised when vote is called on empty queue.
     """
-    vq = PopularVoteQueue(maxsize=5)
+    vq = VoteQueue(maxsize=5)
     with pytest.raises(QueueError):
         vq.vote()
 
@@ -21,7 +22,7 @@ def test_overfill_behavior():
     """
     Test for error when overfilling queue.
     """
-    vq = PopularVoteQueue(maxsize=5)
+    vq = VoteQueue(maxsize=5)
     labels = [1, 2, 3, 3, 3]
     for label in labels:
         vq.put(label)
@@ -35,7 +36,7 @@ def test_count_vote(labels: List[int], exp_res: Optional[int]):
     """
     Test vote counting method.
     """
-    vq = PopularVoteQueue(maxsize=5)
+    vq = VoteQueue(maxsize=5)
     print(labels)
     for label in labels:
         vq.put(label)
