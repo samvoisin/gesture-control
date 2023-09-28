@@ -23,6 +23,7 @@ REQUIRED: List[str] = [
     "Pillow~=9.5",
     "torch~=1.13",
     "torchvision~=0.14",
+    "mediapipe~=0.10",
 ]
 
 # optional extras

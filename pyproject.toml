@@ -37,7 +37,7 @@ profile = "black"
 sections = ["STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 import_heading_stdlib = "standard libraries"
 import_heading_thirdparty = "external libraries"
-import_heading_firstparty = "gestrol library"
+import_heading_firstparty = "gesturemote library"
 dedup_headings = true
 line_length = 120
 
