@@ -6,11 +6,25 @@ from typing import Any
 
 
 class QueueError(Exception):
+    """
+    Custom exception for queue errors.
+    """
+
     pass
 
 
 class PopVoteCounter(Counter):
-    def popular_vote(self) -> int:
+    """
+    Calculate popular vote of a list of elements.
+    """
+
+    def popular_vote(self) -> Any:
+        """
+        Calculate popular vote.
+
+        Returns:
+            Most common item in the list.
+        """
         pop_vote = self.most_common(1)
         return pop_vote[0][0]
 
@@ -49,7 +63,7 @@ class VoteQueue:
             self.queue.put(item)
             self.logger.info(f"Voting queue status: {self}")
 
-    def vote(self) -> int:
+    def vote(self) -> Any:
         """
         Tally popular vote of all entities in the queue. Items are removed from the queue in the process.
 
