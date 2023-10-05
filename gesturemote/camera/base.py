@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Generator
 
 # external libraries
-from torch import Tensor
+import numpy as np
 
 
 class CameraInterface(ABC):
@@ -26,14 +26,14 @@ class CameraInterface(ABC):
         pass
 
     @abstractmethod
-    def get_frame(self) -> Tensor:
+    def get_frame(self) -> np.ndarray:
         """
         Method for capturing and returning a single frame.
         """
         pass
 
     @abstractmethod
-    def stream_frames(self) -> Generator[Tensor, None, None]:
+    def stream_frames(self) -> Generator[np.ndarray, None, None]:
         """
         Stream frames from source.
         """
