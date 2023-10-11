@@ -3,7 +3,7 @@
 
 ## What is it?
 
-GestuReMote (pronounced "gesture-mote") is a tool for interfacing with a computer through physical gestures captured via webcam.
+GestuReMote (pronounced "gesture-mote") is a tool for interfacing with a computer through physical gestures captured via optical sensors. Right now this means a standard webcam - though we plan to construct a dedicated device for sensing in the future.
 
 ## Why use it?
 
@@ -21,13 +21,12 @@ GestuReMote works by accessing a webcam attached to the machine, detecting hands
 
 ### The details
 
+***Warning:*** This repo is under heavy development, so the information below could be out of date.
+
 GestuReMote is implemented in three layers.
 1. The input layer: Images are streamed by device's camera and passed to layer 2.
 2. The model layer: Images are preprocessed and passed into an object detection model where hands are identified and gestures are classified.
 3. The control layer: Gesture classifications are interpreted as gesture routines and control routines are performed.
 
-GestuReMote relies on an SSDLite model with a MobileNetV3 backbone trained on the [HaGRID](https://arxiv.org/abs/2206.08219) (HAnd Gesture Recognition Image Dataset). The model weights can be downloaded [here](https://github.com/hukenovs/hagrid/tree/master). Currently this library supports `SSDLiteMobileNetV3Small`. Thanks to  the HaGRID team for the hard work.
-
-Supported gestures and their functions are limited currently as development is early. See `macos_routines.py` for a few simple gesture routines implemented for MacOS. These routines are illustrative in nature. Improved routines are in development.
-
+GestuReMote relies on the MediaPipe library for [gesture recognition](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer) and [hand landmark detection](https://developers.google.com/mediapipe/solutions/vision/hand_landmarker).
 
