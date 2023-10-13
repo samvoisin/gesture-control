@@ -35,6 +35,11 @@ class VoteQueue:
     """
 
     def __init__(self, maxsize: int, verbose: bool = False) -> None:
+        """
+        Args:
+            maxsize (int): Queue size.
+            verbose (bool, optional): Verbose mode. Defaults to False.
+        """
         self.queue: Queue = Queue(maxsize=maxsize)
         self.vote_counter = PopVoteCounter()
         self.logger = logging.getLogger(__name__)
@@ -45,6 +50,12 @@ class VoteQueue:
         return str(self.queue.queue)
 
     def is_full(self) -> bool:
+        """
+        Check if the queue is full.
+
+        Returns:
+            bool: True if the queue is full, False otherwise.
+        """
         return self.queue.full()
 
     def put(self, item: Any):

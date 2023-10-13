@@ -1,25 +1,23 @@
 # standard libraries
 import logging
-from time import sleep
 from typing import Dict, List
 
 # external libraries
 import cv2
 import numpy as np
-import pandas as pd
 import pyautogui as pag
+from numpy.linalg import norm
 from PIL import Image
 
 # gesturemote library
 from gesturemote.camera import OpenCVCameraInterface
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
-from gesturemote.voting_queue import VoteQueue
 
 
 class GestureController:
     """
-    Master class for gestrol library. Contains all components necessary to control machine with gestures.
+    Gesture controller class.
     """
 
     def __init__(
@@ -44,12 +42,41 @@ class GestureController:
             logging.basicConfig(level=logging.INFO)
 
         self.camera = OpenCVCameraInterface()
-        self.voting_queue = VoteQueue(maxsize=4, verbose=verbose)
         self.is_active = False
+        self.click_down = False
 
         self.screen_width, self.screen_height = pag.size()
 
         self.df: Dict[str, List[float]] = {"x": [], "y": [], "z": []}
+
+    def detect_click(self, finger_coords: np.ndarray):
+        """
+        Detect if the user is clicking.
+
+        Args:
+            finger_coords: coordinates of the finger landmarks.
+
+        Returns:
+            True if the user is clicking, False otherwise.
+        """
+        thumb_tip_vector = finger_coords[:, 0, 0]
+        index_finger_tip_vector = finger_coords[:, 0, 1]
+        middle_finger_tip_vector = finger_coords[:, 0, 2]
+
+        middle_finger_to_index_finger_tip = norm(index_finger_tip_vector - middle_finger_tip_vector)
+        middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
+
+        self.logger.info(f"index to middle finger: {middle_finger_to_index_finger_tip}")
+        self.logger.info(f"thumb to middle finger: {middle_finger_to_thumb_tip}")
+
+        if middle_finger_to_index_finger_tip > middle_finger_to_thumb_tip and not self.click_down:  # click down
+            self.click_down = True
+            pag.mouseDown()
+            self.logger.info("click down")
+        elif middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down:  # release click
+            self.click_down = False
+            pag.mouseUp()
+            self.logger.info("click released")
 
     def activate(self, video_preview: bool = False):
         """
@@ -57,8 +84,9 @@ class GestureController:
         """
         prvw_img_size = 320
         RED = (0, 0, 255)
+        activate_gesture_threshold = 5
+        activate_gesture_counter = 0
 
-        sleep(3)  # wait for camera to initialize
         self.logger.info("Gesture controller initialized.")
         for frame in self.camera.stream_frames():
             if self.monitor_fps:
@@ -68,39 +96,40 @@ class GestureController:
             if prediction is None:
                 continue
 
-            gesture_class, index_finger_coords = prediction
-            self.voting_queue.put(gesture_class)
-            finger1_x, finger1_y, finger1_z = index_finger_coords
+            gesture_label, finger_coords = prediction
+            cursor_pt = finger_coords[:, 0, 1]  # index finger tip
+            self.logger.info(f"Gesture: {gesture_label}")
+            self.logger.info(f"x={cursor_pt[0]:.2f}, y={cursor_pt[1]:.2f}, z={cursor_pt[2]:.2f}")
 
-            self.logger.info(f"x={finger1_x:.2f}, y={finger1_y:.2f}, z={finger1_z:.2f}")
-
-            if self.voting_queue.is_full():
-                gesture_class_label = self.voting_queue.vote()
-
-                if gesture_class_label == "Closed_Fist":
+            if gesture_label == "Closed_Fist":
+                activate_gesture_counter += 1
+                if activate_gesture_counter > activate_gesture_threshold:
                     self.is_active = not self.is_active
                     self.logger.info(f"control mode is {self.is_active}")
-                    continue
+                    activate_gesture_counter = 0
+            else:
+                activate_gesture_counter = 0
 
             if self.is_active:
                 pag.moveTo(
-                    (1 - finger1_x) * self.screen_width,
-                    finger1_y * self.screen_height,
+                    (1 - cursor_pt[0]) * self.screen_width,
+                    cursor_pt[1] * self.screen_height,
                 )
-
-            # collect diagnostics
-            self.df["x"].append(finger1_x)
-            self.df["y"].append(finger1_y)
-            self.df["z"].append(finger1_z)
+                self.detect_click(finger_coords)
 
             if video_preview:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
                 prvw_img = np.array(prvw_img)
 
+                tc_str = (
+                    f"x={cursor_pt[0] * self.screen_width:.2f}, y={cursor_pt[1] * self.screen_height:.2f},"
+                    f" z={cursor_pt[2]:.2f}"
+                )
+
                 cv2.putText(
                     prvw_img,
-                    f"x={finger1_x * self.screen_width:.2f}, y={finger1_y * self.screen_height:.2f}, z={finger1_z:.2f}",
+                    tc_str,
                     (10, 20),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -108,10 +137,11 @@ class GestureController:
                     thickness=1,
                 )
 
+                if self.is_active:
+                    cv2.rectangle(prvw_img, (0, 0), (prvw_img_size, prvw_img_size), RED, 2)
+
                 cv2.imshow("Frame", prvw_img)
 
                 key = cv2.waitKey(1)
                 if key == ord("q"):
-                    df = pd.DataFrame(self.df)
-                    df.to_csv("data.csv", index=False)
                     return
