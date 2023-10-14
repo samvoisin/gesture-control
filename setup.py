@@ -18,6 +18,7 @@ VERSION = "0.1.0"
 # required packages
 # cu113 part is required bc current GPU is sm_86 and pytorch only supports sm_70
 REQUIRED: List[str] = [
+    "click~=8.1",
     "numpy~=1.25",
     "opencv-python~=4.8",
     "Pillow~=9.5",
@@ -105,9 +106,10 @@ setup(
     packages=find_packages(exclude=["test"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
-    # entry_points={
-    #     'console_scripts': ['mycli=mymodule:cli'],
-    # },
+    entry_points="""
+        [console_scripts]
+        gesturemote=gesturemote._cli:cli
+    """,
     install_requires=REQUIRED,
     # extras_require=EXTRAS,
     include_package_data=True,
