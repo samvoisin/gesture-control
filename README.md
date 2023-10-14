@@ -15,6 +15,16 @@ Gesture control interfaces provide several advantages over traditional computer 
 
 ## How does it work?
 
+Install this library using `pip install .` in the repository root.
+
+Activate GestuReMote via the CLI:
+
+```
+gesturemote activate
+```
+
+Use the `--help` option for details.
+
 ### TL;DR
 
 GestuReMote works by accessing a webcam attached to the machine, detecting hands and classifying gestures in the video stream, and executing associated commands.

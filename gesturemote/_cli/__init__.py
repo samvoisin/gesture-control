@@ -8,7 +8,7 @@ from gesturemote.gesture_controller import GestureController
 @click.group()
 def cli():
     """
-    GestureMote command line interface.
+    GestuReMote command line interface.
     """
     pass
 
@@ -19,7 +19,7 @@ def cli():
 @click.option("--video-preview", is_flag=True, help="Show video stream (experimental).")
 def activate(monitor_fps: bool, verbose: bool, video_preview: bool):
     """
-    Activate GestureMote.
+    Activate GestuReMote.
     """
     gc = GestureController(monitor_fps=monitor_fps, verbose=verbose)
     gc.activate(video_preview=video_preview)
