@@ -1,6 +1,5 @@
 # standard libraries
 import logging
-from typing import Dict, List
 
 # external libraries
 import cv2
@@ -22,6 +21,7 @@ class GestureController:
 
     def __init__(
         self,
+        cursor_smoothing_param: int = 3,
         monitor_fps: bool = False,
         verbose: bool = False,
     ):
@@ -32,6 +32,7 @@ class GestureController:
             fps_monitor: frames per second monitor. Defaults to None.
         """
         self.recognizer = LandmarkGestureDetector()
+        self.lagged_cursor_position = np.empty(shape=(cursor_smoothing_param, 3))
 
         self.monitor_fps = monitor_fps
         if self.monitor_fps:
@@ -47,21 +48,19 @@ class GestureController:
 
         self.screen_width, self.screen_height = pag.size()
 
-        self.df: Dict[str, List[float]] = {"x": [], "y": [], "z": []}
-
-    def detect_click(self, finger_coords: np.ndarray):
+    def detect_click(self, finger_coordinates: np.ndarray):
         """
         Detect if the user is clicking.
 
         Args:
-            finger_coords: coordinates of the finger landmarks.
+            finger_coordinates: coordinates of the finger landmarks.
 
         Returns:
             True if the user is clicking, False otherwise.
         """
-        thumb_tip_vector = finger_coords[:, 0, 0]
-        index_finger_tip_vector = finger_coords[:, 0, 1]
-        middle_finger_tip_vector = finger_coords[:, 0, 2]
+        thumb_tip_vector = finger_coordinates[:, 0, 0]
+        index_finger_tip_vector = finger_coordinates[:, 0, 1]
+        middle_finger_tip_vector = finger_coordinates[:, 0, 2]
 
         middle_finger_to_index_finger_tip = norm(index_finger_tip_vector - middle_finger_tip_vector)
         middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
@@ -77,6 +76,21 @@ class GestureController:
             self.click_down = False
             pag.mouseUp()
             self.logger.info("click released")
+
+    def get_cursor_position(self, landmarks: np.ndarray):
+        """
+        Smooth the cursor position.
+
+        Args:
+            landmarks: landmarks of the finger.
+
+        Returns:
+            Smoothed cursor position.
+        """
+        self.lagged_cursor_position = np.roll(self.lagged_cursor_position, 1, axis=0)
+        self.lagged_cursor_position[0, :] = landmarks[:, 0, 1]  # (x,y,z), tip, finger one (index finger)
+
+        return np.mean(self.lagged_cursor_position, axis=0)
 
     def activate(self, video_preview: bool = False):
         """
@@ -94,10 +108,11 @@ class GestureController:
 
             prediction = self.recognizer.predict(frame)
             if prediction is None:
+                self.click_down = False  # ensure click is released when cursor moves off screen.
                 continue
 
-            gesture_label, finger_coords = prediction
-            cursor_pt = finger_coords[:, 0, 1]  # index finger tip
+            gesture_label, finger_landmarks = prediction
+            cursor_pt = self.get_cursor_position(finger_landmarks)
             self.logger.info(f"Gesture: {gesture_label}")
             self.logger.info(f"x={cursor_pt[0]:.2f}, y={cursor_pt[1]:.2f}, z={cursor_pt[2]:.2f}")
 
@@ -115,7 +130,7 @@ class GestureController:
                     (1 - cursor_pt[0]) * self.screen_width,
                     cursor_pt[1] * self.screen_height,
                 )
-                self.detect_click(finger_coords)
+                self.detect_click(finger_landmarks)
 
             if video_preview:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
