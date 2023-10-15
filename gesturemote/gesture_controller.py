@@ -118,7 +118,6 @@ class GestureController:
                 self.click_down = False  # ensure click is released when cursor moves off screen.
 
                 if video_preview and prvw_img is not None:
-                    print("frame should be showing now")
                     cv2.imshow("Frame", prvw_img)
 
                     key = cv2.waitKey(1)
