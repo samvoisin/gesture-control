@@ -106,9 +106,25 @@ class GestureController:
             if self.monitor_fps:
                 frame = self.fps_monitor.monitor_fps(frame)
 
+            if video_preview:
+                prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
+                prvw_img = np.array(prvw_img)
+            else:
+                prvw_img = None
+
             prediction = self.recognizer.predict(frame)
             if prediction is None:
                 self.click_down = False  # ensure click is released when cursor moves off screen.
+
+                if video_preview and prvw_img is not None:
+                    print("frame should be showing now")
+                    cv2.imshow("Frame", prvw_img)
+
+                    key = cv2.waitKey(1)
+                    if key == ord("q"):
+                        return
+
                 continue
 
             gesture_label, finger_landmarks = prediction
@@ -132,11 +148,7 @@ class GestureController:
                 )
                 self.detect_click(finger_landmarks)
 
-            if video_preview:
-                prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
-                prvw_img = np.array(prvw_img)
-
+            if video_preview and prvw_img is not None:
                 tc_str = (
                     f"x={cursor_pt[0] * self.screen_width:.2f}, y={cursor_pt[1] * self.screen_height:.2f},"
                     f" z={cursor_pt[2]:.2f}"
