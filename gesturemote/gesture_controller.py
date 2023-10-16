@@ -48,6 +48,9 @@ class GestureController:
 
         self.screen_width, self.screen_height = pag.size()
 
+        self.toggle_active_threshold = 5
+        self.activate_gesture_counter = 0
+
     def detect_click(self, finger_coordinates: np.ndarray):
         """
         Detect if the user is clicking.
@@ -98,8 +101,6 @@ class GestureController:
         """
         prvw_img_size = 320
         RED = (0, 0, 255)
-        activate_gesture_threshold = 5
-        activate_gesture_counter = 0
 
         self.logger.info("Gesture controller initialized.")
         for frame in self.camera.stream_frames():
@@ -132,13 +133,14 @@ class GestureController:
             self.logger.info(f"x={cursor_pt[0]:.2f}, y={cursor_pt[1]:.2f}, z={cursor_pt[2]:.2f}")
 
             if gesture_label == "Closed_Fist":
-                activate_gesture_counter += 1
-                if activate_gesture_counter > activate_gesture_threshold:
+                self.activate_gesture_counter += 1
+                self.logger.info(f"activate gesture counter: {self.activate_gesture_counter}")
+                if self.activate_gesture_counter > self.toggle_active_threshold:
                     self.is_active = not self.is_active
                     self.logger.info(f"control mode is {self.is_active}")
-                    activate_gesture_counter = 0
+                    self.activate_gesture_counter = 0
             else:
-                activate_gesture_counter = 0
+                self.activate_gesture_counter = 0
 
             if self.is_active:
                 pag.moveTo(
