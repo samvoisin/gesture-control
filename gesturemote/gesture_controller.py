@@ -48,7 +48,7 @@ class GestureController:
 
         self.screen_width, self.screen_height = pag.size()
 
-    def detect_click(self, finger_coordinates: np.ndarray):
+    def detect_primary_click(self, finger_coordinates: np.ndarray):
         """
         Detect if the user is clicking.
 
@@ -68,14 +68,26 @@ class GestureController:
         self.logger.info(f"index to middle finger: {middle_finger_to_index_finger_tip}")
         self.logger.info(f"thumb to middle finger: {middle_finger_to_thumb_tip}")
 
-        if middle_finger_to_index_finger_tip > middle_finger_to_thumb_tip and not self.click_down:  # click down
+        if middle_finger_to_index_finger_tip > middle_finger_to_thumb_tip and not self.click_down:  # primary click down
             self.click_down = True
             pag.mouseDown()
             self.logger.info("click down")
-        elif middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down:  # release click
+        elif (
+            middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down
+        ):  # release primary click
             self.click_down = False
             pag.mouseUp()
             self.logger.info("click released")
+
+    def detect_secondary_click(self, finger_coordinates: np.ndarray):
+        thumb_tip_vector = finger_coordinates[:, 0, 0]
+        ring_finger_tip_vector = finger_coordinates[:, 0, 3]
+
+        ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
+        self.logger.info(f"secondary click distance: {ring_finger_to_thumb_tip:.3f}")
+
+        if ring_finger_to_thumb_tip < 0.1 and not self.click_down:  # secondary click TODO: make this dynamic or param?
+            pag.click(button="right")
 
     def get_cursor_position(self, landmarks: np.ndarray):
         """
@@ -145,7 +157,8 @@ class GestureController:
                     (1 - cursor_pt[0]) * self.screen_width,
                     cursor_pt[1] * self.screen_height,
                 )
-                self.detect_click(finger_landmarks)
+                self.detect_primary_click(finger_landmarks)
+                self.detect_secondary_click(finger_landmarks)
 
             if video_preview and prvw_img is not None:
                 tc_str = (
