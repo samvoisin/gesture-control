@@ -21,7 +21,7 @@ class GestureController:
 
     def __init__(
         self,
-        cursor_smoothing_param: int = 3,
+        cursor_smoothing_param: int = 5,
         activate_gesture_threshold: int = 7,
         monitor_fps: bool = False,
         verbose: bool = False,

@@ -14,7 +14,7 @@ def cli():
 
 
 @cli.command()
-@click.argument("cursor_smoothing_param", type=int, default=3)
+@click.argument("cursor_smoothing_param", type=int, default=5)
 @click.argument("activate_gesture_threshold", type=int, default=7)
 @click.option("--monitor-fps", is_flag=True, help="Monitor frames rate.")
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
