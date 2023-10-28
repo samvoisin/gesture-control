@@ -12,6 +12,7 @@ from PIL import Image
 from gesturemote.camera import OpenCVCameraInterface
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
+from gesturemote.gesture_handler import Gesture, GestureHandler
 
 
 class GestureController:
@@ -49,8 +50,16 @@ class GestureController:
 
         self.screen_width, self.screen_height = pag.size()
 
-        self.toggle_active_threshold = activate_gesture_threshold
-        self.activate_gesture_counter = 0
+        gestures = [
+            Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active),  # control gesture must be present
+            Gesture("Thumb_Down", 3, lambda: pag.press("pagedown")),
+            Gesture("Thumb_Up", 3, lambda: pag.press("pageup")),
+        ]
+        self.gesture_handler = GestureHandler(gestures)
+
+    def _toggle_active(self):
+        self.is_active = not self.is_active
+        self.logger.info(f"Gesture controller is active: {self.is_active}")
 
     def detect_primary_click(self, finger_coordinates: np.ndarray):
         """
@@ -84,6 +93,12 @@ class GestureController:
             self.logger.info("click released")
 
     def detect_secondary_click(self, finger_coordinates: np.ndarray):
+        """
+        Detect if the user is performing a secondary click.
+
+        Args:
+            finger_coordinates: coordinates of the finger landmarks.
+        """
         thumb_tip_vector = finger_coordinates[:, 0, 0]
         ring_finger_tip_vector = finger_coordinates[:, 0, 3]
 
@@ -98,7 +113,7 @@ class GestureController:
         Smooth the cursor position.
 
         Args:
-            landmarks: landmarks of the finger.
+            landmarks: coordinates of the finger landmarks.
 
         Returns:
             Smoothed cursor position.
@@ -145,15 +160,7 @@ class GestureController:
             self.logger.info(f"Gesture: {gesture_label}")
             self.logger.info(f"x={cursor_pt[0]:.2f}, y={cursor_pt[1]:.2f}, z={cursor_pt[2]:.2f}")
 
-            if gesture_label == "Closed_Fist":
-                self.activate_gesture_counter += 1
-                self.logger.info(f"activate gesture counter: {self.activate_gesture_counter}")
-                if self.activate_gesture_counter > self.toggle_active_threshold:
-                    self.is_active = not self.is_active
-                    self.logger.info(f"control mode is {self.is_active}")
-                    self.activate_gesture_counter = 0
-            else:
-                self.activate_gesture_counter = 0
+            self.gesture_handler.handle(gesture_label)
 
             if self.is_active:
                 pag.moveTo(
