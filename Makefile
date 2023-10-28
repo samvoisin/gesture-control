@@ -1,9 +1,9 @@
 update-requirements:
-	./venv/bin/pip-compile setup.py --output-file=./requirements/requirements.txt --resolver=backtracking
+	./venv/bin/pip-compile setup.py --resolver=backtracking --output-file=./requirements/requirements.txt
 	./venv/bin/pip-compile ./requirements/requirements-dev.in --output-file=./requirements/requirements-dev.txt
 
 upgrade-requirements:
-	./venv/bin/pip-compile --upgrade setup.py --output-file=./requirements/requirements.txt --resolver=backtracking
+	./venv/bin/pip-compile --upgrade setup.py --resolver=backtracking --output-file=./requirements/requirements.txt
 	./venv/bin/pip-compile --upgrade ./requirements/requirements-dev.in --output-file=./requirements/requirements-dev.txt
 
 sync-venv: update-requirements
