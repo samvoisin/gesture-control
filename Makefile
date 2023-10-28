@@ -26,7 +26,7 @@ lint:  # format all source code
 	@./venv/bin/flake8 --config=.flake8
 
 test:  # run all tests in project
-	@./venv/bin/pytest -vv --cov-fail-under=70 --cov=./gestrol tests/
+	@./venv/bin/pytest -vv --cov-fail-under=70 --cov=./gesturemote tests/
 
 clean:  # remove development files
 	rm -rf venv
