@@ -5,7 +5,6 @@ from typing import List, Optional
 import pytest
 
 # gesturemote library
-# gestrol library
 from gesturemote.voting_queue import QueueError, VoteQueue
 
 
