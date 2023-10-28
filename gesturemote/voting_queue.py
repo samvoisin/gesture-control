@@ -1,4 +1,3 @@
-# standard libraries
 import logging
 from collections import Counter
 from queue import Queue

@@ -1,8 +1,6 @@
-# standard libraries
 from abc import ABC, abstractmethod
 from typing import Generator
 
-# external libraries
 import numpy as np
 
 

@@ -12,6 +12,7 @@ class Gesture:
     delay: number of classified gestures before calling the callback
     callback: control function corresponding to the gesture label
     """
+
     label: str
     delay: int
     callback: Callable[[], None]

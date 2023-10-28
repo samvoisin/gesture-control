@@ -1,10 +1,8 @@
-# standard libraries
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
 from typing import List, Tuple
 
-# external libraries
 import cv2
 import numpy as np
 import torch

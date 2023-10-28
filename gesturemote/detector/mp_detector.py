@@ -1,9 +1,7 @@
-# standard libraries
 from pathlib import Path
 from time import time
 from typing import Optional, Tuple
 
-# external libraries
 import mediapipe as mp
 import numpy as np
 

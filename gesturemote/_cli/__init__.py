@@ -1,7 +1,5 @@
-# external libraries
 import click
 
-# gesturemote library
 from gesturemote.gesture_controller import GestureController
 
 

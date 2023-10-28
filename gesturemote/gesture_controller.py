@@ -1,14 +1,11 @@
-# standard libraries
 import logging
 
-# external libraries
 import cv2
 import numpy as np
 import pyautogui as pag
 from numpy.linalg import norm
 from PIL import Image
 
-# gesturemote library
 from gesturemote.camera import OpenCVCameraInterface
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor

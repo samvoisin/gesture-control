@@ -1,13 +1,9 @@
-# standard libraries
 import logging
 from typing import Generator
 
-# external libraries
 import cv2
 import numpy as np
 
-# gesturemote library
-# gestrol library
 from gesturemote.camera.base import CameraInterface
 
 logger = logging.getLogger(__name__)

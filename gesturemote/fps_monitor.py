@@ -1,8 +1,6 @@
-# standard libraries
 import logging
 from time import time
 
-# external libraries
 import numpy as np
 
 logger = logging.getLogger(__name__)
