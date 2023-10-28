@@ -1,45 +1,62 @@
-# Example configuration for Black.
-
-# NOTE: you have to use single-quoted strings in TOML for regular expressions.
-# It's the equivalent of r-strings in Python.  Multiline strings are treated as
-# verbose regular expressions by Black.  Use [ ] to denote a significant space
-# character.
-
-[tool.black]
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
 line-length = 120
-target-version = ['py38']
-include = '\.pyi?$'
-exclude = '''
-(
-    /(
-        \.eggs
-        | \.vscode
-        | venv
-        | \.ipynb_checkpoints
-        | data
-    )/
-)
-'''
-# We use preview style for formatting Black itself. If you
-# want stable formatting across releases, you should keep
-# this off.
-preview = true
+indent-width = 4
+target-version = "py39"
 
-# Build system information below.
-# NOTE: You don't need this in your own Black configuration.
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"  # Like Black, use double quotes for strings.
+indent-style = "space"  # Like Black, indent with spaces, rather than tabs.
+skip-magic-trailing-comma = false  # Like Black, respect magic trailing commas.
+line-ending = "auto"  # Like Black, automatically detect the appropriate line ending.
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.isort]
+known-first-party = ["gesturemote"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [build-system]
 requires = ["setuptools>=45.0", "setuptools_scm[toml]>=6.3", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.isort]
-profile = "black"
-sections = ["STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-import_heading_stdlib = "standard libraries"
-import_heading_thirdparty = "external libraries"
-import_heading_firstparty = "gesturemote library"
-dedup_headings = true
-line_length = 120
 
 [tool.pytest.ini_options]
 # Option below requires `tests/optional.py`
