@@ -7,7 +7,6 @@ ignore =
   D200  # one-line docstring should fit on one line w quotes
   D202  # no blank lines allowed after fcn docstring
   D212  # multiline docstring should start at the first line
-  D301  # use r""" if any backslashes in docstring
 
 exclude=
   .eggs
