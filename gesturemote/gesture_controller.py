@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, Protocol
 
 import cv2
 import numpy as np
@@ -7,9 +8,20 @@ from numpy.linalg import norm
 from PIL import Image
 
 from gesturemote.camera import OpenCVCameraInterface
+from gesturemote.camera.base import CameraInterface
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
 from gesturemote.gesture_handler import Gesture, GestureHandler
+
+DEFAULT_GESTURES = [
+    Gesture("Thumb_Down", 3, lambda: pag.press("pagedown")),
+    Gesture("Thumb_Up", 3, lambda: pag.press("pageup")),
+]
+
+
+class DetectorProtocol(Protocol):
+    def predict(self, frame: np.ndarray) -> Optional[tuple[str, np.ndarray]]:
+        ...
 
 
 class GestureController:
@@ -21,6 +33,9 @@ class GestureController:
         self,
         cursor_smoothing_param: int = 5,
         activate_gesture_threshold: int = 7,
+        gestures: Optional[list[Gesture]] = None,
+        detector: Optional[DetectorProtocol] = None,
+        camera: Optional[CameraInterface] = None,
         monitor_fps: bool = False,
         verbose: bool = False,
     ):
@@ -30,8 +45,14 @@ class GestureController:
         Args:
             fps_monitor: frames per second monitor. Defaults to None.
         """
-        self.recognizer = LandmarkGestureDetector()
         self.lagged_cursor_position = np.empty(shape=(cursor_smoothing_param, 3))
+
+        gestures = gestures or DEFAULT_GESTURES
+        gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
+        self.gesture_handler = GestureHandler(gestures)
+
+        self.detector = detector or LandmarkGestureDetector()
+        self.camera = camera or OpenCVCameraInterface()
 
         self.monitor_fps = monitor_fps
         if self.monitor_fps:
@@ -41,18 +62,10 @@ class GestureController:
         if verbose:
             logging.basicConfig(level=logging.INFO)
 
-        self.camera = OpenCVCameraInterface()
         self.is_active = False
         self.click_down = False
 
         self.screen_width, self.screen_height = pag.size()
-
-        gestures = [
-            Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active),  # control gesture must be present
-            Gesture("Thumb_Down", 3, lambda: pag.press("pagedown")),
-            Gesture("Thumb_Up", 3, lambda: pag.press("pageup")),
-        ]
-        self.gesture_handler = GestureHandler(gestures)
 
     def _toggle_active(self):
         self.is_active = not self.is_active
@@ -139,7 +152,7 @@ class GestureController:
             else:
                 prvw_img = None
 
-            prediction = self.recognizer.predict(frame)
+            prediction = self.detector.predict(frame)
             if prediction is None:
                 self.click_down = False  # ensure click is released when cursor moves off screen.
 
