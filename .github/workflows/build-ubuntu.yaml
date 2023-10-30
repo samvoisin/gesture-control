@@ -1,4 +1,4 @@
-name: Build and Deploy on Ubuntu OS
+name: Build and Test on Ubuntu OS
 
 on:
   push:
