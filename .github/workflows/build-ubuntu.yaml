@@ -13,11 +13,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
     - name: Initialize Environment
       shell: bash
       run: make init
-
     - name: Run Tests
       shell: bash
       run: make test
