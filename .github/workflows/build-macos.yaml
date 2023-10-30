@@ -9,7 +9,7 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-  build-and-test:
+  build-and-test-macos:
     runs-on: macos-latest
     steps:
     - name: Checkout
