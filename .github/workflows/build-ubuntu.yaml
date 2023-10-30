@@ -2,7 +2,8 @@ name: Build and Test on Ubuntu OS
 
 on:
   push:
-    branches: [$default-branch]
+    branches:
+      - master
 
 env:
   PYTHON_VERSION: 3.9
