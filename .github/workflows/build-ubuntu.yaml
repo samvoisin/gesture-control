@@ -8,20 +8,16 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-
   build-and-test:
-
     runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      steps:
+    - name: Initialize Environment
+      shell: bash
+      run: make init
 
-        - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Initialize Environment
-          shell: bash
-          run: make init
-
-        - name: Run Tests
-          shell: bash
-          run: make test
+    - name: Run Tests
+      shell: bash
+      run: make test
