@@ -32,3 +32,9 @@ class TestGestureController:
         for _ in range(gesture_controller.lagged_cursor_position.shape[0]):
             gesture_controller.get_cursor_position(landmark_coords)
         assert np.all(gesture_controller.get_cursor_position(landmark_coords) == np.array([1, 2, 3]))
+
+    def test_detect_primary_click(self, gesture_controller: GestureController):
+        pass
+
+    def test_detect_secondary_click(self, gesture_controller: GestureController):
+        pass
