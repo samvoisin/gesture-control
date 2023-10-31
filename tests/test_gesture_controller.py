@@ -33,8 +33,26 @@ class TestGestureController:
             gesture_controller.get_cursor_position(landmark_coords)
         assert np.all(gesture_controller.get_cursor_position(landmark_coords) == np.array([1, 2, 3]))
 
-    def test_detect_primary_click(self, gesture_controller: GestureController):
-        pass
+    @patch("pyautogui.mouseUp")
+    @patch("pyautogui.mouseDown")
+    def test_detect_primary_click(self, mock_mouseDown, mock_mouseUp, gesture_controller: GestureController):
+        assert not gesture_controller.click_down
+
+        finger_coords = np.zeros(shape=(3, 4, 5))
+        finger_coords[:, 0, 0] = np.zeros(3)  # thumb tip
+        finger_coords[:, 0, 1] = np.ones(3)  # index finger tip
+
+        # engage primary click
+        finger_coords[:, 0, 2] = np.zeros(3)  # middle finger tip
+        gesture_controller.detect_primary_click(finger_coords)
+        mock_mouseDown.assert_called_once()
+        assert gesture_controller.click_down
+
+        # release primary click
+        finger_coords[:, 0, 2] = np.ones(3)  # middle finger tip
+        gesture_controller.detect_primary_click(finger_coords)
+        mock_mouseUp.assert_called_once()
+        assert not gesture_controller.click_down
 
     def test_detect_secondary_click(self, gesture_controller: GestureController):
         finger_coords = np.zeros(shape=(3, 4, 5))

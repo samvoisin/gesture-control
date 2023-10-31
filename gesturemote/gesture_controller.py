@@ -92,15 +92,16 @@ class GestureController:
         self.logger.info(f"thumb to middle finger: {middle_finger_to_thumb_tip}")
 
         if middle_finger_to_index_finger_tip > middle_finger_to_thumb_tip and not self.click_down:  # primary click down
-            self.click_down = True
             pag.mouseDown()
-            self.logger.info("click down")
+            self.click_down = True
+            self.logger.info("primary click down")
         elif (
             middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down
         ):  # release primary click
-            self.click_down = False
             pag.mouseUp()
-            self.logger.info("click released")
+            print("y")
+            self.click_down = False
+            self.logger.info("primary click released")
 
     def detect_secondary_click(self, finger_coordinates: np.ndarray):
         """
