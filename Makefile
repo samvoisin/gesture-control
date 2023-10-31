@@ -21,9 +21,7 @@ init:  # create virtual env and install deps
 	@./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
 
 lint:  # format all source code
-	@./venv/bin/isort gestrol/ tests/ setup.py
-	@./venv/bin/black --config=pyproject.toml --check .
-	@./venv/bin/flake8 --config=.flake8
+	@./venv/bin/ruff format --config=pyproject.toml .
 
 test:  # run all tests in project
 	@./venv/bin/pytest -vv --cov-fail-under=70 --cov=./gesturemote tests/
