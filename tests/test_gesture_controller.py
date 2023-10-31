@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, patch
 
 import numpy as np
 import pytest
@@ -37,4 +37,16 @@ class TestGestureController:
         pass
 
     def test_detect_secondary_click(self, gesture_controller: GestureController):
-        pass
+        finger_coords = np.zeros(shape=(3, 4, 5))
+        finger_coords[:, 0, 0] = np.ones(3)  # thumb tip
+        finger_coords[:, 0, 3] = np.ones(3)  # ring finger tip
+
+        with patch("pyautogui.click") as mock_click:
+            gesture_controller.detect_secondary_click(finger_coords)
+            mock_click.assert_called_once()
+            mock_click.assert_called_with(button="right")
+
+            # ensure no click is registered when click_down is True
+            gesture_controller.click_down = True
+            gesture_controller.detect_secondary_click(finger_coords)
+            mock_click.assert_called_once()
