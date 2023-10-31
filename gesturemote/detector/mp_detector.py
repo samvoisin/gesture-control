@@ -1,9 +1,10 @@
 from pathlib import Path
 from time import time
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import mediapipe as mp
 import numpy as np
+from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark
 
 GESTURE_RECOGNIZER_TASK_PATH = Path("models/gesture_recognizer.task").resolve()
 
@@ -15,7 +16,7 @@ PINKY_IDXS = [20, 19, 18, 17]
 FINGER_IDXS = [THUMB_IDXS, INDEX_FINGER_IDXS, MIDDLE_FINGER_IDXS, RING_FINGER_IDXS, PINKY_IDXS]
 
 
-def _build_coordinate_array(hand_landmarks: mp.tasks.vision.GestureRecognizerResult) -> np.ndarray:
+def _build_coordinate_array(hand_landmarks: List[NormalizedLandmark]) -> np.ndarray:
     coordinates = np.empty(shape=(3, 4, 5))
 
     for i, finger_idx in enumerate(FINGER_IDXS):
@@ -26,16 +27,25 @@ def _build_coordinate_array(hand_landmarks: mp.tasks.vision.GestureRecognizerRes
     return coordinates
 
 
-def _parse_gesture_recognition_result(
-    result: mp.tasks.vision.GestureRecognizerResult,
+def parse_gesture_recognition_result(
+    result: Optional[mp.tasks.vision.GestureRecognizerResult],
 ) -> Optional[Tuple[str, np.ndarray]]:
+    """
+    Parse output from mediapipe gesture detector.
+
+    Args:
+        result: Either `GestureRecognizerResult` or None if no hand detected.
+
+    Returns:
+        None if result is None. Otherwise returns a tuple of gesture label and finger landmarks.
+    """
     if result is None or len(result.gestures) == 0 or len(result.hand_landmarks) == 0:
         return None
 
     gesture_category = result.gestures[0][0]
     gesture_label = gesture_category.category_name
 
-    hand_landmarks = result.hand_landmarks[0]
+    hand_landmarks = result.hand_landmarks[0]  # list of 21 NormalizedLandmarks
     coordinates = _build_coordinate_array(hand_landmarks)
 
     return gesture_label, coordinates
@@ -87,4 +97,4 @@ class LandmarkGestureDetector:
         frame_timestamp_ms = int(time() * 1000)
         image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
         self.recognizer.recognize_async(image, frame_timestamp_ms)
-        return _parse_gesture_recognition_result(self._latest_result)
+        return parse_gesture_recognition_result(self._latest_result)
