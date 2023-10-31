@@ -99,7 +99,6 @@ class GestureController:
             middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down
         ):  # release primary click
             pag.mouseUp()
-            print("y")
             self.click_down = False
             self.logger.info("primary click released")
 
