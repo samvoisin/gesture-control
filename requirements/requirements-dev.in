@@ -1,7 +1,7 @@
 -c requirements.txt
 
 # install, making requirements, ...
-pip-tools~=6.8
+pip-tools~=7.3
 
 # code format
 ruff~=0.1

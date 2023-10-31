@@ -23,7 +23,7 @@ REQUIRED: List[str] = [
     "opencv-python~=4.8",
     "Pillow~=9.5",
     "PyAutoGUI~=0.9",
-    "torch~=1.13",
+    "torch~=2.1",
     "torchvision~=0.14",
     "mediapipe~=0.10",
 ]
