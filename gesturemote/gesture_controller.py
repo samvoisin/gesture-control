@@ -33,6 +33,7 @@ class GestureController:
         self,
         cursor_smoothing_param: int = 5,
         activate_gesture_threshold: int = 7,
+        click_threshold: float = 0.1,
         gestures: Optional[list[Gesture]] = None,
         detector: Optional[DetectorProtocol] = None,
         camera: Optional[CameraInterface] = None,
@@ -50,6 +51,8 @@ class GestureController:
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
         self.gesture_handler = GestureHandler(gestures)
+
+        self.click_threshold = click_threshold
 
         self.detector = detector or LandmarkGestureDetector()
         self.camera = camera or OpenCVCameraInterface()
@@ -82,22 +85,17 @@ class GestureController:
             True if the user is clicking, False otherwise.
         """
         thumb_tip_vector = finger_coordinates[:, 0, 0]
-        index_finger_tip_vector = finger_coordinates[:, 0, 1]
         middle_finger_tip_vector = finger_coordinates[:, 0, 2]
 
-        middle_finger_to_index_finger_tip = norm(index_finger_tip_vector - middle_finger_tip_vector)
         middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
+        self.logger.info(f"primary click distance: {middle_finger_to_thumb_tip}")
+        self.logger.info(f"primary click down: {self.click_down}")
 
-        self.logger.info(f"index to middle finger: {middle_finger_to_index_finger_tip}")
-        self.logger.info(f"thumb to middle finger: {middle_finger_to_thumb_tip}")
-
-        if middle_finger_to_index_finger_tip > middle_finger_to_thumb_tip and not self.click_down:  # primary click down
+        if middle_finger_to_thumb_tip < self.click_threshold and not self.click_down:  # primary click down
             pag.mouseDown()
             self.click_down = True
             self.logger.info("primary click down")
-        elif (
-            middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down
-        ):  # release primary click
+        elif middle_finger_to_thumb_tip > self.click_threshold and self.click_down:  # release primary click
             pag.mouseUp()
             self.click_down = False
             self.logger.info("primary click released")
@@ -115,7 +113,7 @@ class GestureController:
         ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
         self.logger.info(f"secondary click distance: {ring_finger_to_thumb_tip:.3f}")
 
-        if ring_finger_to_thumb_tip < 0.1 and not self.click_down:  # secondary click TODO: make this dynamic or param?
+        if ring_finger_to_thumb_tip < self.click_threshold and not self.click_down:
             pag.click(button="right")
 
     def get_cursor_position(self, landmarks: np.ndarray):

@@ -40,16 +40,15 @@ class TestGestureController:
 
         finger_coords = np.zeros(shape=(3, 4, 5))
         finger_coords[:, 0, 0] = np.zeros(3)  # thumb tip
-        finger_coords[:, 0, 1] = np.ones(3)  # index finger tip
 
         # engage primary click
-        finger_coords[:, 0, 2] = np.zeros(3)  # middle finger tip
+        finger_coords[:, 0, 2] = np.zeros(3)  # middle finger tip at same position as thumb tip
         gesture_controller.detect_primary_click(finger_coords)
         mock_mouseDown.assert_called_once()
         assert gesture_controller.click_down
 
         # release primary click
-        finger_coords[:, 0, 2] = np.ones(3)  # middle finger tip
+        finger_coords[:, 0, 2] = np.ones(3)  # middle finger tip at different position from thumb tip
         gesture_controller.detect_primary_click(finger_coords)
         mock_mouseUp.assert_called_once()
         assert not gesture_controller.click_down
