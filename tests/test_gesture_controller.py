@@ -29,7 +29,7 @@ class TestGestureController:
     def test_get_cursor_position(self, gesture_controller: GestureController):
         landmark_coords = np.zeros(shape=(3, 4, 5))
         landmark_coords[:, 0, 1] = np.array([1, 2, 3])
-        for _ in range(gesture_controller.lagged_cursor_position.shape[0]):
+        for _ in range(gesture_controller.lagged_index_finger_landmark.shape[0]):
             gesture_controller.get_cursor_position(landmark_coords)
         assert np.all(gesture_controller.get_cursor_position(landmark_coords) == np.array([1, 2, 3]))
 
