@@ -31,7 +31,7 @@ class GestureController:
 
     def __init__(
         self,
-        cursor_smoothing_param: int = 5,
+        cursor_sensitivity: int = 5,
         activate_gesture_threshold: int = 7,
         click_threshold: float = 0.1,
         gestures: Optional[list[Gesture]] = None,
@@ -46,7 +46,7 @@ class GestureController:
         Args:
             fps_monitor: frames per second monitor. Defaults to None.
         """
-        self.lagged_cursor_position = np.empty(shape=(cursor_smoothing_param, 3))
+        self.lagged_cursor_position = np.empty(shape=(cursor_sensitivity, 3))
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
