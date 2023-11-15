@@ -46,7 +46,7 @@ class GestureController:
         Args:
             fps_monitor: frames per second monitor. Defaults to None.
         """
-        self.lagged_cursor_position = np.empty(shape=(cursor_sensitivity, 3))
+        self.lagged_index_finger_landmark = np.empty(shape=(cursor_sensitivity, 3))
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
