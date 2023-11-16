@@ -135,6 +135,7 @@ class GestureController:
         self.lagged_index_finger_landmark[0, :] = landmarks[:, 0, 1]  # (x,y,z), tip, finger one (index finger)
         smoothed_index_finger_landmark = np.mean(self.lagged_index_finger_landmark, axis=0)
 
+        # 1 - x to invert the x-axis
         cursor_position_x = (1 - smoothed_index_finger_landmark[0]) * self.screen_width
         cursor_position_y = smoothed_index_finger_landmark[1] * self.screen_height
 
