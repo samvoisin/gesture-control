@@ -27,11 +27,14 @@ class TestGestureController:
         assert gesture_controller.is_active
 
     def test_get_cursor_position(self, gesture_controller: GestureController):
+        # modify screen size to 1x1 to simplify test calculations
+        gesture_controller.screen_height, gesture_controller.screen_width = 1, 1
+
         landmark_coords = np.zeros(shape=(3, 4, 5))
         landmark_coords[:, 0, 1] = np.array([1, 2, 3])
-        for _ in range(gesture_controller.lagged_cursor_position.shape[0]):
+        for _ in range(gesture_controller.lagged_index_finger_landmark.shape[0]):
             gesture_controller.get_cursor_position(landmark_coords)
-        assert np.all(gesture_controller.get_cursor_position(landmark_coords) == np.array([1, 2, 3]))
+        assert gesture_controller.get_cursor_position(landmark_coords) == (0, 2)
 
     @patch("pyautogui.mouseUp")
     @patch("pyautogui.mouseDown")
