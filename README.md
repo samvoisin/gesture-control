@@ -27,7 +27,7 @@ GestuReMote works by accessing a webcam attached to the machine, detecting hands
 
 GestuReMote currently works by accessing a local webcam via [OpenCV](https://opencv.org/). Images captured by the webcam are then processed with [Google's mediapipe library](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer) to identify gestures and landmarks on the hand. Finally, the identified landmarks and gestures are used to change the cursor's position, right and left click, and perform some common user-interface actions.
 
-Currently only MacOS is supported. I apologize for this - I've been developing on a new MacBook lately (and loving it!). I will extend support to Windows and Linux operating systems as soon as possible!
+Currently only MacOS is supported. Support for Windows and Linux operating systems is coming as soon as possible!
 
 ### Installing
 
