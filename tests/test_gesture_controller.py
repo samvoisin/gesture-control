@@ -22,6 +22,9 @@ def gesture_controller() -> GestureController:
 
 class TestGestureController:
     def test_control_gesture_present(self, gesture_controller: GestureController):
+        """
+        Ensure that the control gesture is present in the list of gestures to prevent accidental removal.
+        """
         assert not gesture_controller.is_active
         gesture_controller.gesture_handler.gestures["Closed_Fist"].callback()
         assert gesture_controller.is_active
@@ -41,7 +44,7 @@ class TestGestureController:
     def test_detect_primary_click(self, mock_mouseDown, mock_mouseUp, gesture_controller: GestureController):
         assert not gesture_controller.click_down
 
-        finger_coords = np.zeros(shape=(3, 4, 5))
+        finger_coords = np.ones(shape=(3, 4, 5))
         finger_coords[:, 0, 0] = np.zeros(3)  # thumb tip
 
         # engage primary click
