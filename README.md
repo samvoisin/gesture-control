@@ -3,27 +3,21 @@
 
 ## What is it?
 
-GestuReMote (pronounced "gesture-mote") is a tool for interfacing with a computer through physical gestures captured via optical sensors. Right now this means a standard webcam - though we plan to construct a dedicated device for sensing in the future.
+GestuReMote (pronounced "gesture-mote") is a tool for interfacing with a computer through physical gestures captured via optical sensors. Right now this means a standard webcam - though I plan to construct a dedicated device in the future.
+
+Currently GestuReMote supports systems running MacOS. Support for Linux operating systems and Windows will be here in the next few months.
+
+This is an open source project that work on when I am able, so please be patient. If you would like to get involved in the development of GestuReMote don't hesitate to reach out!
 
 ## Why use it?
 
 Gesture control interfaces provide several advantages over traditional computer interfaces.
 
-* Natural and Intuitive Interaction: One of the key advantages of gesture-based interfaces is their innate intuitiveness. Physical gestures can provide a direct mental link between user and object - for example, pointing with an index finger. Control through a tradition mouse or trackpad is indirect.
-* Physical and Cognitive Engagement: Gesture-based interfaces require users to engage both physically and cognitively. This engagement can enhance user immersion and involvement with the tasks at hand.
-* Accessibility: Gesture-based interfaces have the potential to cater to a broader range of users, including those with physical disabilities or impairments.
+* Intuitive control: One of the key advantages of gesture-based interfaces is their innate intuitiveness. Physical gestures can provide a direct link between user and machine. This is in contrast to indirect control provided by a traditional mouse or trackpad. As an illustration, consider the scenario in which you want to access a particular application on your machine. Simply pointing at the application icon with your index finger is a very intuitive method of control. Moving a mouse which in turn moves the cursor by some dpi ratio is a much less direct way to accomplish the same task.
+* Physical and cognitive alignment: Gesture-based interfaces require users to engage both physically and cognitively. This engagement can enhance user immersion and involvement with the tasks being performed.
+* Accessibility: Gesture-based interfaces have the potential to cater to a broader range of users, including those with a mobility or physical disability.
 
 ## How does it work?
-
-Install this library using `pip install .` in the repository root.
-
-Activate GestuReMote via the CLI:
-
-```
-gesturemote activate
-```
-
-Use the `--help` option for details.
 
 ### TL;DR
 
@@ -31,12 +25,24 @@ GestuReMote works by accessing a webcam attached to the machine, detecting hands
 
 ### The details
 
-***Warning:*** This repo is under heavy development, so the information below could be out of date.
+GestuReMote currently works by accessing a local webcam via [OpenCV](https://opencv.org/). Images captured by the webcam are then processed with [Google's mediapipe library](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer) to identify gestures and landmarks on the hand. Finally, the identified landmarks and gestures are used to change the cursor's position, right and left click, and perform some common user-interface actions.
 
-GestuReMote is implemented in three layers.
-1. The input layer: Images are streamed by device's camera and passed to layer 2.
-2. The model layer: Images are preprocessed and passed into an object detection model where hands are identified and gestures are classified.
-3. The control layer: Gesture classifications are interpreted as gesture routines and control routines are performed.
+Currently only MacOS is supported. I apologize for this - I've been developing on a new MacBook lately (and loving it!). I will extend support to Windows and Linux operating systems as soon as possible!
 
-GestuReMote relies on the MediaPipe library for [gesture recognition](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer) and [hand landmark detection](https://developers.google.com/mediapipe/solutions/vision/hand_landmarker).
+### Installing
 
+First, download the most recent [HandGestureClassifier task](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer#models). Save the `.task` file to the `models` directory.
+
+You can install GestuReMote with the `make init` recipe (see the `Makefile` in the repo's root for details). Alternatively, you can install this library using `pip install .` in the repository root.
+
+### Using GestuReMote
+
+There is a CLI available to make using GestuReMote as easy as possible. Activate GestuReMote through the CLI with:
+
+```
+gesturemote activate
+```
+
+You can use `gesturemote activate --help` for details on which options are available to you. If you are having a hard time getting GestuReMote to work, use the `--video-preview` option to see what the camera sees.
+
+Once gestuReMote is active, it will wait for you to make the control gesture before doing anything. The control gesture is a closed fist. While gesturemote is in control mode, the cursor will track your index finger while it is in front of the camera. You can perform a primary click (typically this is a left click) by touching your middle finger to your thumb. The primary click will remain engaged as long as your middle finger and thumb are touching. This allows click-and-drag behavior. You can perform a secondary click (typically a right-click) by touching your ring finger to your thumb. You can use the "thumbs-up" and "thumbs-down" gestures to perform PageUp and PageDown actions respectively.
