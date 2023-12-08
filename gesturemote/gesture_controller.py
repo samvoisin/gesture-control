@@ -46,7 +46,7 @@ class GestureController:
         Args:
             fps_monitor: frames per second monitor. Defaults to None.
         """
-        self.lagged_index_finger_landmark = np.empty(shape=(cursor_sensitivity, 3))
+        self.lagged_index_finger_landmark = np.empty(shape=(cursor_sensitivity, 2))
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
@@ -132,13 +132,16 @@ class GestureController:
             On screen cursor position.
         """
         self.lagged_index_finger_landmark = np.roll(self.lagged_index_finger_landmark, 1, axis=0)
-        self.lagged_index_finger_landmark[0, :] = landmarks[:, 0, 1]  # (x,y,z), tip, finger one (index finger)
+        self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, 1]  # (x,y), tip, finger one (index finger)
         smoothed_index_finger_landmark = np.mean(self.lagged_index_finger_landmark, axis=0)
 
-        # 1 - x to invert the x-axis
-        cursor_position_x = (1 - smoothed_index_finger_landmark[0]) * self.screen_width
-        cursor_position_y = smoothed_index_finger_landmark[1] * self.screen_height
+        cursor_position_x = self.screen_width - np.interp(
+            smoothed_index_finger_landmark[0], [0, 1], [0, self.screen_width]
+        )
+        cursor_position_y = np.interp(smoothed_index_finger_landmark[1], [0, 1], [0, self.screen_height])
 
+        self.logger.info(f"Landmark coords: ({smoothed_index_finger_landmark[0]}, {smoothed_index_finger_landmark[1]})")
+        self.logger.info(f"Cursor coords: ({cursor_position_x}, {cursor_position_y})")
         return cursor_position_x, cursor_position_y
 
     def activate(self, video_preview: bool = False):
