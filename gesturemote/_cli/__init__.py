@@ -15,6 +15,7 @@ def cli():
 @click.option("--cursor-sensitivity", type=int, default=7)
 @click.option("--activate-gesture-threshold", type=int, default=7)
 @click.option("--click-threshold", type=float, default=0.1)
+@click.option("--frame-margin", type=float, default=0.1)
 @click.option("--monitor-fps", is_flag=True, help="Monitor frames rate.")
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
 @click.option("--video", is_flag=True, help="Show video stream (experimental).")
@@ -22,6 +23,7 @@ def activate(
     cursor_sensitivity: int,
     activate_gesture_threshold: int,
     click_threshold: float,
+    frame_margin: float,
     monitor_fps: bool,
     verbose: bool,
     video: bool,
@@ -33,6 +35,7 @@ def activate(
         cursor_sensitivity=cursor_sensitivity,
         activate_gesture_threshold=activate_gesture_threshold,
         click_threshold=click_threshold,
+        frame_margin=frame_margin,
         monitor_fps=monitor_fps,
         verbose=verbose,
     )
