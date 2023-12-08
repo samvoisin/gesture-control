@@ -34,6 +34,7 @@ class GestureController:
         cursor_sensitivity: int = 5,
         activate_gesture_threshold: int = 7,
         click_threshold: float = 0.1,
+        frame_margin: float = 0.1,
         gestures: Optional[list[Gesture]] = None,
         detector: Optional[DetectorProtocol] = None,
         camera: Optional[CameraInterface] = None,
@@ -47,12 +48,13 @@ class GestureController:
             fps_monitor: frames per second monitor. Defaults to None.
         """
         self.lagged_index_finger_landmark = np.empty(shape=(cursor_sensitivity, 2))
+        self.click_threshold = click_threshold
+        self._frame_margin_min = frame_margin
+        self._frame_margin_max = 1 - frame_margin
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
         self.gesture_handler = GestureHandler(gestures)
-
-        self.click_threshold = click_threshold
 
         self.detector = detector or LandmarkGestureDetector()
         self.camera = camera or OpenCVCameraInterface()
@@ -133,18 +135,28 @@ class GestureController:
         """
         self.lagged_index_finger_landmark = np.roll(self.lagged_index_finger_landmark, 1, axis=0)
         self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, 1]  # (x,y), tip, finger one (index finger)
-        smoothed_index_finger_landmark = np.mean(self.lagged_index_finger_landmark, axis=0)
+        smoothed_index_finger_landmark = self.lagged_index_finger_landmark.mean(axis=0)
+
+        smoothed_index_finger_landmark = np.clip(
+            smoothed_index_finger_landmark, self._frame_margin_min, self._frame_margin_max
+        )
 
         cursor_position_x = self.screen_width - np.interp(
-            smoothed_index_finger_landmark[0], [0, 1], [0, self.screen_width]
+            smoothed_index_finger_landmark[0],
+            [self._frame_margin_min, self._frame_margin_max],
+            [0, self.screen_width],
         )
-        cursor_position_y = np.interp(smoothed_index_finger_landmark[1], [0, 1], [0, self.screen_height])
+        cursor_position_y = np.interp(
+            smoothed_index_finger_landmark[1],
+            [self._frame_margin_min, self._frame_margin_max],
+            [0, self.screen_height],
+        )
 
         self.logger.info(f"Landmark coords: ({smoothed_index_finger_landmark[0]}, {smoothed_index_finger_landmark[1]})")
         self.logger.info(f"Cursor coords: ({cursor_position_x}, {cursor_position_y})")
         return cursor_position_x, cursor_position_y
 
-    def activate(self, video_preview: bool = False):
+    def activate(self, video: bool = False):
         """
         Activate the gesture controller.
         """
@@ -156,7 +168,7 @@ class GestureController:
             if self.monitor_fps:
                 frame = self.fps_monitor.monitor_fps(frame)
 
-            if video_preview:
+            if video:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
                 prvw_img = np.array(prvw_img)
@@ -167,7 +179,7 @@ class GestureController:
             if prediction is None:
                 self.click_down = False  # ensure click is released when cursor moves off screen.
 
-                if video_preview and prvw_img is not None:
+                if video and prvw_img is not None:
                     cv2.imshow("Frame", prvw_img)
 
                     key = cv2.waitKey(1)
@@ -187,7 +199,7 @@ class GestureController:
                 self.detect_primary_click(finger_landmarks)
                 self.detect_secondary_click(finger_landmarks)
 
-            if video_preview and prvw_img is not None:
+            if video and prvw_img is not None:
                 cursor_pos_str = f"x={cursor_pos_x:.2f}, y={cursor_pos_y:.2f}"
 
                 cv2.putText(

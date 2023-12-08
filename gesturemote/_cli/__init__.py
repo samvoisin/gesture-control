@@ -12,19 +12,19 @@ def cli():
 
 
 @cli.command()
-@click.option("--cursor-sensitivity", type=int, default=5)
+@click.option("--cursor-sensitivity", type=int, default=7)
 @click.option("--activate-gesture-threshold", type=int, default=7)
 @click.option("--click-threshold", type=float, default=0.1)
 @click.option("--monitor-fps", is_flag=True, help="Monitor frames rate.")
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
-@click.option("--video-preview", is_flag=True, help="Show video stream (experimental).")
+@click.option("--video", is_flag=True, help="Show video stream (experimental).")
 def activate(
     cursor_sensitivity: int,
     activate_gesture_threshold: int,
     click_threshold: float,
     monitor_fps: bool,
     verbose: bool,
-    video_preview: bool,
+    video: bool,
 ):
     """
     Activate GestuReMote.
@@ -36,4 +36,4 @@ def activate(
         monitor_fps=monitor_fps,
         verbose=verbose,
     )
-    gc.activate(video_preview=video_preview)
+    gc.activate(video=video)

@@ -34,10 +34,10 @@ class TestGestureController:
         gesture_controller.screen_height, gesture_controller.screen_width = 1, 1
 
         landmark_coords = np.zeros(shape=(3, 4, 5))
-        landmark_coords[:, 0, 1] = np.array([1, 2, 3])
+        landmark_coords[:, 0, 1] = np.array([0.25, 0.75, 0])
         for _ in range(gesture_controller.lagged_index_finger_landmark.shape[0]):
             gesture_controller.get_cursor_position(landmark_coords)
-        assert gesture_controller.get_cursor_position(landmark_coords) == (0, 2)
+        assert gesture_controller.get_cursor_position(landmark_coords) == (0.8125, 0.8125)
 
     @patch("pyautogui.mouseUp")
     @patch("pyautogui.mouseDown")
