@@ -43,7 +43,15 @@ class GestureController:
     ):
         """
         Args:
-            fps_monitor: frames per second monitor. Defaults to None.
+            cursor_sensitivity: Number of frames to lag the cursor position.
+            activate_gesture_threshold: Number of frames to hold the activate gesture to toggle the controller.
+            click_threshold: Distance between finger digits to register a primary or secondary click.
+            frame_margin: percentage of the frame to pad. Ensures the cursor can access elements on edge of screen.
+            gestures: List of gestures to handle.
+            detector: Detector to use for gesture recognition.
+            camera: Camera interface to use.
+            monitor_fps: Whether to monitor the FPS of the camera.
+            verbose: Send log output to terminal.
         """
         self.lagged_index_finger_landmark = np.empty(shape=(cursor_sensitivity, 2))
         self.click_threshold = click_threshold
