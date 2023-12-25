@@ -42,8 +42,6 @@ class GestureController:
         verbose: bool = False,
     ):
         """
-        Initiate method.
-
         Args:
             fps_monitor: frames per second monitor. Defaults to None.
         """
@@ -87,22 +85,17 @@ class GestureController:
             True if the user is clicking, False otherwise.
         """
         thumb_tip_vector = finger_coordinates[:, 0, 0]
-        index_finger_tip_vector = finger_coordinates[:, 0, 1]
         middle_finger_tip_vector = finger_coordinates[:, 0, 2]
 
-        middle_finger_to_index_finger_tip = norm(index_finger_tip_vector - middle_finger_tip_vector)
         middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
 
-        self.logger.info(f"index to middle finger: {middle_finger_to_index_finger_tip}")
         self.logger.info(f"thumb to middle finger: {middle_finger_to_thumb_tip}")
 
-        if middle_finger_to_index_finger_tip > middle_finger_to_thumb_tip and not self.click_down:  # primary click down
+        if middle_finger_to_thumb_tip < self.click_threshold and not self.click_down:  # primary click down
             pag.mouseDown()
             self.click_down = True
             self.logger.info("primary click down")
-        elif (
-            middle_finger_to_index_finger_tip < middle_finger_to_thumb_tip and self.click_down
-        ):  # release primary click
+        elif middle_finger_to_thumb_tip > self.click_threshold and self.click_down:  # release primary click
             pag.mouseUp()
             self.click_down = False
             self.logger.info("primary click released")
