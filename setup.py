@@ -16,7 +16,6 @@ REQUIRES_PYTHON = ">=3.8"
 VERSION = "0.1.0"
 
 # required packages
-# cu113 part is required bc current GPU is sm_86 and pytorch only supports sm_70
 REQUIRED: List[str] = [
     "click~=8.1",
     "numpy~=1.25",
