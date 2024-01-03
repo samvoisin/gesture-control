@@ -29,7 +29,9 @@ REQUIRED: List[str] = [
 ]
 
 # optional extras
-# EXTRAS = {}
+EXTRAS = {
+    ':sys_platform=="darwin"': ["pyobjc-core", "pyobjc"],
+}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -112,7 +114,7 @@ setup(
         gesturemote=gesturemote._cli:cli
     """,
     install_requires=REQUIRED,
-    # extras_require=EXTRAS,
+    extras_require=EXTRAS,
     include_package_data=True,
     license="GNU",
     # $ setup.py publish support.
