@@ -1,9 +1,7 @@
 name: Build and Test on MacOS
 
 on:
-  push:
-    branches:
-      - main
+  push
 
 env:
   PYTHON_VERSION: 3.9
