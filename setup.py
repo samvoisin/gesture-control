@@ -27,7 +27,6 @@ REQUIRED: List[str] = [
     "mediapipe~=0.10",
 ]
 
-# optional extras
 EXTRAS = {
     ':sys_platform=="darwin"': ["pyobjc-core", "pyobjc"],
 }
