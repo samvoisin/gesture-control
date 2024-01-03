@@ -1,5 +1,8 @@
 
+
 # GestuReMote
+
+![macos build workflow](https://github.com/samvoisin/gesture-control/actions/workflows/build-macos.yaml/badge.svg)
 
 ## What is it?
 
