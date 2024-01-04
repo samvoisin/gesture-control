@@ -177,9 +177,8 @@ class GestureController:
                 prvw_img = None
 
             prediction = self.detector.predict(frame)
-            if prediction is None:
-                self.click_down = False  # ensure click is released when cursor moves off screen.
 
+            if prediction is None:
                 if video and prvw_img is not None:
                     cv2.imshow("Frame", prvw_img)
 
@@ -190,6 +189,31 @@ class GestureController:
                 continue
 
             gesture_label, finger_landmarks = prediction
+
+            if video:
+                # place gesture label at bottom right corner of frame
+                cv2.putText(  # type: ignore
+                    img=prvw_img,
+                    text=gesture_label,
+                    org=(prvw_img_size - 100, prvw_img_size - 20),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                    fontScale=0.5,
+                    color=RED,
+                    thickness=1,
+                )
+
+                _, n_marks_per_finger, n_fingers = finger_landmarks.shape
+                for finger in range(n_fingers):
+                    for mark in range(n_marks_per_finger):
+                        x, y = finger_landmarks[:2, mark, finger]
+                        cv2.circle(  # type: ignore
+                            img=prvw_img,
+                            center=(int(x * prvw_img_size), int(y * prvw_img_size)),
+                            radius=3,
+                            color=RED,
+                            thickness=-1,
+                        )
+
             self.logger.info(f"Gesture: {gesture_label}")
             self.gesture_handler.handle(gesture_label)
 
