@@ -168,6 +168,8 @@ class GestureController:
         prvw_img_size = 720
         RED = (0, 0, 255)
 
+        cursor_pos_x, cursor_pos_y = self.screen_width / 2, self.screen_height / 2
+
         self.logger.info("Gesture controller initialized.")
         for frame in self.camera.stream_frames():
             if self.monitor_fps:
@@ -208,9 +210,8 @@ class GestureController:
             self.logger.info(f"Gesture: {gesture_label}")
             self.gesture_handler.handle(gesture_label)
 
-            cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_landmarks)
-
             if self.is_active and gesture_label == "None":
+                cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_landmarks)
                 pag.moveTo(cursor_pos_x, cursor_pos_y)
                 self.detect_primary_click(finger_landmarks)
                 self.detect_secondary_click(finger_landmarks)
