@@ -124,7 +124,7 @@ class GestureController:
         if ring_finger_to_thumb_tip < self.click_threshold and not self.click_down:
             pag.click(button="right")
 
-    def get_cursor_position(self, landmarks: np.ndarray):
+    def get_cursor_position(self, landmarks: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
         Smooth the cursor position.
 
@@ -160,8 +160,12 @@ class GestureController:
     def activate(self, video: bool = False):
         """
         Activate the gesture controller.
+
+        Args:
+            video: show video stream annotated with diagnostic information. Performance will be degraded and therefore
+            should only be used when diagnosing problems with controller. Default False.
         """
-        prvw_img_size = 320
+        prvw_img_size = 720
         RED = (0, 0, 255)
 
         self.logger.info("Gesture controller initialized.")
@@ -173,13 +177,23 @@ class GestureController:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
                 prvw_img = np.array(prvw_img)
+
+                cv2.putText(
+                    img=prvw_img,
+                    text=f"Control mode: {self.is_active}",
+                    org=(0, 20),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                    fontScale=0.5,
+                    color=RED,
+                    thickness=1,
+                )
+
             else:
                 prvw_img = None
 
             prediction = self.detector.predict(frame)
-            if prediction is None:
-                self.click_down = False  # ensure click is released when cursor moves off screen.
 
+            if prediction is None:
                 if video and prvw_img is not None:
                     cv2.imshow("Frame", prvw_img)
 
@@ -190,6 +204,7 @@ class GestureController:
                 continue
 
             gesture_label, finger_landmarks = prediction
+
             self.logger.info(f"Gesture: {gesture_label}")
             self.gesture_handler.handle(gesture_label)
 
@@ -201,20 +216,39 @@ class GestureController:
                 self.detect_secondary_click(finger_landmarks)
 
             if video and prvw_img is not None:
-                cursor_pos_str = f"x={cursor_pos_x:.2f}, y={cursor_pos_y:.2f}"
+                cursor_pos_str = f"Cursor: x={int(cursor_pos_x)}, y={int(cursor_pos_y)}"
 
                 cv2.putText(
                     prvw_img,
                     cursor_pos_str,
-                    (10, 20),
+                    (0, 40),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
                     RED,
                     thickness=1,
                 )
 
-                if self.is_active:
-                    cv2.rectangle(prvw_img, (0, 0), (prvw_img_size, prvw_img_size), RED, 2)
+                cv2.putText(
+                    prvw_img,
+                    gesture_label,
+                    (0, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    RED,
+                    1,
+                )
+
+                _, n_marks_per_finger, n_fingers = finger_landmarks.shape
+                for finger in range(n_fingers):
+                    for mark in range(n_marks_per_finger):
+                        x, y = finger_landmarks[:2, mark, finger]
+                        cv2.circle(
+                            img=prvw_img,
+                            center=(int(x * prvw_img_size), int(y * prvw_img_size)),
+                            radius=3,
+                            color=RED,
+                            thickness=-1,
+                        )
 
                 cv2.imshow("Frame", prvw_img)
 
