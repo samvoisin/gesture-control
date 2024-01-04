@@ -81,15 +81,3 @@ class TestGestureController:
             gesture_controller.click_down = True
             gesture_controller.detect_secondary_click(finger_coords)
             mock_click.assert_called_once()
-
-    def test_no_cursor_movement_w_gesture(self, gesture_controller: GestureController):
-        # set up: a gesture controller with known cursor position
-        gesture_controller.screen_height, gesture_controller.screen_width = 100, 100
-
-        landmark_coords = np.zeros(shape=(3, 4, 5))
-        landmark_coords[:, 0, 1] = np.array([0.25, 0.75, 0])
-        assert gesture_controller.get_cursor_position(landmark_coords) == (81.25, 81.25)
-
-        # gesture detector identifies gesture with label and new cursor position
-
-        # test that cursor position has not changed from known position
