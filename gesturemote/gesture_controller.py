@@ -210,7 +210,7 @@ class GestureController:
 
             cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_landmarks)
 
-            if self.is_active:
+            if self.is_active and gesture_label == "None":
                 pag.moveTo(cursor_pos_x, cursor_pos_y)
                 self.detect_primary_click(finger_landmarks)
                 self.detect_secondary_click(finger_landmarks)
