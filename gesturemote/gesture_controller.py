@@ -217,27 +217,25 @@ class GestureController:
                 self.detect_secondary_click(finger_landmarks)
 
             if video and prvw_img is not None:
-                cursor_pos_str = f"Cursor: x={int(cursor_pos_x)}, y={int(cursor_pos_y)}"
+                diagnostic_text = [
+                    f"Cursor: x={int(cursor_pos_x)}, y={int(cursor_pos_y)}",
+                    f"Gesture: {gesture_label}",
+                    f"Primary click active: {self.click_down}",
+                ]
+                text_y = 40
 
-                cv2.putText(
-                    prvw_img,
-                    cursor_pos_str,
-                    (0, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    RED,
-                    thickness=1,
-                )
+                for text in diagnostic_text:
+                    cv2.putText(
+                        prvw_img,
+                        text,
+                        (0, text_y),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        RED,
+                        thickness=1,
+                    )
 
-                cv2.putText(
-                    prvw_img,
-                    gesture_label,
-                    (0, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    RED,
-                    1,
-                )
+                    text_y += 20
 
                 _, n_marks_per_finger, n_fingers = finger_landmarks.shape
                 for finger in range(n_fingers):
