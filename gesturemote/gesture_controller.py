@@ -196,6 +196,10 @@ class GestureController:
             prediction = self.detector.predict(frame)
 
             if prediction is None:
+                # release primary click if no hand detected
+                self.click_down = False
+                pag.mouseUp()
+
                 if video and prvw_img is not None:
                     cv2.imshow("Frame", prvw_img)
 
