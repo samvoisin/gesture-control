@@ -117,10 +117,6 @@ class GestureController:
             prediction = self.detector.predict(frame)
 
             if prediction is None:
-                # release primary click if no hand detected
-                self.click_down = False
-                pag.mouseUp()
-
                 if video and prvw_img is not None:
                     cv2.imshow("Frame", prvw_img)
 
@@ -141,7 +137,7 @@ class GestureController:
             if video and prvw_img is not None:
                 diagnostic_text = [
                     f"Gesture: {gesture_label}",
-                    f"Primary click active: {self.click_down}",
+                    f"Primary click active: {self.cursor_handler.click_down}",
                 ]
                 text_y = 40
 
