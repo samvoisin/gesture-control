@@ -4,11 +4,11 @@ from typing import Optional, Protocol
 import cv2
 import numpy as np
 import pyautogui as pag
-from numpy.linalg import norm
 from PIL import Image
 
 from gesturemote.camera import OpenCVCameraInterface
 from gesturemote.camera.base import CameraInterface
+from gesturemote.cursor_handler import CursorHandler
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
 from gesturemote.gesture_handler import Gesture, GestureHandler
@@ -60,7 +60,8 @@ class GestureController:
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
-        self.gesture_handler = GestureHandler(gestures)
+        self.gesture_handler = GestureHandler(gestures, verbose)
+        self.cursor_handler = CursorHandler(cursor_sensitivity, click_threshold, frame_margin, verbose)
 
         self.detector = detector or LandmarkGestureDetector()
         self.camera = camera or OpenCVCameraInterface()
@@ -74,88 +75,10 @@ class GestureController:
             logging.basicConfig(level=logging.INFO)
 
         self.is_active = False
-        self.click_down = False
-
-        self.screen_width, self.screen_height = pag.size()
 
     def _toggle_active(self):
         self.is_active = not self.is_active
         self.logger.info(f"Gesture controller is active: {self.is_active}")
-
-    def detect_primary_click(self, finger_coordinates: np.ndarray):
-        """
-        Detect if the user is clicking.
-
-        Args:
-            finger_coordinates: coordinates of the finger landmarks.
-
-        Returns:
-            True if the user is clicking, False otherwise.
-        """
-        thumb_tip_vector = finger_coordinates[:, 0, 0]
-        middle_finger_tip_vector = finger_coordinates[:, 0, 2]
-
-        middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
-
-        self.logger.info(f"thumb to middle finger: {middle_finger_to_thumb_tip}")
-
-        if middle_finger_to_thumb_tip < self.click_threshold and not self.click_down:  # primary click down
-            pag.mouseDown()
-            self.click_down = True
-            self.logger.info("primary click down")
-        elif middle_finger_to_thumb_tip > self.click_threshold and self.click_down:  # release primary click
-            pag.mouseUp()
-            self.click_down = False
-            self.logger.info("primary click released")
-
-    def detect_secondary_click(self, finger_coordinates: np.ndarray):
-        """
-        Detect if the user is performing a secondary click.
-
-        Args:
-            finger_coordinates: coordinates of the finger landmarks.
-        """
-        thumb_tip_vector = finger_coordinates[:, 0, 0]
-        ring_finger_tip_vector = finger_coordinates[:, 0, 3]
-
-        ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
-        self.logger.info(f"secondary click distance: {ring_finger_to_thumb_tip:.3f}")
-
-        if ring_finger_to_thumb_tip < self.click_threshold and not self.click_down:
-            pag.click(button="right")
-
-    def get_cursor_position(self, landmarks: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """
-        Smooth the cursor position.
-
-        Args:
-            landmarks: Coordinates of the finger landmarks.
-
-        Returns:
-            On screen cursor position.
-        """
-        self.lagged_index_finger_landmark = np.roll(self.lagged_index_finger_landmark, 1, axis=0)
-        self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, 1]  # (x,y), tip, finger one (index finger)
-        smoothed_index_finger_landmark = self.lagged_index_finger_landmark.mean(axis=0)
-
-        smoothed_index_finger_landmark = np.clip(
-            smoothed_index_finger_landmark, self._frame_margin_min, self._frame_margin_max
-        )
-
-        cursor_position_x = self.screen_width - np.interp(
-            smoothed_index_finger_landmark[0],
-            [self._frame_margin_min, self._frame_margin_max],
-            [0, self.screen_width],
-        )
-        cursor_position_y = np.interp(
-            smoothed_index_finger_landmark[1],
-            [self._frame_margin_min, self._frame_margin_max],
-            [0, self.screen_height],
-        )
-
-        self.logger.info(f"Landmark coords: ({smoothed_index_finger_landmark[0]}, {smoothed_index_finger_landmark[1]})")
-        self.logger.info(f"Cursor coords: ({cursor_position_x}, {cursor_position_y})")
-        return cursor_position_x, cursor_position_y
 
     def activate(self, video: bool = False):
         """
@@ -167,8 +90,6 @@ class GestureController:
         """
         prvw_img_size = 720
         RED = (0, 0, 255)
-
-        cursor_pos_x, cursor_pos_y = self.screen_width / 2, self.screen_height / 2
 
         self.logger.info("Gesture controller initialized.")
         for frame in self.camera.stream_frames():
@@ -215,14 +136,10 @@ class GestureController:
             self.gesture_handler.handle(gesture_label)
 
             if self.is_active and gesture_label == "None":
-                cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_landmarks)
-                pag.moveTo(cursor_pos_x, cursor_pos_y)
-                self.detect_primary_click(finger_landmarks)
-                self.detect_secondary_click(finger_landmarks)
+                self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
             if video and prvw_img is not None:
                 diagnostic_text = [
-                    f"Cursor: x={int(cursor_pos_x)}, y={int(cursor_pos_y)}",
                     f"Gesture: {gesture_label}",
                     f"Primary click active: {self.click_down}",
                 ]

@@ -25,10 +25,11 @@ class GestureHandler:
         verbose: bool = False,
     ):
         self.gestures = {gesture.label: gesture for gesture in gestures}
+        self.label_queue: list[str] = []
+
         self.logger = logging.getLogger(__name__)
         if verbose:
             logging.basicConfig(level=logging.INFO)
-        self.label_queue: list[str] = []
 
     def handle(self, label: str):
         if label not in self.gestures:
