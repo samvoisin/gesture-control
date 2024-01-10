@@ -6,6 +6,10 @@ from numpy.linalg import norm
 
 
 class CursorHandler:
+    """
+    Class for converting hand landmarks into cursor controls.
+    """
+
     def __init__(
         self,
         cursor_sensitivity: int = 5,
@@ -13,6 +17,15 @@ class CursorHandler:
         frame_margin: float = 0.1,
         verbose: bool = False,
     ):
+        """
+        Args:
+            cursor_sensitivity (int, optional): Number of frames to lag the cursor position. Defaults to 5.
+            click_threshold (float, optional): Distance between finger digits to register a primary or secondary click.
+            Defaults to 0.1.
+            frame_margin (float, optional): percentage of the frame to pad. Ensures the cursor can access elements on
+            edge of screen. Defaults to 0.1.
+            verbose (bool, optional): Send log output to terminal.. Defaults to False.
+        """
         self.lagged_index_finger_landmark = np.zeros(shape=(cursor_sensitivity, 2))
 
         self._frame_margin_min = frame_margin
@@ -28,6 +41,13 @@ class CursorHandler:
             logging.basicConfig(level=logging.INFO)
 
     def process_finger_coordinates(self, finger_coordinates: np.ndarray):
+        """
+        Consume hand landmark coordinates to change cursor state.
+
+        Args:
+            finger_coordinates (np.ndarray): finger coordinates must be 3 x 4 x 5 array of coordinates corresponding to
+            3 spatial dimensions (x,y,z), 4 landmarks, 5 fingers
+        """
         cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_coordinates)
         pag.moveTo(cursor_pos_x, cursor_pos_y)
         self.detect_primary_click(finger_coordinates)
@@ -78,7 +98,7 @@ class CursorHandler:
 
     def get_cursor_position(self, landmarks: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
-        Smooth the cursor position.
+        Calculate smoothed the cursor position.
 
         Args:
             landmarks: Coordinates of the finger landmarks.
