@@ -60,6 +60,7 @@ class GestureController:
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self.toggle_control_mode))  # control gesture
+        self._recognized_gestures = [gesture.label for gesture in gestures]
         self.gesture_handler = GestureHandler(gestures, verbose)
         self.cursor_handler = CursorHandler(cursor_sensitivity, click_threshold, frame_margin, verbose)
 
@@ -132,7 +133,7 @@ class GestureController:
             self.logger.info(f"Gesture: {gesture_label}")
             self.gesture_handler.handle(gesture_label)
 
-            if self.control_mode and gesture_label == "None":
+            if self.control_mode and gesture_label not in self._recognized_gestures:
                 self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
             if video and prvw_img is not None:
