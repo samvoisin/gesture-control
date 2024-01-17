@@ -77,6 +77,9 @@ class GestureController:
         self.control_mode = False
 
     def toggle_control_mode(self):
+        """
+        Activate/deactivate control mode on the gesture controller.
+        """
         self.control_mode = not self.control_mode
         self.logger.info(f"Gesture controller is active: {self.control_mode}")
 
