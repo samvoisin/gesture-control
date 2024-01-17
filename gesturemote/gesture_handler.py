@@ -25,6 +25,7 @@ class GestureHandler:
         verbose: bool = False,
     ):
         self.gestures = {gesture.label: gesture for gesture in gestures}
+        self.recognized_gestures = list(self.gestures.keys())
         self.label_queue: list[str] = []
 
         self.logger = logging.getLogger(__name__)
