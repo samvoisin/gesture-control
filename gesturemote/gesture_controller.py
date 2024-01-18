@@ -135,7 +135,7 @@ class GestureController:
             self.logger.info(f"Gesture: {gesture_label}")
             self.gesture_handler.handle(gesture_label)
 
-            if self.control_mode and gesture_label == "None":
+            if self.control_mode and gesture_label not in self.gesture_handler.recognized_gestures:
                 self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
             if video and prvw_img is not None:
