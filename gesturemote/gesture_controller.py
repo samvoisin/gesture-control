@@ -59,7 +59,7 @@ class GestureController:
         self._frame_margin_max = 1 - frame_margin
 
         gestures = gestures or DEFAULT_GESTURES
-        gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self._toggle_active))  # control gesture
+        gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self.toggle_control_mode))  # control gesture
         self.gesture_handler = GestureHandler(gestures, verbose)
         self.cursor_handler = CursorHandler(cursor_sensitivity, click_threshold, frame_margin, verbose)
 
@@ -74,11 +74,14 @@ class GestureController:
         if verbose:
             logging.basicConfig(level=logging.INFO)
 
-        self.is_active = False
+        self.control_mode = False
 
-    def _toggle_active(self):
-        self.is_active = not self.is_active
-        self.logger.info(f"Gesture controller is active: {self.is_active}")
+    def toggle_control_mode(self):
+        """
+        Activate/deactivate control mode on the gesture controller.
+        """
+        self.control_mode = not self.control_mode
+        self.logger.info(f"Gesture controller is active: {self.control_mode}")
 
     def activate(self, video: bool = False):
         """
@@ -92,6 +95,7 @@ class GestureController:
         RED = (0, 0, 255)
 
         self.logger.info("Gesture controller initialized.")
+
         for frame in self.camera.stream_frames():
             if self.monitor_fps:
                 frame = self.fps_monitor.monitor_fps(frame)
@@ -103,7 +107,7 @@ class GestureController:
 
                 cv2.putText(
                     img=prvw_img,
-                    text=f"Control mode: {self.is_active}",
+                    text=f"Control mode: {self.control_mode}",
                     org=(0, 20),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=0.5,
@@ -131,7 +135,7 @@ class GestureController:
             self.logger.info(f"Gesture: {gesture_label}")
             self.gesture_handler.handle(gesture_label)
 
-            if self.is_active and gesture_label == "None":
+            if self.control_mode and gesture_label == "None":
                 self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
             if video and prvw_img is not None:
