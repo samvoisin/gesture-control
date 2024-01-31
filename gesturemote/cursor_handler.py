@@ -1,8 +1,21 @@
 import logging
+from enum import Enum
 
 import numpy as np
 import pyautogui as pag
 from numpy.linalg import norm
+
+
+class Fingers(Enum):
+    """
+    Enum for finger names/coordinate indices.
+    """
+
+    THUMB = 0
+    INDEX = 1
+    MIDDLE = 2
+    RING = 3
+    PINKY = 4
 
 
 class CursorHandler:
@@ -64,8 +77,8 @@ class CursorHandler:
         Returns:
             True if the user is clicking, False otherwise.
         """
-        thumb_tip_vector = finger_coordinates[:, 0, 0]
-        middle_finger_tip_vector = finger_coordinates[:, 0, 2]
+        thumb_tip_vector = finger_coordinates[:, 0, Fingers.THUMB.value]
+        middle_finger_tip_vector = finger_coordinates[:, 0, Fingers.MIDDLE.value]
 
         middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
 
@@ -87,8 +100,8 @@ class CursorHandler:
         Args:
             finger_coordinates: coordinates of the finger landmarks.
         """
-        thumb_tip_vector = finger_coordinates[:, 0, 0]
-        ring_finger_tip_vector = finger_coordinates[:, 0, 3]
+        thumb_tip_vector = finger_coordinates[:, 0, Fingers.THUMB.value]
+        ring_finger_tip_vector = finger_coordinates[:, 0, Fingers.RING.value]
 
         ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
         self.logger.info(f"secondary click distance: {ring_finger_to_thumb_tip:.3f}")
@@ -107,7 +120,7 @@ class CursorHandler:
             On screen cursor position.
         """
         self.lagged_index_finger_landmark = np.roll(self.lagged_index_finger_landmark, 1, axis=0)
-        self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, 1]  # (x,y), tip, finger one (index finger)
+        self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, Fingers.INDEX.value]  # (x,y), tip
         self.logger.info(self.lagged_index_finger_landmark)
         smoothed_index_finger_landmark = self.lagged_index_finger_landmark.mean(axis=0)
 
