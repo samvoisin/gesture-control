@@ -71,8 +71,8 @@ class TestCursorHandler:
     )
     def test_detect_scroll(self, index_finger, middle_finger, scroll_amount):
         finger_coords = np.zeros(shape=(3, 4, 5))
-        finger_coords[:, :, 1] = index_finger
-        finger_coords[:, :, 2] = middle_finger
+        finger_coords[:, :, Fingers.INDEX.value] = index_finger
+        finger_coords[:, :, Fingers.MIDDLE.value] = middle_finger
 
         cursor_handler = CursorHandler(scroll_sensitivity=0.1)
 
@@ -84,8 +84,8 @@ class TestCursorHandler:
 
     def test_detect_scroll_no_scroll(self):
         finger_coords = np.zeros(shape=(3, 4, 5))
-        finger_coords[:, :, 1] = np.ones(shape=(3, 4))
-        finger_coords[:, :, 2] = np.zeros(shape=(3, 4))
+        finger_coords[:, :, Fingers.INDEX.value] = np.ones(shape=(3, 4))
+        finger_coords[:, :, Fingers.MIDDLE.value] = np.zeros(shape=(3, 4))
 
         cursor_handler = CursorHandler(scroll_sensitivity=0.1)
 

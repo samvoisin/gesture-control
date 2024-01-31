@@ -127,8 +127,8 @@ class CursorHandler:
             bool: True if user is scrolling, False otherwise.
         """
         max_scroll = 24
-        index_finger_array = finger_coordinates[:, :, 1]
-        middle_finger_array = finger_coordinates[:, :, 2]
+        index_finger_array = finger_coordinates[:, :, Fingers.INDEX.value]
+        middle_finger_array = finger_coordinates[:, :, Fingers.MIDDLE.value]
 
         # first two landmarks
         index_middle_finger_distance = norm(index_finger_array[:, :2] - middle_finger_array[:, :2])
