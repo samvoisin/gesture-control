@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 
 from gesturemote.cursor_handler import CursorHandler
 
@@ -60,3 +61,35 @@ class TestCursorHandler:
             cursor_handler.click_down = True
             cursor_handler.detect_secondary_click(finger_coords)
             mock_click.assert_called_once()
+
+    @pytest.mark.parametrize(
+        ["index_finger", "middle_finger", "scroll_amount"],
+        [
+            pytest.param(np.ones(shape=(3, 4)), np.ones(shape=(3, 4)), 12, id="scroll up"),
+            pytest.param(np.zeros(shape=(3, 4)), np.zeros(shape=(3, 4)), -12, id="scroll down"),
+        ],
+    )
+    def test_detect_scroll(self, index_finger, middle_finger, scroll_amount):
+        finger_coords = np.zeros(shape=(3, 4, 5))
+        finger_coords[:, :, 1] = index_finger
+        finger_coords[:, :, 2] = middle_finger
+
+        cursor_handler = CursorHandler(scroll_sensitivity=0.1)
+
+        with patch("pyautogui.scroll") as mock_scroll:
+            scroll_detected = cursor_handler.detect_scroll(finger_coords)
+            assert scroll_detected
+            mock_scroll.assert_called_once()
+            mock_scroll.assert_called_with(scroll_amount)
+
+    def test_detect_scroll_no_scroll(self):
+        finger_coords = np.zeros(shape=(3, 4, 5))
+        finger_coords[:, :, 1] = np.ones(shape=(3, 4))
+        finger_coords[:, :, 2] = np.zeros(shape=(3, 4))
+
+        cursor_handler = CursorHandler(scroll_sensitivity=0.1)
+
+        with patch("pyautogui.scroll") as mock_scroll:
+            scroll_detected = cursor_handler.detect_scroll(finger_coords)
+            assert not scroll_detected
+            mock_scroll.assert_not_called()

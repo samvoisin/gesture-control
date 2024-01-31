@@ -113,7 +113,7 @@ class CursorHandler:
         Returns:
             bool: True if user is scrolling, False otherwise.
         """
-        max_scroll = 25
+        max_scroll = 24
         index_finger_array = finger_coordinates[:, :, 1]
         middle_finger_array = finger_coordinates[:, :, 2]
 
