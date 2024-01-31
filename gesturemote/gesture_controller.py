@@ -32,6 +32,7 @@ class GestureController:
     def __init__(
         self,
         cursor_sensitivity: int = 5,
+        scroll_sensitivity: float = 0.1,
         activate_gesture_threshold: int = 7,
         click_threshold: float = 0.1,
         frame_margin: float = 0.1,
@@ -44,6 +45,7 @@ class GestureController:
         """
         Args:
             cursor_sensitivity: Number of frames to lag the cursor position.
+            scroll_sensitivity: Distance between landmarks to register scrolling.
             activate_gesture_threshold: Number of frames to hold the activate gesture to toggle the controller.
             click_threshold: Distance between finger digits to register a primary or secondary click.
             frame_margin: percentage of the frame to pad. Ensures the cursor can access elements on edge of screen.
@@ -61,7 +63,13 @@ class GestureController:
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self.toggle_control_mode))  # control gesture
         self.gesture_handler = GestureHandler(gestures, verbose)
-        self.cursor_handler = CursorHandler(cursor_sensitivity, click_threshold, frame_margin, verbose)
+        self.cursor_handler = CursorHandler(
+            cursor_sensitivity,
+            scroll_sensitivity,
+            click_threshold,
+            frame_margin,
+            verbose,
+        )
 
         self.detector = detector or LandmarkGestureDetector()
         self.camera = camera or OpenCVCameraInterface()
