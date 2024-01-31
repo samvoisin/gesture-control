@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from gesturemote.cursor_handler import CursorHandler
+from gesturemote.cursor_handler import CursorHandler, Fingers
 
 
 class TestCursorHandler:
@@ -13,10 +13,10 @@ class TestCursorHandler:
         cursor_handler.screen_height, cursor_handler.screen_width = 10, 10
 
         landmark_coords = np.zeros(shape=(3, 4, 5))
-        landmark_coords[:-1, 0, 1] = np.array([0.0, 0.3])
+        landmark_coords[:-1, 0, Fingers.INDEX.value] = np.array([0.0, 0.3])
         cp_x, cp_y = 0, 0
         for _ in range(cursor_handler.lagged_index_finger_landmark.shape[0]):
-            landmark_coords[:-1, 0, 1] += 0.1
+            landmark_coords[:-1, 0, Fingers.INDEX.value] += 0.1
             cp_x, cp_y = cursor_handler.get_cursor_position(landmark_coords)
 
         assert cp_x == 8
@@ -30,24 +30,24 @@ class TestCursorHandler:
         assert not cursor_handler.click_down
 
         finger_coords = np.ones(shape=(3, 4, 5))
-        finger_coords[:, 0, 0] = np.zeros(3)  # thumb tip
+        finger_coords[:, 0, Fingers.THUMB.value] = np.zeros(3)  # thumb tip
 
         # engage primary click
-        finger_coords[:, 0, 2] = np.zeros(3)  # middle finger tip at same position as thumb tip
+        finger_coords[:, 0, Fingers.MIDDLE.value] = np.zeros(3)  # middle finger tip at same position as thumb tip
         cursor_handler.detect_primary_click(finger_coords)
         mock_mouseDown.assert_called_once()
         assert cursor_handler.click_down
 
         # release primary click
-        finger_coords[:, 0, 2] = np.ones(3)  # middle finger tip at different position from thumb tip
+        finger_coords[:, 0, Fingers.MIDDLE.value] = np.ones(3)  # middle finger tip at different position from thumb tip
         cursor_handler.detect_primary_click(finger_coords)
         mock_mouseUp.assert_called_once()
         assert not cursor_handler.click_down
 
     def test_detect_secondary_click(self):
         finger_coords = np.zeros(shape=(3, 4, 5))
-        finger_coords[:, 0, 0] = np.ones(3)  # thumb tip
-        finger_coords[:, 0, 3] = np.ones(3)  # ring finger tip
+        finger_coords[:, 0, Fingers.THUMB.value] = np.ones(3)  # thumb tip
+        finger_coords[:, 0, Fingers.RING.value] = np.ones(3)  # ring finger tip
 
         cursor_handler = CursorHandler(cursor_sensitivity=3, click_threshold=0.1)
 
