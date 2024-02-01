@@ -48,4 +48,11 @@ gesturemote activate
 
 You can use `gesturemote activate --help` for details on which options are available to you. If you are having a hard time getting GestuReMote to work, use the `--video-preview` option to see what the camera sees.
 
-Once GestuReMote is active, it will wait for you to make the control gesture before doing anything. The control gesture is a closed fist. While gesturemote is in control mode, the cursor will track your index finger while it is in front of the camera. You can perform a primary click (typically this is a left click) by touching your middle finger to your thumb. The primary click will remain engaged as long as your middle finger and thumb are touching. This allows click-and-drag behavior. You can perform a secondary click (typically a right-click) by touching your ring finger to your thumb. You can use the "thumbs-up" and "thumbs-down" gestures to perform PageUp and PageDown actions respectively. Finally, you can turn control mode off by making the control gesture again.
+Once GestuReMote is active, it will wait for you to make the control gesture before doing anything.
+
+* The control gesture is a closed fist. When you perform this gesture, GestuReMote will enter control mode. When you perform it again, control mode will be turned off.
+* While gesturemote is in control mode, the cursor will track your index finger while it is in front of the camera.
+* You can perform a primary click by touching your middle finger to your thumb. The primary click will remain engaged as long as your middle finger and thumb are touching. This allows click-and-drag behavior.
+* You can perform a secondary click by touching your ring finger to your thumb.
+* You can scroll up and down by putting your index and middle fingers together in parallel and moving them up and down. Moving them upwards relative to the center of the camera view sends the scroll-up signal. Moving them downwards relative to the center of the camera view sends the scroll-down signal. The scroll speed increases with the distance relative to the center of the camera view.
+* You can use the "thumbs-up" and "thumbs-down" gestures to perform PageUp and PageDown actions respectively.

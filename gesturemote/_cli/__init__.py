@@ -13,6 +13,7 @@ def cli():
 
 @cli.command()
 @click.option("--cursor-sensitivity", type=int, default=7)
+@click.option("--scroll-sensitivity", type=float, default=0.1)
 @click.option("--activate-gesture-threshold", type=int, default=7)
 @click.option("--click-threshold", type=float, default=0.1)
 @click.option("--frame-margin", type=float, default=0.1)
@@ -21,6 +22,7 @@ def cli():
 @click.option("--video", is_flag=True, help="Show video stream (experimental).")
 def activate(
     cursor_sensitivity: int,
+    scroll_sensitivity: float,
     activate_gesture_threshold: int,
     click_threshold: float,
     frame_margin: float,
@@ -33,6 +35,7 @@ def activate(
     """
     gc = GestureController(
         cursor_sensitivity=cursor_sensitivity,
+        scroll_sensitivity=scroll_sensitivity,
         activate_gesture_threshold=activate_gesture_threshold,
         click_threshold=click_threshold,
         frame_margin=frame_margin,
