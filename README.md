@@ -3,6 +3,7 @@
 # GestuReMote
 
 ![macos build workflow](https://github.com/samvoisin/gesture-control/actions/workflows/build-macos.yaml/badge.svg?event=push)
+[![codecov](https://codecov.io/gh/samvoisin/gesture-control/graph/badge.svg?token=K16WHE65U4)](https://codecov.io/gh/samvoisin/gesture-control)
 
 ## What is it?
 
