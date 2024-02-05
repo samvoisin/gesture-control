@@ -50,7 +50,3 @@ class OpenCVCameraInterface(CameraInterface):
         """
         while True:
             yield self.get_frame()
-
-
-if __name__ == "__main__":
-    pass
