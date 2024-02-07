@@ -27,6 +27,7 @@ class CursorHandler:
         self,
         cursor_sensitivity: int = 5,
         scroll_sensitivity: float = 0.1,
+        inverse_scroll: bool = False,
         click_threshold: float = 0.1,
         frame_margin: float = 0.1,
         verbose: bool = False,
@@ -35,6 +36,7 @@ class CursorHandler:
         Args:
             cursor_sensitivity (int, optional): Number of frames to lag the cursor position. Defaults to 5.
             scroll_sensitivity (float, optional): Distance between landmarks to register scrolling.
+            inverse_scroll (bool, optional): Whether to invert the scroll direction.
             click_threshold (float, optional): Distance between finger digits to register a primary or secondary click.
             Defaults to 0.1.
             frame_margin (float, optional): percentage of the frame to pad. Ensures the cursor can access elements on
@@ -47,6 +49,7 @@ class CursorHandler:
         self._frame_margin_max = 1 - frame_margin
 
         self.scroll_sensitivity = scroll_sensitivity
+        self.inverse_scroll = inverse_scroll
         self.click_threshold = click_threshold
         self.click_down = False
 
@@ -138,6 +141,7 @@ class CursorHandler:
 
         index_finger_tip = index_finger_array[:, 0]
         scroll_amount = max_scroll * (index_finger_tip[1] - 0.5)
+        scroll_amount = int(scroll_amount) if not self.inverse_scroll else -int(scroll_amount)
         pag.scroll(scroll_amount)
         return True
 
