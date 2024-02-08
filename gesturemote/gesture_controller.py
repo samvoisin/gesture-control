@@ -33,6 +33,7 @@ class GestureController:
         self,
         cursor_sensitivity: int = 5,
         scroll_sensitivity: float = 0.1,
+        inverse_scroll: bool = False,
         activate_gesture_threshold: int = 7,
         click_threshold: float = 0.1,
         frame_margin: float = 0.1,
@@ -46,6 +47,7 @@ class GestureController:
         Args:
             cursor_sensitivity: Number of frames to lag the cursor position.
             scroll_sensitivity: Distance between landmarks to register scrolling.
+            inverse_scroll: Whether to invert the scroll direction.
             activate_gesture_threshold: Number of frames to hold the activate gesture to toggle the controller.
             click_threshold: Distance between finger digits to register a primary or secondary click.
             frame_margin: percentage of the frame to pad. Ensures the cursor can access elements on edge of screen.
@@ -66,6 +68,7 @@ class GestureController:
         self.cursor_handler = CursorHandler(
             cursor_sensitivity,
             scroll_sensitivity,
+            inverse_scroll,
             click_threshold,
             frame_margin,
             verbose,

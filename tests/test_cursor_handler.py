@@ -63,18 +63,20 @@ class TestCursorHandler:
             mock_click.assert_called_once()
 
     @pytest.mark.parametrize(
-        ["index_finger", "middle_finger", "scroll_amount"],
+        ["index_finger", "middle_finger", "scroll_amount", "inverse_scroll"],
         [
-            pytest.param(np.ones(shape=(3, 4)), np.ones(shape=(3, 4)), 12, id="scroll up"),
-            pytest.param(np.zeros(shape=(3, 4)), np.zeros(shape=(3, 4)), -12, id="scroll down"),
+            pytest.param(np.ones(shape=(3, 4)), np.ones(shape=(3, 4)), 12, False, id="scroll up"),
+            pytest.param(np.zeros(shape=(3, 4)), np.zeros(shape=(3, 4)), -12, False, id="scroll down"),
+            pytest.param(np.ones(shape=(3, 4)), np.ones(shape=(3, 4)), -12, True, id="scroll up inv"),
+            pytest.param(np.zeros(shape=(3, 4)), np.zeros(shape=(3, 4)), 12, True, id="scroll down inv"),
         ],
     )
-    def test_detect_scroll(self, index_finger, middle_finger, scroll_amount):
+    def test_detect_scroll(self, index_finger, middle_finger, scroll_amount, inverse_scroll):
         finger_coords = np.zeros(shape=(3, 4, 5))
         finger_coords[:, :, Fingers.INDEX.value] = index_finger
         finger_coords[:, :, Fingers.MIDDLE.value] = middle_finger
 
-        cursor_handler = CursorHandler(scroll_sensitivity=0.1)
+        cursor_handler = CursorHandler(scroll_sensitivity=0.0, inverse_scroll=inverse_scroll)
 
         with patch("pyautogui.scroll") as mock_scroll:
             scroll_detected = cursor_handler.detect_scroll(finger_coords)
