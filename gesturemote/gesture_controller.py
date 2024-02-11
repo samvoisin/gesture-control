@@ -112,7 +112,7 @@ class GestureController:
                 frame = self.fps_monitor.monitor_fps(frame)
 
             if video:
-                prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
                 prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
                 prvw_img = np.array(prvw_img)
 
