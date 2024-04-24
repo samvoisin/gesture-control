@@ -20,7 +20,7 @@ jobs:
 
     - name: Initialize Environment
       shell: bash
-      run: make init-macos
+      run: make init
 
     - name: Run Tests
       shell: bash
