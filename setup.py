@@ -12,7 +12,7 @@ DESCRIPTION = "gesture-based interface"
 URL = "https://github.com/samvoisin/gesture-control"
 EMAIL = "samvoisin@protonmail.com"
 AUTHOR = "Sam Voisin"
-REQUIRES_PYTHON = ">=3.8"
+REQUIRES_PYTHON = ">=3.10"
 VERSION = "0.1.0"
 
 # required packages
