@@ -1,4 +1,5 @@
 # Run the Ruff linter.
+repos:
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
   rev: v0.1.3

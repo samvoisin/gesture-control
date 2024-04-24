@@ -10,6 +10,16 @@ sync-venv: update-requirements
 	@./venv/bin/pip-sync ./requirements/requirements.txt ./requirements/requirements-dev.txt
 	@./venv/bin/pip install -e .
 
+init-macos:  # create virtual env and install deps for macos
+	@python3 -m venv venv
+	@./venv/bin/python3 -m pip install -U pip
+
+	@./venv/bin/python3 -m pip install -r requirements/requirements-dev-macos.txt
+	@./venv/bin/python3 -m pip install -r requirements/requirements-macos.txt
+
+	@./venv/bin/python3 -m pip install -e .
+	@./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
+
 init:  # create virtual env and install deps
 	@python3 -m venv venv
 	@./venv/bin/python3 -m pip install -U pip
