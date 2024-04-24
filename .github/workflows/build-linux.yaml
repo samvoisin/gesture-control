@@ -18,14 +18,6 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install Xvfb
-      run: sudo apt-get install -y xvfb
-
-    - name: Start Xvfb
-      run: |
-        export DISPLAY=:99
-        Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-
     - name: Initialize Environment
       shell: bash
       run: make init

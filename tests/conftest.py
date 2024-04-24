@@ -1,11 +1,15 @@
-# external libraries
+import os
+
 import numpy as np
 import pytest
 from torch import Tensor
 
-# gesturemote library
-# gestrol library
 from gesturemote.camera.base import CameraInterface
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_env():
+    os.environ["DISPLAY"] = ":0"
 
 
 @pytest.fixture
