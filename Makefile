@@ -28,7 +28,7 @@ upgrade-requirements-macos:
 	@./venv/bin/pip-compile --upgrade setup.py --resolver=backtracking --output-file=./requirements/requirements-macos.txt
 	@./venv/bin/pip-compile --upgrade ./requirements/requirements-dev.in --output-file=./requirements/requirements-dev-macos.txt
 
-sync-venv: update-requirements-macos
+sync-venv-macos: update-requirements-macos
 	@./venv/bin/pip-sync ./requirements/requirements-macos.txt ./requirements/requirements-dev-macos.txt
 	@./venv/bin/pip install -e .
 
