@@ -1,4 +1,4 @@
-name: Build and Test on MacOS
+name: Build and Test on Linux
 
 on:
   push
@@ -7,8 +7,8 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-  build-and-test-macos:
-    runs-on: macos-latest
+  build-and-test-linux:
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
