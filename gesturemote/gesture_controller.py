@@ -57,7 +57,6 @@ class GestureController:
             monitor_fps: Whether to monitor the FPS of the camera.
             verbose: Send log output to terminal.
         """
-        self.lagged_index_finger_landmark = np.empty(shape=(cursor_sensitivity, 2))
         self.click_threshold = click_threshold
         self._frame_margin_min = frame_margin
         self._frame_margin_max = 1 - frame_margin
