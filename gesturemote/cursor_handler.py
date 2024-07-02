@@ -2,6 +2,7 @@ import logging
 from enum import Enum
 
 import numpy as np
+import pyautogui as pag
 from numpy.linalg import norm
 from Quartz.CoreGraphics import (
     CGEventCreateMouseEvent,
@@ -66,8 +67,7 @@ class CursorHandler:
         self.click_threshold = click_threshold
         self.click_down = False
 
-        self.screen_width = 2560  # Adjust this value based on your screen resolution
-        self.screen_height = 1440  # Adjust this value based on your screen resolution
+        self.screen_width, self.screen_height = pag.size()
 
         self.logger = logging.getLogger(__name__)
         if verbose:
@@ -112,6 +112,7 @@ class CursorHandler:
             self.logger.info("primary click")
             self.mouse_click(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
 
+    def detect_click_and_drag(self, finger_coordinates: np.ndarray):
         # if middle_finger_to_thumb_tip < self.click_threshold and not self.click_down:  # primary click down
         #     self.mouse_down(kCGMouseButtonLeft)
         #     self.click_down = True
@@ -121,7 +122,6 @@ class CursorHandler:
         #     self.click_down = False
         #     self.logger.info("primary click released")
 
-    def detect_click_and_drag(self, finger_coordinates: np.ndarray):
         raise NotImplementedError
 
     def detect_secondary_click(self, finger_coordinates: np.ndarray, cursor_pos_x: float, cursor_pos_y: float):
@@ -157,13 +157,16 @@ class CursorHandler:
 
         # first two landmarks
         index_middle_finger_distance = norm(index_finger_array[:, :2] - middle_finger_array[:, :2])
+        self.logger.info(f"index to middle finger distance: {index_middle_finger_distance}")
 
         if index_middle_finger_distance > self.scroll_sensitivity:
             return False
 
+        self.logger.info("scrolling detected")
         index_finger_tip = index_finger_array[:, 0]
         scroll_amount = max_scroll * (index_finger_tip[1] - 0.5)
         scroll_amount = int(scroll_amount) if not self.inverse_scroll else -int(scroll_amount)
+        self.logger.info(f"scroll amount: {scroll_amount}")
         self.mouse_scroll(scroll_amount)
         return True
 
@@ -199,7 +202,7 @@ class CursorHandler:
 
         self.logger.info(f"Landmark coords: ({smoothed_index_finger_landmark[0]}, {smoothed_index_finger_landmark[1]})")
         self.logger.info(f"Cursor coords: ({cursor_position_x}, {cursor_position_y})")
-        return cursor_position_x[0], cursor_position_y[0]
+        return float(cursor_position_x), float(cursor_position_y)
 
     def move_mouse(self, x: float, y: float):
         event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), kCGMouseButtonLeft)
