@@ -88,6 +88,8 @@ class GestureController:
 
         self.control_mode = False
 
+        self.prvw_img_size = 720
+
     def toggle_control_mode(self):
         """
         Activate/deactivate control mode on the gesture controller.
@@ -103,7 +105,6 @@ class GestureController:
             video: show video stream annotated with diagnostic information. Performance will be degraded and therefore
             should only be used when diagnosing problems with controller. Default False.
         """
-        prvw_img_size = 720
 
         self.logger.info("Gesture controller initialized.")
 
@@ -113,7 +114,7 @@ class GestureController:
 
             if video:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-                prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
+                prvw_img = Image.fromarray(prvw_img).resize((self.prvw_img_size, self.prvw_img_size))
                 prvw_img = np.array(prvw_img)
 
                 cv2.putText(
@@ -156,7 +157,7 @@ class GestureController:
                         x, y = finger_landmarks[:2, mark, finger]
                         cv2.circle(
                             img=prvw_img,
-                            center=(int(x * prvw_img_size), int(y * prvw_img_size)),
+                            center=(int(x * self.prvw_img_size), int(y * self.prvw_img_size)),
                             radius=3,
                             color=RED,
                             thickness=-1,
