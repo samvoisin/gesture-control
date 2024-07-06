@@ -1,5 +1,6 @@
 import click
 
+from gesturemote.camera import OpenCVCameraInterface
 from gesturemote.gesture_controller import GestureController
 
 
@@ -21,6 +22,7 @@ def cli():
 @click.option("--monitor-fps", is_flag=True, help="Monitor frames rate.")
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
 @click.option("--video", is_flag=True, help="Show video stream (experimental).")
+@click.option("--camera-index", type=int, default=0)
 def activate(
     cursor_sensitivity: int,
     scroll_sensitivity: float,
@@ -31,10 +33,13 @@ def activate(
     monitor_fps: bool,
     verbose: bool,
     video: bool,
+    camera_index: int,
 ):
     """
     Activate GestuReMote.
     """
+    camera = OpenCVCameraInterface(index=camera_index)
+
     gc = GestureController(
         cursor_sensitivity=cursor_sensitivity,
         scroll_sensitivity=scroll_sensitivity,
@@ -42,6 +47,7 @@ def activate(
         activate_gesture_threshold=activate_gesture_threshold,
         click_threshold=click_threshold,
         frame_margin=frame_margin,
+        camera=camera,
         monitor_fps=monitor_fps,
         verbose=verbose,
     )

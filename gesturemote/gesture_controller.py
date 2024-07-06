@@ -18,6 +18,8 @@ DEFAULT_GESTURES = [
     Gesture("Thumb_Up", 3, lambda: pag.press("pageup")),
 ]
 
+RED = (0, 0, 255)
+
 
 class DetectorProtocol(Protocol):
     def predict(self, frame: np.ndarray) -> Optional[tuple[str, np.ndarray]]:
@@ -86,6 +88,8 @@ class GestureController:
 
         self.control_mode = False
 
+        self.prvw_img_size = 720
+
     def toggle_control_mode(self):
         """
         Activate/deactivate control mode on the gesture controller.
@@ -101,8 +105,6 @@ class GestureController:
             video: show video stream annotated with diagnostic information. Performance will be degraded and therefore
             should only be used when diagnosing problems with controller. Default False.
         """
-        prvw_img_size = 720
-        RED = (0, 0, 255)
 
         self.logger.info("Gesture controller initialized.")
 
@@ -112,7 +114,7 @@ class GestureController:
 
             if video:
                 prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-                prvw_img = Image.fromarray(prvw_img).resize((prvw_img_size, prvw_img_size))
+                prvw_img = Image.fromarray(prvw_img).resize((self.prvw_img_size, self.prvw_img_size))
                 prvw_img = np.array(prvw_img)
 
                 cv2.putText(
@@ -149,32 +151,13 @@ class GestureController:
                 self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
             if video and prvw_img is not None:
-                diagnostic_text = [
-                    f"Gesture: {gesture_label}",
-                    f"Primary click active: {self.cursor_handler.click_down}",
-                ]
-                text_y = 40
-
-                for text in diagnostic_text:
-                    cv2.putText(
-                        prvw_img,
-                        text,
-                        (0, text_y),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5,
-                        RED,
-                        thickness=1,
-                    )
-
-                    text_y += 20
-
                 _, n_marks_per_finger, n_fingers = finger_landmarks.shape
                 for finger in range(n_fingers):
                     for mark in range(n_marks_per_finger):
                         x, y = finger_landmarks[:2, mark, finger]
                         cv2.circle(
                             img=prvw_img,
-                            center=(int(x * prvw_img_size), int(y * prvw_img_size)),
+                            center=(int(x * self.prvw_img_size), int(y * self.prvw_img_size)),
                             radius=3,
                             color=RED,
                             thickness=-1,
