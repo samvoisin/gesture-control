@@ -24,7 +24,7 @@ lint:  # format all source code
 	@./venv/bin/ruff format --config=pyproject.toml .
 
 test:  # run all tests in project
-	@./venv/bin/pytest -vv --cov-fail-under=80 --cov=./gesturemote --cov-report=xml tests/
+	@./venv/bin/pytest -vv --cov-fail-under=80 --cov=./gesturemote --cov-report=term --cov-report=xml tests/
 
 clean:  # remove development files
 	rm -rf venv

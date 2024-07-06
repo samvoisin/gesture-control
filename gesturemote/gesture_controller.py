@@ -150,24 +150,6 @@ class GestureController:
                 self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
             if video and prvw_img is not None:
-                diagnostic_text = [
-                    f"Gesture: {gesture_label}",
-                ]
-                text_y = 40
-
-                for text in diagnostic_text:
-                    cv2.putText(
-                        prvw_img,
-                        text,
-                        (0, text_y),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5,
-                        RED,
-                        thickness=1,
-                    )
-
-                    text_y += 20
-
                 _, n_marks_per_finger, n_fingers = finger_landmarks.shape
                 for finger in range(n_fingers):
                     for mark in range(n_marks_per_finger):
