@@ -2,12 +2,13 @@ import logging
 from enum import Enum
 
 import numpy as np
-import pyautogui as pag
 from numpy.linalg import norm
 from Quartz.CoreGraphics import (
+    CGDisplayBounds,
     CGEventCreateMouseEvent,
     CGEventCreateScrollWheelEvent,
     CGEventPost,
+    CGMainDisplayID,
     kCGEventLeftMouseDown,
     kCGEventLeftMouseUp,
     kCGEventMouseMoved,
@@ -67,7 +68,9 @@ class CursorHandler:
         self.click_threshold = click_threshold
         self.click_down = False
 
-        self.screen_width, self.screen_height = pag.size()
+        # get screen dimensions; NOTE: currently only supports main display
+        display_bounds = CGDisplayBounds(CGMainDisplayID())
+        self.screen_width, self.screen_height = display_bounds.size.width, display_bounds.size.height
 
         self.logger = logging.getLogger(__name__)
         if verbose:
@@ -86,7 +89,7 @@ class CursorHandler:
             return
 
         cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_coordinates)
-        self.move_mouse(cursor_pos_x, cursor_pos_y)
+        self._move_mouse(cursor_pos_x, cursor_pos_y)
 
         self.detect_primary_click(finger_coordinates, cursor_pos_x, cursor_pos_y)
         self.detect_secondary_click(finger_coordinates, cursor_pos_x, cursor_pos_y)
@@ -97,6 +100,8 @@ class CursorHandler:
 
         Args:
             finger_coordinates (np.ndarray): coordinates of the finger landmarks.
+            cursor_pos_x (float): x-coordinate of the cursor.
+            cursor_pos_y (float): y-coordinate of the cursor.
 
         Returns:
             True if the user is clicking, False otherwise.
@@ -110,7 +115,7 @@ class CursorHandler:
 
         if middle_finger_to_thumb_tip < self.click_threshold:
             self.logger.info("primary click")
-            self.mouse_click(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
+            self._mouse_click(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
 
     def detect_click_and_drag(self, finger_coordinates: np.ndarray):
         # if middle_finger_to_thumb_tip < self.click_threshold and not self.click_down:  # primary click down
@@ -130,6 +135,8 @@ class CursorHandler:
 
         Args:
             finger_coordinates (np.ndarray): coordinates of the finger landmarks.
+            cursor_pos_x (float): x-coordinate of the cursor.
+            cursor_pos_y (float): y-coordinate of the cursor.
         """
         thumb_tip_vector = finger_coordinates[:, 0, Fingers.THUMB.value]
         ring_finger_tip_vector = finger_coordinates[:, 0, Fingers.RING.value]
@@ -139,7 +146,7 @@ class CursorHandler:
 
         if ring_finger_to_thumb_tip < self.click_threshold and not self.click_down:
             self.logger.info("secondary click")
-            self.mouse_click(kCGMouseButtonRight, cursor_pos_x, cursor_pos_y)
+            self._mouse_click(kCGMouseButtonRight, cursor_pos_x, cursor_pos_y)
 
     def detect_scroll(self, finger_coordinates: np.ndarray) -> bool:
         """
@@ -167,7 +174,7 @@ class CursorHandler:
         scroll_amount = max_scroll * (index_finger_tip[1] - 0.5)
         scroll_amount = int(scroll_amount) if not self.inverse_scroll else -int(scroll_amount)
         self.logger.info(f"scroll amount: {scroll_amount}")
-        self.mouse_scroll(scroll_amount)
+        self._mouse_scroll(scroll_amount)
         return True
 
     def get_cursor_position(self, landmarks: np.ndarray) -> tuple[float, float]:
@@ -204,27 +211,27 @@ class CursorHandler:
         self.logger.info(f"Cursor coords: ({cursor_position_x}, {cursor_position_y})")
         return float(cursor_position_x), float(cursor_position_y)
 
-    def move_mouse(self, x: float, y: float):
+    def _move_mouse(self, x: float, y: float):
         event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), kCGMouseButtonLeft)
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
 
-    def mouse_down(self, button, x: float, y: float):
+    def _mouse_down(self, button, x: float, y: float):
         event = CGEventCreateMouseEvent(
             None, kCGEventLeftMouseDown if button == kCGMouseButtonLeft else kCGEventRightMouseDown, (x, y), button
         )
         self.logger.info(f"Mouse down: {button}")
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
 
-    def mouse_up(self, button, x: float, y: float):
+    def _mouse_up(self, button, x: float, y: float):
         event = CGEventCreateMouseEvent(
             None, kCGEventLeftMouseUp if button == kCGMouseButtonLeft else kCGEventRightMouseUp, (x, y), button
         )
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
 
-    def mouse_click(self, button, x: float, y: float):
-        self.mouse_down(button, x, y)
-        self.mouse_up(button, x, y)
+    def _mouse_click(self, button, x: float, y: float):
+        self._mouse_down(button, x, y)
+        self._mouse_up(button, x, y)
 
-    def mouse_scroll(self, amount):
+    def _mouse_scroll(self, amount):
         event = CGEventCreateScrollWheelEvent(None, kCGScrollEventUnitPixel, 1, amount)
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
