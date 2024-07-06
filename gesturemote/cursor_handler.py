@@ -66,7 +66,6 @@ class CursorHandler:
         self.scroll_sensitivity = scroll_sensitivity
         self.inverse_scroll = inverse_scroll
         self.click_threshold = click_threshold
-        self.click_down = False
 
         # get screen dimensions; NOTE: currently only supports main display
         display_bounds = CGDisplayBounds(CGMainDisplayID())
@@ -81,7 +80,7 @@ class CursorHandler:
         Consume hand landmark coordinates to change cursor state.
 
         Args:
-            finger_coordinates (np.ndarray): finger coordinates must be 3 x 4 x 5 array of coordinates corresponding to
+            finger_coordinates (np.ndarray): 3 x 4 x 5 array of coordinates corresponding to
             3 spatial dimensions (x,y,z), 4 landmarks, 5 fingers
         """
         scroll_detected = self.detect_scroll(finger_coordinates)
@@ -117,18 +116,6 @@ class CursorHandler:
             self.logger.info("primary click")
             self._mouse_click(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
 
-    def detect_click_and_drag(self, finger_coordinates: np.ndarray):
-        # if middle_finger_to_thumb_tip < self.click_threshold and not self.click_down:  # primary click down
-        #     self.mouse_down(kCGMouseButtonLeft)
-        #     self.click_down = True
-        #     self.logger.info("primary click down")
-        # elif middle_finger_to_thumb_tip > self.click_threshold and self.click_down:  # release primary click
-        #     self.mouse_up(kCGMouseButtonLeft)
-        #     self.click_down = False
-        #     self.logger.info("primary click released")
-
-        raise NotImplementedError
-
     def detect_secondary_click(self, finger_coordinates: np.ndarray, cursor_pos_x: float, cursor_pos_y: float):
         """
         Detect if the user is performing a secondary click.
@@ -144,7 +131,7 @@ class CursorHandler:
         ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
         self.logger.info(f"secondary click distance: {ring_finger_to_thumb_tip:.3f}")
 
-        if ring_finger_to_thumb_tip < self.click_threshold and not self.click_down:
+        if ring_finger_to_thumb_tip < self.click_threshold:
             self.logger.info("secondary click")
             self._mouse_click(kCGMouseButtonRight, cursor_pos_x, cursor_pos_y)
 
@@ -159,18 +146,18 @@ class CursorHandler:
             bool: True if user is scrolling, False otherwise.
         """
         max_scroll = 24
-        index_finger_array = finger_coordinates[:, :, Fingers.INDEX.value]
-        middle_finger_array = finger_coordinates[:, :, Fingers.MIDDLE.value]
+        index_finger_position = finger_coordinates[:, :, Fingers.INDEX.value]
+        middle_finger_position = finger_coordinates[:, :, Fingers.MIDDLE.value]
 
         # first two landmarks
-        index_middle_finger_distance = norm(index_finger_array[:, :2] - middle_finger_array[:, :2])
-        self.logger.info(f"index to middle finger distance: {index_middle_finger_distance}")
+        index_middle_finger_distance = norm(index_finger_position[:, :2] - middle_finger_position[:, :2])
+        self.logger.info(f"index to middle finger (scroll) distance: {index_middle_finger_distance}")
 
         if index_middle_finger_distance > self.scroll_sensitivity:
             return False
 
         self.logger.info("scrolling detected")
-        index_finger_tip = index_finger_array[:, 0]
+        index_finger_tip = index_finger_position[:, 0]
         scroll_amount = max_scroll * (index_finger_tip[1] - 0.5)
         scroll_amount = int(scroll_amount) if not self.inverse_scroll else -int(scroll_amount)
         self.logger.info(f"scroll amount: {scroll_amount}")
@@ -189,8 +176,8 @@ class CursorHandler:
         """
         self.lagged_index_finger_landmark = np.roll(self.lagged_index_finger_landmark, 1, axis=0)
         self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, Fingers.INDEX.value]  # (x,y), tip
-        self.logger.info(self.lagged_index_finger_landmark)
         smoothed_index_finger_landmark = self.lagged_index_finger_landmark.mean(axis=0)
+        self.logger.info(f"Smoothed index finger landmark: {smoothed_index_finger_landmark}")
 
         smoothed_index_finger_landmark = np.clip(
             smoothed_index_finger_landmark, self._frame_margin_min, self._frame_margin_max

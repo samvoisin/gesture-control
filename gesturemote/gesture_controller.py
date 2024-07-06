@@ -152,7 +152,6 @@ class GestureController:
             if video and prvw_img is not None:
                 diagnostic_text = [
                     f"Gesture: {gesture_label}",
-                    f"Primary click active: {self.cursor_handler.click_down}",
                 ]
                 text_y = 40
 
