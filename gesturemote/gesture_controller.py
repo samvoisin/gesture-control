@@ -18,6 +18,8 @@ DEFAULT_GESTURES = [
     Gesture("Thumb_Up", 3, lambda: pag.press("pageup")),
 ]
 
+RED = (0, 0, 255)
+
 
 class DetectorProtocol(Protocol):
     def predict(self, frame: np.ndarray) -> Optional[tuple[str, np.ndarray]]:
@@ -102,7 +104,6 @@ class GestureController:
             should only be used when diagnosing problems with controller. Default False.
         """
         prvw_img_size = 720
-        RED = (0, 0, 255)
 
         self.logger.info("Gesture controller initialized.")
 
