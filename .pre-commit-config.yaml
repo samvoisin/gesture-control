@@ -1,12 +1,9 @@
-# Run the Ruff linter.
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
-  rev: v0.1.3
+  rev: v0.5.5
   hooks:
+    # Run the linter.
     - id: ruff
-# Run the Ruff formatter.
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
-  rev: v0.1.3
-  hooks:
+      args: [ --fix ]
+    # Run the formatter.
     - id: ruff-format
