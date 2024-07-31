@@ -6,7 +6,7 @@ pip-tools~=7.3
 # code format
 ruff~=0.1
 mypy==0.910
-pre-commit~=2.15
+pre-commit~=3.8
 
 # testing
 pytest~=7.0
