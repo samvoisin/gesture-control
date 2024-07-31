@@ -20,7 +20,7 @@ jobs:
 
     - name: Initialize Environment
       shell: bash
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      install-uv: curl -LsSf https://astral.sh/uv/install.sh | sh
       run: make init
 
     - name: Run Tests
