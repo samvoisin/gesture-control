@@ -22,8 +22,7 @@ RED = (0, 0, 255)
 
 
 class DetectorProtocol(Protocol):
-    def predict(self, frame: np.ndarray) -> Optional[tuple[str, np.ndarray]]:
-        ...
+    def predict(self, frame: np.ndarray) -> Optional[tuple[str, np.ndarray]]: ...
 
 
 class GestureController:

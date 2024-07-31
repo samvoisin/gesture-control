@@ -21,6 +21,9 @@ jobs:
     - name: Initialize Environment
       shell: bash
       run: make init
+      env:
+        VIRTUAL_ENV: /Users/runner/work/gesture-control/gesture-control/venv
+
 
     - name: Run Tests
       shell: bash

@@ -31,7 +31,12 @@ target-version = "py39"
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
-select = ["E", "F"]
+select = [
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "W",  # pycodestyle warnings
+  "I",  # isort
+  ]
 ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -47,10 +52,10 @@ indent-style = "space"  # Like Black, indent with spaces, rather than tabs.
 skip-magic-trailing-comma = false  # Like Black, respect magic trailing commas.
 line-ending = "auto"  # Like Black, automatically detect the appropriate line ending.
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["gesturemote"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
