@@ -15,8 +15,6 @@ init:
 	python3 -m venv venv
 	./venv/bin/python3 -m pip install -U pip
 
-	pwd
-
 	./venv/bin/python3 -m pip install uv
 
 	./venv/bin/uv pip install -r requirements/requirements-dev.txt
