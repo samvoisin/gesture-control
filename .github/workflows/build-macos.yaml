@@ -30,5 +30,6 @@ jobs:
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        VIRTUAL_ENV: /Users/runner/work/gesture-control/gesture-control/venv
       with:
         files: ./coverage.xml
