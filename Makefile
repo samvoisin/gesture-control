@@ -13,6 +13,7 @@ sync-venv: update-requirements
 # create virtual env and install deps
 init:
 	python3 -m venv venv
+	sh ./venv/bin/activate
 	./venv/bin/python3 -m pip install -U pip
 
 	echo ${VIRTUAL_ENV}
