@@ -15,12 +15,14 @@ init:
 	python3 -m venv venv
 	./venv/bin/python3 -m pip install -U pip
 
+	echo $VIRTUAL_ENV
+
 	./venv/bin/python3 -m pip install uv
 
-	./venv/bin/activate && uv pip install -r requirements/requirements-dev.txt
-	./venv/bin/activate && uv pip install -r requirements/requirements.txt
+	./venv/bin/uv pip install -r requirements/requirements-dev.txt
+	./venv/bin/uv pip install -r requirements/requirements.txt
 
-	./venv/bin/activate && uv pip install -e .
+	./venv/bin/uv pip install -e .
 	./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
 
 lint:  # lint all source code
