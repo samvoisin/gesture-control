@@ -15,7 +15,7 @@ init:
 	python3 -m venv venv
 	./venv/bin/python3 -m pip install -U pip
 
-	echo $VIRTUAL_ENV
+	echo ${VIRTUAL_ENV}
 
 	./venv/bin/python3 -m pip install uv
 
