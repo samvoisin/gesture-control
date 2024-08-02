@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from typing import Union
 
 import numpy as np
 from numpy.linalg import norm
@@ -19,6 +20,8 @@ from Quartz.CoreGraphics import (
     kCGMouseButtonRight,
     kCGScrollEventUnitPixel,
 )
+
+Button = Union[kCGMouseButtonLeft, kCGMouseButtonRight]
 
 
 class Fingers(Enum):
@@ -202,20 +205,20 @@ class CursorHandler:
         event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), kCGMouseButtonLeft)
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
 
-    def _mouse_down(self, button, x: float, y: float):
+    def _mouse_down(self, button: Button, x: float, y: float):
         event = CGEventCreateMouseEvent(
             None, kCGEventLeftMouseDown if button == kCGMouseButtonLeft else kCGEventRightMouseDown, (x, y), button
         )
         self.logger.info(f"Mouse down: {button}")
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
 
-    def _mouse_up(self, button, x: float, y: float):
+    def _mouse_up(self, button: Button, x: float, y: float):
         event = CGEventCreateMouseEvent(
             None, kCGEventLeftMouseUp if button == kCGMouseButtonLeft else kCGEventRightMouseUp, (x, y), button
         )
         CGEventPost(kCGEventSourceStateHIDSystemState, event)
 
-    def _mouse_click(self, button, x: float, y: float):
+    def _mouse_click(self, button: Button, x: float, y: float):
         self._mouse_down(button, x, y)
         self._mouse_up(button, x, y)
 
