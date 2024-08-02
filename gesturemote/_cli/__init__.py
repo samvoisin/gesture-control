@@ -13,8 +13,8 @@ def cli():
 
 
 @cli.command()
-@click.option("--cursor-sensitivity", type=int, default=7)
-@click.option("--scroll-sensitivity", type=float, default=0.1)
+@click.option("--cursor-sensitivity", type=int, default=8)
+@click.option("--scroll-sensitivity", type=float, default=0.075)
 @click.option("--inverse-scroll", is_flag=True, help="Invert the scroll direction.")
 @click.option("--activate-gesture-threshold", type=int, default=7)
 @click.option("--click-threshold", type=float, default=0.1)

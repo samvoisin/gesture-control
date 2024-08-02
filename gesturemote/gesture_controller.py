@@ -32,8 +32,8 @@ class GestureController:
 
     def __init__(
         self,
-        cursor_sensitivity: int = 5,
-        scroll_sensitivity: float = 0.1,
+        cursor_sensitivity: int = 8,
+        scroll_sensitivity: float = 0.075,
         inverse_scroll: bool = False,
         activate_gesture_threshold: int = 7,
         click_threshold: float = 0.1,
