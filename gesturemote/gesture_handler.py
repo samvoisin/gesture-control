@@ -19,11 +19,20 @@ class Gesture:
 
 
 class GestureHandler:
+    """
+    Gesture handler class. Used to handle gesture recognition and apply corresponding callback action.
+    """
+
     def __init__(
         self,
         gestures: list[Gesture],
         verbose: bool = False,
     ):
+        """
+        Args:
+            gestures (list[Gesture]): List of gestures to handle. See Gesture dataclass for more information.
+            verbose (bool, optional): Send log output to terminal. Defaults to False.
+        """
         self.gestures = {gesture.label: gesture for gesture in gestures}
         self.recognized_gestures = list(self.gestures.keys())
         self.label_queue: list[str] = []
@@ -33,6 +42,12 @@ class GestureHandler:
             logging.basicConfig(level=logging.INFO)
 
     def handle(self, label: str):
+        """
+        Take gesture label and call the corresponding callback if the gesture is recognized.
+
+        Args:
+            label (str): label provided by the classifier
+        """
         if label not in self.gestures:
             return
 

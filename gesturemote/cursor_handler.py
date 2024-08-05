@@ -56,7 +56,7 @@ class CursorHandler:
             Defaults to 0.1.
             frame_margin (float, optional): percentage of the frame to pad. Ensures the cursor can access elements on
             edge of screen. Defaults to 0.1.
-            verbose (bool, optional): Send log output to terminal.. Defaults to False.
+            verbose (bool, optional): Send log output to terminal. Defaults to False.
         """
         self.lagged_index_finger_landmark = np.zeros(shape=(cursor_sensitivity, 2))
 
@@ -137,9 +137,6 @@ class CursorHandler:
         if ring_finger_to_thumb_tip < self.click_threshold:
             self.logger.info("secondary click")
             self._mouse_click(kCGMouseButtonRight, cursor_pos_x, cursor_pos_y)
-
-    def detect_click_and_drag(self, finger_coordinates: np.ndarray, cursor_pos_x: float, cursor_pos_y: float):
-        pass
 
     def detect_scroll(self, finger_coordinates: np.ndarray) -> bool:
         """
