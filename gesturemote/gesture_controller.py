@@ -32,8 +32,8 @@ class GestureController:
 
     def __init__(
         self,
-        cursor_sensitivity: int = 5,
-        scroll_sensitivity: float = 0.1,
+        cursor_sensitivity: int = 8,
+        scroll_sensitivity: float = 0.075,
         inverse_scroll: bool = False,
         activate_gesture_threshold: int = 7,
         click_threshold: float = 0.1,
@@ -94,7 +94,7 @@ class GestureController:
         Activate/deactivate control mode on the gesture controller.
         """
         self.control_mode = not self.control_mode
-        self.logger.info(f"Gesture controller is active: {self.control_mode}")
+        self.logger.info("Gesture controller is active: %s", self.control_mode)
 
     def activate(self, video: bool = False):
         """
@@ -143,7 +143,7 @@ class GestureController:
 
             gesture_label, finger_landmarks = prediction
 
-            self.logger.info(f"Gesture: {gesture_label}")
+            self.logger.info("Gesture: %s", gesture_label)
             self.gesture_handler.handle(gesture_label)
 
             if self.control_mode and gesture_label not in self.gesture_handler.recognized_gestures:

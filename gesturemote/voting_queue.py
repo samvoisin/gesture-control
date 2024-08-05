@@ -71,7 +71,7 @@ class VoteQueue:
             raise QueueError("Voting queue is full. Cannot put another element.")
         else:
             self.queue.put(item)
-            self.logger.info(f"Voting queue status: {self}")
+            self.logger.info("Voting queue status: %s", self)
 
     def vote(self) -> Any:
         """

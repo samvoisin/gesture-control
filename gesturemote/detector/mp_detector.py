@@ -17,6 +17,15 @@ FINGER_IDXS = [THUMB_IDXS, INDEX_FINGER_IDXS, MIDDLE_FINGER_IDXS, RING_FINGER_ID
 
 
 def _build_coordinate_array(hand_landmarks: List[NormalizedLandmark]) -> np.ndarray:
+    """
+    Build a 3D coordinate array from hand landmarks.
+
+    Args:
+        hand_landmarks (List[NormalizedLandmark]): gesture recognizer task landmarks.
+
+    Returns:
+        np.ndarray: Array of shape (3, 4, 5) containing x, y, z coordinates of finger landmarks.
+    """
     coordinates = np.empty(shape=(3, 4, 5))
 
     for i, finger_idx in enumerate(FINGER_IDXS):
@@ -64,27 +73,26 @@ class LandmarkGestureDetector:
     7 - Love, label: ILoveYou
     """
 
-    def __init__(self) -> None:
-        BaseOptions = mp.tasks.BaseOptions
-        GestureRecognizer = mp.tasks.vision.GestureRecognizer
-        GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
-        VisionRunningMode = mp.tasks.vision.RunningMode
-
-        options = GestureRecognizerOptions(
-            base_options=BaseOptions(model_asset_path=GESTURE_RECOGNIZER_TASK_PATH),
-            running_mode=VisionRunningMode.LIVE_STREAM,
+    def __init__(self):
+        options = mp.tasks.vision.GestureRecognizerOptions(
+            base_options=mp.tasks.BaseOptions(model_asset_path=GESTURE_RECOGNIZER_TASK_PATH),
+            running_mode=mp.tasks.vision.RunningMode.LIVE_STREAM,
             result_callback=self._result_callback,
         )
 
-        self.recognizer = GestureRecognizer.create_from_options(options)
+        self.recognizer = mp.tasks.vision.GestureRecognizer.create_from_options(options)
         self._latest_result = None
 
     def _result_callback(
         self, result: mp.tasks.vision.GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int
     ):
+        """
+        Callback for handling asynchronous detection results. Results are available only in this callback.
+        Therefore we need to store the latest result in a class variable.
+        """
         self._latest_result = result
 
-    def predict(self, frame: np.ndarray):
+    def predict(self, frame: np.ndarray) -> Optional[Tuple[str, np.ndarray]]:
         """
         Predict gesture and landmarks from a frame.
 

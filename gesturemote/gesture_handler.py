@@ -40,10 +40,10 @@ class GestureHandler:
             self.label_queue.append(label)
         else:
             self.label_queue = [label]
-        self.logger.info(f"Label queue: {self.label_queue}")
+        self.logger.info("Label queue: %s", self.label_queue)
 
         gesture = self.gestures[label]
         if len(self.label_queue) == gesture.delay:
-            self.logger.info(f"Calling callback for gesture: {gesture.label}")
+            self.logger.info("Calling callback for gesture: %s", gesture.label)
             gesture.callback()
             self.label_queue = []
