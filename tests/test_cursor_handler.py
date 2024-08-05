@@ -23,15 +23,23 @@ class TestCursorHandler:
         assert cp_x == 8
         assert cp_y == 5
 
-    def test_detect_primary_click(self):
+    @pytest.mark.parametrize(
+        ["primary_click_status", "middle_finger_arr", "mock_fcn"],
+        [
+            pytest.param(False, np.zeros(3), "_mouse_down", id="down"),
+            pytest.param(True, np.ones(3), "_mouse_up", id="up"),
+        ],
+    )
+    def test_detect_primary_click_down(self, primary_click_status, middle_finger_arr, mock_fcn):
         cursor_handler = CursorHandler(cursor_sensitivity=3, click_threshold=0.1)
+        cursor_handler.primary_click_down = primary_click_status
 
         finger_coords = np.ones(shape=(3, 4, 5))
         finger_coords[:, 0, Fingers.THUMB.value] = np.zeros(3)  # thumb tip
 
         # engage primary click
-        finger_coords[:, 0, Fingers.MIDDLE.value] = np.zeros(3)  # middle finger tip at same position as thumb tip
-        with patch("gesturemote.cursor_handler.CursorHandler._mouse_click") as mock_click:
+        finger_coords[:, 0, Fingers.MIDDLE.value] = middle_finger_arr  # middle finger tip at same position as thumb tip
+        with patch("gesturemote.cursor_handler.CursorHandler." + mock_fcn) as mock_click:
             cursor_handler.detect_primary_click(finger_coords, 0, 0)
             mock_click.assert_called_once()
 
