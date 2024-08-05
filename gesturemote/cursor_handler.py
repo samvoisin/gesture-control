@@ -56,7 +56,7 @@ class CursorHandler:
             Defaults to 0.1.
             frame_margin (float, optional): percentage of the frame to pad. Ensures the cursor can access elements on
             edge of screen. Defaults to 0.1.
-            verbose (bool, optional): Send log output to terminal. Defaults to False.
+            verbose (bool, optional): Send log output to terminal.. Defaults to False.
         """
         self.lagged_index_finger_landmark = np.zeros(shape=(cursor_sensitivity, 2))
 
@@ -70,6 +70,8 @@ class CursorHandler:
         # get screen dimensions; NOTE: currently only supports main display
         display_bounds = CGDisplayBounds(CGMainDisplayID())
         self.screen_width, self.screen_height = display_bounds.size.width, display_bounds.size.height
+
+        self.primary_click_down = False
 
         self.logger = logging.getLogger(__name__)
         if verbose:
@@ -89,8 +91,6 @@ class CursorHandler:
 
         cursor_pos_x, cursor_pos_y = self.get_cursor_position(finger_coordinates)
 
-        self.detect_click_and_drag(finger_coordinates, cursor_pos_x, cursor_pos_y)
-
         self._move_mouse(cursor_pos_x, cursor_pos_y)
 
         self.detect_primary_click(finger_coordinates, cursor_pos_x, cursor_pos_y)
@@ -98,7 +98,7 @@ class CursorHandler:
 
     def detect_primary_click(self, finger_coordinates: np.ndarray, cursor_pos_x: float, cursor_pos_y: float):
         """
-        Detect if the user is clicking.
+        Detect if the user is performing a primary click. Click and drag is also supported.
 
         Args:
             finger_coordinates (np.ndarray): coordinates of the finger landmarks.
@@ -115,9 +115,15 @@ class CursorHandler:
 
         self.logger.info("thumb to middle finger: %f", middle_finger_to_thumb_tip)
 
-        if middle_finger_to_thumb_tip < self.click_threshold:
-            self.logger.info("primary click")
-            self._mouse_click(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
+        if middle_finger_to_thumb_tip < self.click_threshold and not self.primary_click_down:
+            self.logger.info("primary click down")
+            self._mouse_down(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
+            self.primary_click_down = True
+
+        elif middle_finger_to_thumb_tip >= self.click_threshold and self.primary_click_down:
+            self.logger.info("primary click up")
+            self._mouse_up(kCGMouseButtonLeft, cursor_pos_x, cursor_pos_y)
+            self.primary_click_down = False
 
     def detect_secondary_click(self, finger_coordinates: np.ndarray, cursor_pos_x: float, cursor_pos_y: float):
         """
@@ -134,7 +140,7 @@ class CursorHandler:
         ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
         self.logger.info("secondary click distance: %f", ring_finger_to_thumb_tip)
 
-        if ring_finger_to_thumb_tip < self.click_threshold:
+        if ring_finger_to_thumb_tip < self.click_threshold and not self.primary_click_down:
             self.logger.info("secondary click")
             self._mouse_click(kCGMouseButtonRight, cursor_pos_x, cursor_pos_y)
 
