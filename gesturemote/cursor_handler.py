@@ -33,6 +33,17 @@ class Fingers(Enum):
     PINKY = 4
 
 
+class Knuckles(Enum):
+    """
+    Enum for knuckle landmarks
+    """
+
+    DISTAL = 0  # finger tip
+    MIDDLE = 1
+    PROXIMAL = 2
+    METALCARPAL = 3  # base knuckle landmark
+
+
 class CursorHandler:
     """
     Class for converting hand landmarks into cursor controls.
@@ -108,8 +119,8 @@ class CursorHandler:
         Returns:
             True if the user is clicking, False otherwise.
         """
-        thumb_tip_vector = finger_coordinates[:, 0, Fingers.THUMB.value]
-        middle_finger_tip_vector = finger_coordinates[:, 0, Fingers.MIDDLE.value]
+        thumb_tip_vector = finger_coordinates[:, Knuckles.DISTAL.value, Fingers.THUMB.value]
+        middle_finger_tip_vector = finger_coordinates[:, Knuckles.DISTAL.value, Fingers.MIDDLE.value]
 
         middle_finger_to_thumb_tip = norm(thumb_tip_vector - middle_finger_tip_vector)
 
@@ -134,8 +145,8 @@ class CursorHandler:
             cursor_pos_x (float): x-coordinate of the cursor.
             cursor_pos_y (float): y-coordinate of the cursor.
         """
-        thumb_tip_vector = finger_coordinates[:, 0, Fingers.THUMB.value]
-        ring_finger_tip_vector = finger_coordinates[:, 0, Fingers.RING.value]
+        thumb_tip_vector = finger_coordinates[:, Knuckles.DISTAL.value, Fingers.THUMB.value]
+        ring_finger_tip_vector = finger_coordinates[:, Knuckles.DISTAL.value, Fingers.RING.value]
 
         ring_finger_to_thumb_tip = norm(thumb_tip_vector - ring_finger_tip_vector)
         self.logger.info("secondary click distance: %f", ring_finger_to_thumb_tip)
@@ -155,18 +166,18 @@ class CursorHandler:
             bool: True if user is scrolling, False otherwise.
         """
         max_scroll = 24
-        index_finger_position = finger_coordinates[:, :, Fingers.INDEX.value]
-        middle_finger_position = finger_coordinates[:, :, Fingers.MIDDLE.value]
+        index_finger_landmarks = finger_coordinates[:, : Knuckles.PROXIMAL.value, Fingers.INDEX.value]
+        middle_finger_landmarks = finger_coordinates[:, : Knuckles.PROXIMAL.value, Fingers.MIDDLE.value]
 
         # first two landmarks
-        index_middle_finger_distance = norm(index_finger_position[:, :2] - middle_finger_position[:, :2])
+        index_middle_finger_distance = norm(index_finger_landmarks - middle_finger_landmarks)
         self.logger.info("index to middle finger (scroll) distance: %f", index_middle_finger_distance)
 
         if index_middle_finger_distance > self.scroll_sensitivity:
             return False
 
         self.logger.info("scrolling detected")
-        index_finger_tip = index_finger_position[:, 0]
+        index_finger_tip = index_finger_landmarks[:, Knuckles.DISTAL.value]
         scroll_amount = max_scroll * (index_finger_tip[1] - 0.5)
         scroll_amount = int(scroll_amount) if not self.inverse_scroll else -int(scroll_amount)
         self.logger.info("scroll amount: %d", scroll_amount)
@@ -184,7 +195,7 @@ class CursorHandler:
             On screen cursor position.
         """
         self.lagged_index_finger_landmark = np.roll(self.lagged_index_finger_landmark, 1, axis=0)
-        self.lagged_index_finger_landmark[0, :] = landmarks[:2, 0, Fingers.INDEX.value]  # (x,y), tip
+        self.lagged_index_finger_landmark[0, :] = landmarks[:2, Knuckles.DISTAL.value, Fingers.INDEX.value]  # (x,y),tip
         smoothed_index_finger_landmark = self.lagged_index_finger_landmark.mean(axis=0)
         self.logger.info(
             "Smoothed index finger landmark: %f, %f",
@@ -236,6 +247,6 @@ class CursorHandler:
         self._mouse_down(button, x, y)
         self._mouse_up(button, x, y)
 
-    def _mouse_scroll(self, amount):
+    def _mouse_scroll(self, amount: int):
         event = CGEventCreateScrollWheelEvent(None, kCGScrollEventUnitPixel, 1, amount)
         CGEventPost(kCGEventSourceStateHIDSystemState, event)

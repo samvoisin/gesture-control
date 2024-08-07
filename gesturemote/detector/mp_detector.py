@@ -6,6 +6,8 @@ import mediapipe as mp
 import numpy as np
 from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark
 
+from gesturemote.cursor_handler import Fingers, Knuckles
+
 GESTURE_RECOGNIZER_TASK_PATH = Path("models/gesture_recognizer.task").resolve()
 
 THUMB_IDXS = [4, 3, 2, 1]
@@ -28,10 +30,10 @@ def _build_coordinate_array(hand_landmarks: List[NormalizedLandmark]) -> np.ndar
     """
     coordinates = np.empty(shape=(3, 4, 5))
 
-    for i, finger_idx in enumerate(FINGER_IDXS):
-        for j in range(4):
-            landmark = hand_landmarks[finger_idx[j]]
-            coordinates[:, j, i] = (landmark.x, landmark.y, landmark.z)
+    for finger in Fingers:
+        for knuckle in Knuckles:
+            landmark = hand_landmarks[FINGER_IDXS[finger.value][knuckle.value]]
+            coordinates[:, knuckle.value, finger.value] = (landmark.x, landmark.y, landmark.z)
 
     return coordinates
 
