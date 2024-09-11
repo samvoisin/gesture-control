@@ -1,15 +1,14 @@
 import logging
+from pathlib import Path
 from typing import Generator
 
 import cv2
 import numpy as np
 
-from gesturemote.camera.base import CameraInterface
-
 logger = logging.getLogger(__name__)
 
 
-class OpenCVCameraInterface(CameraInterface):
+class OpenCVCameraInterface:
     """
     OpenCV camera interface.
     """
@@ -50,3 +49,18 @@ class OpenCVCameraInterface(CameraInterface):
         """
         while True:
             yield self.get_frame()
+
+
+class VideoLoaderInterface(OpenCVCameraInterface):
+    """
+    Subclass of `OpenCVCameraInterface` for loading and streaming frames of video files saved on disk.
+    This class is primarily used for testing purposes.
+    """
+
+    def __init__(self, video_path: Path):
+        """
+        Args:
+            video_path (Path): Path to video file.
+        """
+        self.camera = cv2.VideoCapture(str(video_path))
+        logger.info("Video loaded")
