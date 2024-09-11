@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Protocol
+from typing import Generator, Optional, Protocol
 
 import cv2
 import numpy as np
@@ -7,7 +7,6 @@ import pyautogui as pag
 from PIL import Image
 
 from gesturemote.camera import OpenCVCameraInterface
-from gesturemote.camera.base import CameraInterface
 from gesturemote.cursor_handler import CursorHandler
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
@@ -19,6 +18,10 @@ DEFAULT_GESTURES = [
 ]
 
 RED = (0, 0, 255)
+
+
+class CameraProtocol(Protocol):
+    def stream_frames(self) -> Generator[np.ndarray, None, None]: ...
 
 
 class DetectorProtocol(Protocol):
@@ -40,7 +43,7 @@ class GestureController:
         frame_margin: float = 0.1,
         gestures: Optional[list[Gesture]] = None,
         detector: Optional[DetectorProtocol] = None,
-        camera: Optional[CameraInterface] = None,
+        camera: Optional[CameraProtocol] = None,
         monitor_fps: bool = False,
         verbose: bool = False,
     ):

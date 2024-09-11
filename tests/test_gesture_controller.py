@@ -1,25 +1,18 @@
+from typing import Generator
 from unittest.mock import create_autospec
 
 import numpy as np
 import pytest
 
-from gesturemote.camera.base import CameraInterface
 from gesturemote.gesture_controller import DetectorProtocol, GestureController
 from gesturemote.gesture_handler import Gesture
 
 
-class MockCameraInterface(CameraInterface):
-    def __init__(self):
-        pass
-
-    def __del__(self):
-        pass
-
-    def get_frame(self):
-        pass
-
-    def stream_frames(self):
-        return np.empty(shape=(1, 1, 1))
+class MockCameraInterface:
+    def stream_frames(self) -> Generator[np.ndarray, None, None]:
+        while True:
+            yield np.empty(shape=(1, 1, 1))
+            break
 
 
 @pytest.fixture
