@@ -1,10 +1,8 @@
-import logging
 from time import time
 
 import numpy as np
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+from gesturemote.logger_config import configure_logger
 
 
 class FPSMonitor:
@@ -22,6 +20,7 @@ class FPSMonitor:
         self.period = period
         self.frame_count: int = 0
         self._active_flag: bool = False
+        self.logger = configure_logger()
 
     def _reset_monitor(self) -> None:
         self.frame_count = 0
@@ -57,7 +56,7 @@ class FPSMonitor:
         self.frame_count += 1
         if self.frame_count == self.period:
             avg_fps = self._calculate_mean()
-            logger.info(f"Mean FPS over past {self.period} frames: {avg_fps:.2f} fps.")
+            self.logger.info(f"Mean FPS over past {self.period} frames: {avg_fps:.2f} fps.")
             self._reset_monitor()
 
         return frame

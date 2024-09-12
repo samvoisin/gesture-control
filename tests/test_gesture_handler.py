@@ -6,7 +6,7 @@ from gesturemote.gesture_handler import Gesture, GestureHandler
 class TestGestureHandler:
     def test_constructor(self):
         gestures = [Gesture(label="test", delay=3, callback=lambda: print("test"))]
-        gesture_handler = GestureHandler(gestures=gestures, verbose=True)
+        gesture_handler = GestureHandler(gestures=gestures)
         assert gesture_handler.gestures == {"test": gestures[0]}
 
     def test_handle(self):

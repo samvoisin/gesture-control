@@ -1,7 +1,8 @@
-import logging
 from collections import Counter
 from queue import Queue
 from typing import Any
+
+from gesturemote.logger_config import configure_logger
 
 
 class QueueError(Exception):
@@ -33,17 +34,14 @@ class VoteQueue:
     A Queue where a vote is taken on labeled elements and the most voted label is popped from the queue.
     """
 
-    def __init__(self, maxsize: int, verbose: bool = False) -> None:
+    def __init__(self, maxsize: int) -> None:
         """
         Args:
             maxsize (int): Queue size.
-            verbose (bool, optional): Verbose mode. Defaults to False.
         """
         self.queue: Queue = Queue(maxsize=maxsize)
         self.vote_counter = PopVoteCounter()
-        self.logger = logging.getLogger(__name__)
-        if verbose:
-            self.logger.setLevel(logging.INFO)
+        self.logger = configure_logger()
 
     def __repr__(self) -> str:
         return str(self.queue.queue)

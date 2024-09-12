@@ -1,3 +1,5 @@
+from typing import Optional
+
 import click
 
 from gesturemote.camera import OpenCVCameraInterface
@@ -21,6 +23,7 @@ def cli():
 @click.option("--frame-margin", type=float, default=0.1)
 @click.option("--monitor-fps", is_flag=True, help="Monitor frames rate.")
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
+@click.option("--logfile", type=str, default=None, help="Log file path.")
 @click.option("--video", is_flag=True, help="Show video stream (experimental).")
 @click.option("--camera-index", type=int, default=0)
 def activate(
@@ -32,6 +35,7 @@ def activate(
     frame_margin: float,
     monitor_fps: bool,
     verbose: bool,
+    logfile: Optional[str],
     video: bool,
     camera_index: int,
 ):
@@ -50,5 +54,6 @@ def activate(
         camera=camera,
         monitor_fps=monitor_fps,
         verbose=verbose,
+        logfile=logfile,
     )
     gc.activate(video=video)
