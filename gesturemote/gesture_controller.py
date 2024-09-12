@@ -62,7 +62,10 @@ class GestureController:
             camera: Camera interface to use.
             monitor_fps: Whether to monitor the FPS of the camera.
             verbose: Set log level to DEBUG.
+            logfile: Path to log file.
         """
+        self.logger = configure_logger(logfile=logfile)
+
         self.click_threshold = click_threshold
         self._frame_margin_min = frame_margin
         self._frame_margin_max = 1 - frame_margin
@@ -88,11 +91,8 @@ class GestureController:
         self.control_mode = False
         self.prvw_img_size = 720
 
-        self.logger = configure_logger()
         if verbose:
-            self.logger.setLevel("DEBUG")
-        if logfile:
-            self.logger.addHandler(logging.FileHandler(logfile))
+            self.logger.setLevel(logging.DEBUG)
 
     def toggle_control_mode(self):
         """

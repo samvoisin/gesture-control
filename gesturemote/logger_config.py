@@ -1,21 +1,32 @@
 import logging
+from typing import Optional
 
 
-def configure_logger():
+def configure_logger(logfile: Optional[str] = None) -> logging.Logger:
+    """
+    Configure logger.
+
+    Args:
+        logfile (Optional[str], optional): Path to log file. Defaults to None.
+
+    Returns:
+        logging.Logger: Configured logger.
+    """
     logger = logging.getLogger("GestuReMote")
 
-    # Check if the logger already has handlers (to avoid duplicate logs)
+    # check if logger already has handlers (to avoid duplicate logs)
     if not logger.handlers:
-        # Create a console handler
+        print(logfile)
+        # create a console handler
         console_handler = logging.StreamHandler()
-
-        # Create a formatter with timestamp
         formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-        # Attach the formatter to the handler
         console_handler.setFormatter(formatter)
-
-        # Attach the handler to the logger
         logger.addHandler(console_handler)
+
+        if logfile:
+            # create a file handler
+            file_handler = logging.FileHandler(logfile)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
 
     return logger
