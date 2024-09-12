@@ -1,6 +1,7 @@
-import logging
 from dataclasses import dataclass
 from typing import Callable
+
+from gesturemote.logger_config import configure_logger
 
 
 @dataclass
@@ -26,20 +27,16 @@ class GestureHandler:
     def __init__(
         self,
         gestures: list[Gesture],
-        verbose: bool = False,
     ):
         """
         Args:
             gestures (list[Gesture]): List of gestures to handle. See Gesture dataclass for more information.
-            verbose (bool, optional): Send log output to terminal. Defaults to False.
         """
         self.gestures = {gesture.label: gesture for gesture in gestures}
         self.recognized_gestures = list(self.gestures.keys())
         self.label_queue: list[str] = []
 
-        self.logger = logging.getLogger(__name__)
-        if verbose:
-            logging.basicConfig(level=logging.INFO)
+        self.logger = configure_logger()
 
     def handle(self, label: str):
         """

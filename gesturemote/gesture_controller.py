@@ -11,6 +11,7 @@ from gesturemote.cursor_handler import CursorHandler
 from gesturemote.detector.mp_detector import LandmarkGestureDetector
 from gesturemote.fps_monitor import FPSMonitor
 from gesturemote.gesture_handler import Gesture, GestureHandler
+from gesturemote.logger_config import configure_logger
 
 DEFAULT_GESTURES = [
     Gesture("Thumb_Down", 3, lambda: pag.press("pagedown")),
@@ -46,6 +47,7 @@ class GestureController:
         camera: Optional[CameraProtocol] = None,
         monitor_fps: bool = False,
         verbose: bool = False,
+        logfile: Optional[str] = None,
     ):
         """
         Args:
@@ -59,7 +61,7 @@ class GestureController:
             detector: Detector to use for gesture recognition.
             camera: Camera interface to use.
             monitor_fps: Whether to monitor the FPS of the camera.
-            verbose: Send log output to terminal.
+            verbose: Set log level to DEBUG.
         """
         self.click_threshold = click_threshold
         self._frame_margin_min = frame_margin
@@ -67,14 +69,13 @@ class GestureController:
 
         gestures = gestures or DEFAULT_GESTURES
         gestures.append(Gesture("Closed_Fist", activate_gesture_threshold, self.toggle_control_mode))  # control gesture
-        self.gesture_handler = GestureHandler(gestures, verbose)
+        self.gesture_handler = GestureHandler(gestures)
         self.cursor_handler = CursorHandler(
             cursor_sensitivity,
             scroll_sensitivity,
             inverse_scroll,
             click_threshold,
             frame_margin,
-            verbose,
         )
 
         self.detector = detector or LandmarkGestureDetector()
@@ -84,13 +85,14 @@ class GestureController:
         if self.monitor_fps:
             self.fps_monitor = FPSMonitor()
 
-        self.logger = logging.getLogger(__name__)
-        if verbose:
-            logging.basicConfig(level=logging.INFO)
-
         self.control_mode = False
-
         self.prvw_img_size = 720
+
+        self.logger = configure_logger()
+        if verbose:
+            self.logger.setLevel("DEBUG")
+        if logfile:
+            self.logger.addHandler(logging.FileHandler(logfile))
 
     def toggle_control_mode(self):
         """
@@ -107,7 +109,6 @@ class GestureController:
             video: show video stream annotated with diagnostic information. Performance will be degraded and therefore
             should only be used when diagnosing problems with controller. Default False.
         """
-
         self.logger.info("Gesture controller initialized.")
 
         for frame in self.camera.stream_frames():

@@ -1,4 +1,3 @@
-import logging
 from enum import Enum
 
 import numpy as np
@@ -19,6 +18,8 @@ from Quartz.CoreGraphics import (
     kCGMouseButtonRight,
     kCGScrollEventUnitPixel,
 )
+
+from gesturemote.logger_config import configure_logger
 
 
 class Fingers(Enum):
@@ -56,7 +57,6 @@ class CursorHandler:
         inverse_scroll: bool = False,
         click_threshold: float = 0.1,
         frame_margin: float = 0.1,
-        verbose: bool = False,
     ):
         """
         Args:
@@ -67,7 +67,6 @@ class CursorHandler:
             Defaults to 0.1.
             frame_margin (float, optional): percentage of the frame to pad. Ensures the cursor can access elements on
             edge of screen. Defaults to 0.1.
-            verbose (bool, optional): Send log output to terminal.. Defaults to False.
         """
         self.lagged_index_finger_landmark = np.zeros(shape=(cursor_sensitivity, 2))
 
@@ -84,9 +83,7 @@ class CursorHandler:
 
         self.primary_click_down = False
 
-        self.logger = logging.getLogger(__name__)
-        if verbose:
-            logging.basicConfig(level=logging.INFO)
+        self.logger = configure_logger()
 
     def process_finger_coordinates(self, finger_coordinates: np.ndarray):
         """
@@ -152,7 +149,7 @@ class CursorHandler:
         self.logger.info("secondary click distance: %f", ring_finger_to_thumb_tip)
 
         if ring_finger_to_thumb_tip < self.click_threshold and not self.primary_click_down:
-            self.logger.info("secondary click")
+            self.logger.info("secondary click detected")
             self._mouse_click(kCGMouseButtonRight, cursor_pos_x, cursor_pos_y)
 
     def detect_scroll(self, finger_coordinates: np.ndarray) -> bool:
