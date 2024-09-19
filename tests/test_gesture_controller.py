@@ -51,5 +51,5 @@ class TestGestureController:
     def test_activate_w_gest_label(self, gesture_controller: GestureController):
         gesture_controller.detector.predict.return_value = ("test_gesture_1", None)
 
-        gesture_controller.activate()
+        next(gesture_controller.activate())
         assert gesture_controller.gesture_handler.label_queue.pop() == "test_gesture_1"
