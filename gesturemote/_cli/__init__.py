@@ -25,7 +25,7 @@ def cli():
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
 @click.option("--logfile", type=str, default=None, help="Log file path.")
 @click.option("--video", is_flag=True, help="Show video stream (experimental).")
-@click.options("--video-image-size", type=int, default=720, help="Size of the video image.")
+@click.option("--video-image-size", type=int, default=720, help="Size of the video image.")
 @click.option("--camera-index", type=int, default=0)
 def activate(
     cursor_sensitivity: int,
