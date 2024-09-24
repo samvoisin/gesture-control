@@ -53,3 +53,11 @@ class TestGestureController:
 
         next(gesture_controller.activate())
         assert gesture_controller.gesture_handler.label_queue.pop() == "test_gesture_1"
+
+    def test_no_prediction(self, gesture_controller: GestureController):
+        gesture_controller.detector.predict.return_value = None
+
+        frame, control_mode, landmarks = next(gesture_controller.activate())
+        assert isinstance(frame, np.ndarray)
+        assert isinstance(control_mode, bool)
+        assert landmarks is None
