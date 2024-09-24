@@ -141,10 +141,10 @@ def display_video(frame: np.ndarray, control_mode: bool, finger_landmarks: Optio
 
     prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
     prvw_img = Image.fromarray(prvw_img).resize((preview_img_size, preview_img_size))
-    prvw_img = np.array(prvw_img)
+    prvw_img_arr = np.array(prvw_img)
 
     cv2.putText(
-        img=prvw_img,
+        img=prvw_img_arr,
         text=f"Control mode: {control_mode}",
         org=(0, 20),
         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
@@ -159,11 +159,11 @@ def display_video(frame: np.ndarray, control_mode: bool, finger_landmarks: Optio
             for mark in range(n_marks_per_finger):
                 x, y = finger_landmarks[:2, mark, finger]
                 cv2.circle(
-                    img=prvw_img,
+                    img=prvw_img_arr,
                     center=(int(x * preview_img_size), int(y * preview_img_size)),
                     radius=3,
                     color=RED,
                     thickness=-1,
                 )
 
-    cv2.imshow("Frame", prvw_img)
+    cv2.imshow("Frame", prvw_img_arr)
