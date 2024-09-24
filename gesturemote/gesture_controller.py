@@ -1,5 +1,5 @@
 import logging
-from typing import Generator, Optional, Protocol
+from typing import Generator, Optional, Protocol, Tuple
 
 import cv2
 import numpy as np
@@ -89,7 +89,6 @@ class GestureController:
             self.fps_monitor = FPSMonitor()
 
         self.control_mode = False
-        self.prvw_img_size = 720
 
         if verbose:
             self.logger.setLevel(logging.DEBUG)
@@ -101,13 +100,9 @@ class GestureController:
         self.control_mode = not self.control_mode
         self.logger.info("Gesture controller is active: %s", self.control_mode)
 
-    def activate(self, video: bool = False):
+    def activate(self) -> Generator[Tuple[np.ndarray, bool, Optional[np.ndarray]], None, None]:
         """
         Activate the gesture controller.
-
-        Args:
-            video: show video stream annotated with diagnostic information. Performance will be degraded and therefore
-            should only be used when diagnosing problems with controller. Default False.
         """
         self.logger.info("Gesture controller initialized.")
 
@@ -115,34 +110,10 @@ class GestureController:
             if self.monitor_fps:
                 frame = self.fps_monitor.monitor_fps(frame)
 
-            if video:
-                prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-                prvw_img = Image.fromarray(prvw_img).resize((self.prvw_img_size, self.prvw_img_size))
-                prvw_img = np.array(prvw_img)
-
-                cv2.putText(
-                    img=prvw_img,
-                    text=f"Control mode: {self.control_mode}",
-                    org=(0, 20),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
-                    color=RED,
-                    thickness=1,
-                )
-
-            else:
-                prvw_img = None
-
             prediction = self.detector.predict(frame)
 
             if prediction is None:
-                if video and prvw_img is not None:
-                    cv2.imshow("Frame", prvw_img)
-
-                    key = cv2.waitKey(1)
-                    if key == ord("q"):
-                        return
-
+                yield frame, self.control_mode, None
                 continue
 
             gesture_label, finger_landmarks = prediction
@@ -153,21 +124,46 @@ class GestureController:
             if self.control_mode and gesture_label not in self.gesture_handler.recognized_gestures:
                 self.cursor_handler.process_finger_coordinates(finger_landmarks)
 
-            if video and prvw_img is not None:
-                _, n_marks_per_finger, n_fingers = finger_landmarks.shape
-                for finger in range(n_fingers):
-                    for mark in range(n_marks_per_finger):
-                        x, y = finger_landmarks[:2, mark, finger]
-                        cv2.circle(
-                            img=prvw_img,
-                            center=(int(x * self.prvw_img_size), int(y * self.prvw_img_size)),
-                            radius=3,
-                            color=RED,
-                            thickness=-1,
-                        )
+            yield frame, self.control_mode, finger_landmarks
 
-                cv2.imshow("Frame", prvw_img)
 
-                key = cv2.waitKey(1)
-                if key == ord("q"):
-                    return
+def display_video(frame: np.ndarray, control_mode: bool, finger_landmarks: Optional[np.ndarray], preview_img_size):
+    """
+    Display frames from the camera with overlayed detection information.
+    This allows for visual debugging of the gesture detection.
+
+    Args:
+        frame (np.ndarray): The frame from the camera.
+        control_mode (bool): Whether the gesture controller is in control mode.
+        finger_landmarks (Optional[np.ndarray]): The detected finger landmarks.
+        preview_img_size (int): The size of the preview image.
+    """
+
+    prvw_img = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
+    prvw_img = Image.fromarray(prvw_img).resize((preview_img_size, preview_img_size))
+    prvw_img_arr = np.array(prvw_img)
+
+    cv2.putText(
+        img=prvw_img_arr,
+        text=f"Control mode: {control_mode}",
+        org=(0, 20),
+        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale=0.5,
+        color=RED,
+        thickness=1,
+    )
+
+    if finger_landmarks is not None:
+        _, n_marks_per_finger, n_fingers = finger_landmarks.shape
+        for finger in range(n_fingers):
+            for mark in range(n_marks_per_finger):
+                x, y = finger_landmarks[:2, mark, finger]
+                cv2.circle(
+                    img=prvw_img_arr,
+                    center=(int(x * preview_img_size), int(y * preview_img_size)),
+                    radius=3,
+                    color=RED,
+                    thickness=-1,
+                )
+
+    cv2.imshow("Frame", prvw_img_arr)

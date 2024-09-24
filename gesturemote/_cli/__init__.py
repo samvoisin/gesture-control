@@ -3,7 +3,7 @@ from typing import Optional
 import click
 
 from gesturemote.camera import OpenCVCameraInterface
-from gesturemote.gesture_controller import GestureController
+from gesturemote.gesture_controller import GestureController, display_video
 
 
 @click.group()
@@ -25,6 +25,7 @@ def cli():
 @click.option("--verbose", is_flag=True, help="Log verbose output.")
 @click.option("--logfile", type=str, default=None, help="Log file path.")
 @click.option("--video", is_flag=True, help="Show video stream (experimental).")
+@click.option("--video-image-size", type=int, default=720, help="Size of the video image.")
 @click.option("--camera-index", type=int, default=0)
 def activate(
     cursor_sensitivity: int,
@@ -37,6 +38,7 @@ def activate(
     verbose: bool,
     logfile: Optional[str],
     video: bool,
+    video_image_size: int,
     camera_index: int,
 ):
     """
@@ -56,4 +58,6 @@ def activate(
         verbose=verbose,
         logfile=logfile,
     )
-    gc.activate(video=video)
+    for frame, control_model, finger_landmarks in gc.activate():
+        if video:
+            display_video(frame, control_model, finger_landmarks, preview_img_size=video_image_size)
