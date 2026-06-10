@@ -77,7 +77,7 @@ class LandmarkGestureDetector:
 
     def __init__(self):
         options = mp.tasks.vision.GestureRecognizerOptions(
-            base_options=mp.tasks.BaseOptions(model_asset_path=GESTURE_RECOGNIZER_TASK_PATH),
+            base_options=mp.tasks.BaseOptions(model_asset_path=str(GESTURE_RECOGNIZER_TASK_PATH)),
             running_mode=mp.tasks.vision.RunningMode.LIVE_STREAM,
             result_callback=self._result_callback,
         )

@@ -12,12 +12,15 @@ dependencies = [
     "click~=8.1",
     "numpy~=1.25",
     "opencv-python~=4.8",
-    "Pillow~=9.5",
+    "Pillow>=10.0",
     "PyAutoGUI~=0.9",
     "torch~=2.1",
     "torchvision~=0.14",
     "mediapipe~=0.10",
 ]
+
+[project.scripts]
+gesturemote = "gesturemote._cli:cli"
 
 [dependency-groups]
 dev = [
