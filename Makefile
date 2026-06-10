@@ -1,27 +1,17 @@
 update-requirements:
-	@./venv/bin/uv pip compile setup.py -o requirements/requirements.txt
-	@./venv/bin/uv pip compile requirements/requirements-dev.in -o requirements/requirements-dev.txt
-
-upgrade-requirements:
-	@./venv/bin/uv pip compile --upgrade setup.py -o requirements/requirements.txt
-	@./venv/bin/uv pip compile --upgrade requirements/requirements-dev.in -o requirements/requirements-dev.txt
+	uv lock
 
 sync-venv: update-requirements
-	@./venv/bin/uv pip sync requirements/requirements.txt requirements/requirements-dev.txt
-	@./venv/bin/uv pip install -e .
+	uv sync
 
-# create virtual env and install deps
 init:
-	@python3 -m venv venv
-	@./venv/bin/python3 -m pip install -U pip
+	uv venv
 
-	@./venv/bin/python3 -m pip install uv
+	uv pip install -r requirements/requirements-dev.txt
+	uv pip install -r requirements/requirements.txt
 
-	@./venv/bin/uv pip install -r requirements/requirements-dev.txt
-	@./venv/bin/uv pip install -r requirements/requirements.txt
-
-	@./venv/bin/uv pip install -e .
-	@./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
+	uv pip install -e .
+	./venv/bin/python3 -m pre_commit install --install-hooks --overwrite
 
 lint:  # lint all source code
 	@./venv/bin/ruff check --config=pyproject.toml
